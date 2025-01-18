@@ -1,0 +1,46 @@
+.cartSummary {
+  z-index: 10;
+  position: fixed;
+  top: 60px;
+  right: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+  width: 250px;
+  line-height: 1.5;
+  padding: 15px;
+  background-color: rgba(255, 255, 255, 0.181);
+  border: 1px solid #cccccc82;
+  border-radius: 10px;
+  backdrop-filter: blur(7px);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.closeIcon {
+  cursor: pointer;
+  font-size: 20px;
+  color: #000;
+}
+
+.cartSummary h3 {
+  margin: 0 0 10px 0;
+  font-size: 18px;
+}
+
+.cartSummary p {
+  margin: 5px 0;
+  font-size: 16px;
+}
+
+@media (max-width: 768px) {
+
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  
+}

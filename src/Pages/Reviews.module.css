@@ -1,0 +1,270 @@
+/* Responsive Video Container */
+.videoContainer {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: black; /* Fallback color for video loading */
+}
+
+.review {
+  padding: 20px;
+}
+
+/* Ensures the video covers the entire viewport without distortion */
+.advancedVideo video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Full-Screen Image Container */
+.imageContainer {
+  width: 100%;
+  height: 100vh;
+}
+
+.fullScreenImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Overlay for content over the video */
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  background-color: rgba(0, 0, 0, 0.642); /* Dark transparent overlay */
+}
+
+/* Responsive Fashion Network Logo */
+.fashionNetwork {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 1000px;
+  max-width: 100%;
+  width: 25vw; /* 25% of the viewport width for responsive scaling */
+  height: auto;
+  object-fit: contain; /* Ensures the logo fits without any white gaps */
+  cursor: pointer; /* Indicates it's a clickable element */
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+}
+
+/* Hover Effect for the Logo */
+.fashionNetwork:hover {
+  transform: translateX(-50%) scale(1.1);
+  opacity: 0.9;
+}
+
+/* Review Section */
+.reviewsList {
+  align-items: center;
+  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 columns of equal width */
+  width: 30vw;
+  margin-left: 5vw;
+  margin-right: 5vw;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+}
+
+.reviewStars {
+  margin-bottom: 15px;
+  margin-top: 15px;
+  gap: 3px;
+}
+
+.reviewItem {
+  height: -webkit-fill-available;
+  display: flex;
+  flex-direction: column;
+  margin: 20px;
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.reviewerName {
+  margin-bottom: 15px;
+  font-size: large;
+font-weight: 600;
+}
+
+.reviewImg {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.reviewContent {
+  flex-direction: column;
+}
+
+.reviewHeader {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  }
+
+/* Desktop-specific styles */
+@media (min-width: 1024px) {
+  .reviewsList {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 columns of equal width */
+    width: 90vw;
+    margin-left: 5vw;
+    margin-right: 5vw;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .reviewItem {
+    display: flex;
+    flex-direction: column;
+    margin: 20px;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .reviewsList {
+    width: 90vw;
+    margin-left: 5vw;
+    margin-right: 5vw;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+  }
+
+  .reviewContent {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .reviewHeader {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+/* Media Queries for Responsiveness */
+
+/* Medium devices (tablets) */
+@media (max-width: 1024px) {
+  .fashionNetwork {
+    width: 35vw;
+    top: 1000px;
+  }
+
+  .reviewsList {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr); /* 3 columns of equal width */
+    width: 90vw;
+    margin-left: 5vw;
+    margin-right: 5vw;
+    gap: 15px;
+  }
+
+  .reviewStars {
+    margin-bottom: 15px;
+    margin-top: 15px;
+    gap: 3px;
+  }
+}
+
+@media (max-width: 768px) {
+  .fashionNetwork {
+    width: 45vw;
+    top: 1000px;
+  }
+
+  .reviewsList {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr); /* 3 columns of equal width */
+    width: 90vw;
+    margin-left: 5vw;
+    margin-right: 5vw;
+    gap: 15px;
+  }
+
+  .reviewItem {
+    margin: 20px;
+    padding: 15px;
+    border-radius: 6px;
+  }
+
+  .reviewImg {
+    width: 100%;
+    height: auto;
+    border-radius: 6px;
+  }
+
+  .reviewContent {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .reviewHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 5px;
+  }
+
+  .reviewerName {
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+  }
+
+  .reviewStars {
+    margin-bottom: 15px;
+    margin-top: 15px;
+    gap: 3px;
+  }
+
+  .reviewMessage {
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+
+  .reviewDate {
+    font-size: 0.8rem;
+    align-self: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .fashionNetwork {
+    width: 50vw;
+    top: 70vh;
+  }
+}
+
+
+
+
+
+
+

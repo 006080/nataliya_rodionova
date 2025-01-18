@@ -1,0 +1,40 @@
+.nav {
+  z-index: 100;
+  width: 100vw;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: beige;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.navContacts {
+  background-color: black; /* Black background for contact page */
+  color: white; /* White text for contact page */
+}
+
+.navBarContentWrapper {
+  margin-left: 0;
+  margin-right: 0;
+  width: 95%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 10px;
+}
+
+@media (max-width: 768px) {
+  .nav {
+    padding: 3px;
+  }
+
+  .navBarContentWrapper {
+    flex-direction: column; /* Stack items vertically on mobile */
+  }
+}

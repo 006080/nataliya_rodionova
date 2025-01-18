@@ -1,0 +1,125 @@
+.reviewComponent {
+  margin-left: 5%;
+  margin-top: 70px;
+  width: 25%; /* 70% of the viewport width on all devices */
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(204, 204, 204, 0.51);
+  border-radius: 10px;
+  backdrop-filter: blur(7px);
+  box-sizing: border-box;
+}
+
+.reviewForm {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.radio{
+  display: none;
+}
+
+h2 {
+  color: white;
+  text-align: left;
+}
+
+.imageUpload {
+  cursor: pointer;
+  text-align: center;
+  background-color: #e4e5e9;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.previewImg {
+  max-width: 30%;
+  height: auto;
+  margin-top: 10px;
+}
+
+.starRating {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+}
+
+.star {
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+textarea {
+  min-height: 100px;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+}
+
+button {
+  padding: 10px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #000000;
+}
+
+.review-stars {
+  display: flex;
+  gap: 3px;
+}
+
+.reviewText {
+  flex-grow: 1;
+  color: #000000;
+}
+
+@media (max-width: 768px) {
+  .reviewComponent {
+  margin-left: 15%;
+  margin-right: 15%;
+  margin-top: 70px;
+  width: 70%; /* 70% of the viewport width on all devices */
+  padding: 10px;
+  background-color: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(204, 204, 204, 0.51);
+  border-radius: 10px;
+  backdrop-filter: blur(7px);
+  box-sizing: border-box;
+}
+
+.previewImg {
+  max-width: 100%;
+  height: auto;
+  margin-top: 10px;
+}
+  }
+
+/* Tablet Styling */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .reviewComponent {
+    margin-left: 15%;
+    margin-right: 15%;
+    margin-top: 70px;
+    width: 70%; /* 70% of the viewport width on all devices */
+    padding: 10px;
+    background-color: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(204, 204, 204, 0.51);
+    border-radius: 10px;
+    backdrop-filter: blur(7px);
+    box-sizing: border-box;
+  }
+
+  .previewImg {
+    max-width: 100%;
+    height: auto;
+    margin-top: 10px;
+  }
+}

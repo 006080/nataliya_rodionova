@@ -1,0 +1,81 @@
+.submitModal {
+  z-index: 100;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 20px;
+  width: 280px;
+  height: 280px;
+  max-width: 100%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(204, 204, 204, 0.5);
+  border-radius: 180px;
+  background-color: rgb(0, 0, 0); /* Slight transparency for a sleek look */
+  color: #fff; /* Ensure text is visible on the red background */
+  backdrop-filter: blur(10px); /* Adds a nice blurred effect behind the modal */
+  text-align: center;
+  line-height: 1.5;
+  animation: fadeIn 0.3s ease-in-out; /* Smooth fade-in animation */
+}
+
+.adesivo {
+    width: 70px;
+   margin-bottom: -15px;
+   filter: invert(1); 
+}
+
+.item {
+    font-style: italic;
+    font-size: small;
+    font-weight: 300;
+    text-align: center;
+}
+/* Close icon styling */
+.submitModal .closeIcon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+  color: #fff;
+}
+
+/* Add a smooth fade-in effect */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width:768) {
+  .submitModal {
+    width: 90%;
+    padding: 15px;
+  }
+
+  .submitModal {
+  z-index: 100;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 20px;
+  width: 180px;
+  height: 180px;
+  max-width: 100%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(204, 204, 204, 0.5);
+  border-radius: 180px;
+  background-color: rgb(0, 0, 0); /* Slight transparency for a sleek look */
+  color: #fff; /* Ensure text is visible on the red background */
+  backdrop-filter: blur(10px); /* Adds a nice blurred effect behind the modal */
+  text-align: center;
+  line-height: 1.5;
+  animation: fadeIn 0.3s ease-in-out; /* Smooth fade-in animation */
+}
+
+}

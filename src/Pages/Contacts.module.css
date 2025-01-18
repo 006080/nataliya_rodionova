@@ -1,0 +1,56 @@
+.background {
+  width: 100%;
+  height: 100vh; /* Ensure the background covers the full height of the viewport */
+  background-image: url("https://res.cloudinary.com/dwenvtwyx/image/upload/v1729416672/1927770_975440439216944_7677889623802894798_n_uq3omb.webp");
+  display: flex;
+  position: fixed;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  background-size: cover; /* Ensure the background image covers the entire area */
+  background-position: center; /* Center the background image */
+  background-repeat: no-repeat; /* Prevent the background image from repeating */
+  box-sizing: border-box; /* Ensure padding is included in element's total width and height */
+  left: 0;
+  right: 0;
+  top: 0; /* Ensure the background covers from the top */
+  bottom: 0; /* Ensure the background covers to the bottom */
+  overflow: hidden; /* Prevent scrolling */
+}
+
+.contactHeader {
+  color: white;
+  margin-top: 100px;
+  text-align: right; /* Align text to the right */
+}
+
+.contactContainer {
+  margin-top: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Align content to the left */
+  padding-left: 20px; /* Optional: Add padding to space it from the left edge */
+  width: 100%; /* Make the container take full width */
+}
+
+
+
+@media (max-width: 768px) {
+  .contactContainer {
+left: 0 !important;
+  display: flex; /* Use flexbox to align items */
+  flex-direction: column;
+  align-items: start;
+}
+ 
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  .contactContainer {
+  left: 0;
+  display: flex; /* Use flexbox to align items */
+  flex-direction: column;
+  align-items: start;
+}
+
+}

@@ -1,0 +1,246 @@
+.navigation {
+  cursor: pointer;
+  width: 100vw; /* Adjusted to occupy 70% of the viewport width */
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Align logo on the left, icons on the right */
+  transition: background-color 0.3s ease, color 0.3s ease;
+  margin-left: 0; /* Ensure no left margin */
+}
+
+/* Styling when on the Contacts Page */
+.blackBackground {
+  background-color: black;
+  padding: 10px;
+  position: relative; /* Required for absolute positioning of child elements */
+  /* Removed margin-left and margin-right to align left */
+}
+
+/* Logo Styling */
+.whiteLogo {
+  filter: brightness(0) invert(1); /* Makes the logo white */
+}
+
+.logo {
+  cursor: pointer;
+}
+
+.logotype {
+  width: 100px;
+}
+
+/* Navbar Links */
+.navbar {
+  text-align: center;
+  flex-grow: 1; /* Allow the navbar to take up space between logo and icons */
+}
+
+.navLinks {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  white-space: nowrap;
+  display: flex;
+  justify-content: center;
+}
+
+.navLinks li {
+  margin: 0 20px;
+}
+
+.navLinks li p {
+  cursor: pointer;
+  font-size: 16px;
+  color: #555; /* Default color */
+  transition: color 0.2s ease;
+}
+
+/* .navLinks li p:hover {
+  color: #000; 
+} */
+
+/* Active link color for Contacts page */
+.blackBackground .navLinks li p {
+  color: rgb(167, 167, 167); /* Change to lighter color on black background */
+}
+
+/* Icon Container */
+.icons {
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+/* Cart Icon and Cart Count */
+.cartIconContainer {
+  position: relative;
+  cursor: pointer;
+}
+
+.cartIcon {
+  font-size: 28px;
+  color: #555; /* Default color */
+  z-index: 3000;
+}
+
+.cartCount {
+  position: absolute;
+  top: -5px;
+  right: -10px;
+  background-color: rgb(47, 249, 84);
+  color: white;
+  border-radius: 50%;
+  padding: 5px 8px;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+/* User Icon */
+.userIcon {
+  font-size: 24px;
+  color: #555; /* Default color */
+  margin-left: 15px;
+  cursor: pointer;
+}
+
+/* Burger Icon (for mobile view) */
+.burgerIcon {
+  font-size: 24px;
+  color: #555; /* Default color */
+  margin-left: 15px;
+  cursor: pointer;
+  display: none; /* Hidden by default, visible in mobile */
+}
+
+/* Dropdown Menu for Mobile */
+.dropdownMenu {
+  position: absolute;
+  top: 60px;
+  right: 20px;
+  background-color: beige;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  padding: 10px;
+  width: 150px;
+}
+
+.dropdownLinks {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.dropdownLinks li {
+  margin: 10px 0;
+}
+
+.dropdownLinks li p {
+  cursor: pointer;
+  font-size: 14px;
+  color: #555; /* Default color */
+  transition: color 0.2s ease;
+}
+
+.dropdownLinks li p:hover {
+  color: #000; /* Hover color */
+}
+
+/* Modal Styling for Contacts Page */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgb(0, 0, 0); /* Dark semi-transparent background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background-color: rgb(0, 0, 0); /* Semi-transparent black for consistency */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  padding: 20px 30px;
+  width: 80%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.modalContent ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.modalContent li {
+  margin: 15px 0;
+}
+
+.modalContent p {
+  font-size: 18px;
+  color: white; /* White font color for visibility */
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.modalContent p:hover {
+  color: #ffefad; /* Hover color for links */
+}
+
+/* Close button for modal */
+.closeButton {
+  background-color: transparent;
+  color: white;
+  border: 1px solid white;
+  padding: 10px 20px;
+  margin-top: 20px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.closeButton:hover {
+  background-color: white;
+  color: black;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  /* Hide navbar links in mobile view */
+  .navLinks {
+    display: none;
+  }
+
+  .logo {
+    cursor: pointer;
+    margin-left: 10px;
+  }
+
+  /* Show burger icon for mobile view */
+  .burgerIcon {
+    display: block;
+  }
+
+  /* Adjust dropdownMenu for mobile if needed */
+  .dropdownMenu {
+    width: 200px;
+    right: 10px;
+    top: 50px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .navbar {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .logo {
+    cursor: pointer;
+    margin-left: 20px;
+  }
+}

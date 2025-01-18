@@ -1,0 +1,237 @@
+:root {
+    --color-style: #0e094bdd;
+    --color-mission: beige;
+    --color-materials: #00402b;
+    --color-service: #000000;
+    --color-customers: #400b42;
+}
+
+body {
+    margin: 0;
+    overflow-x: hidden;
+}
+
+.ordnung {
+    margin-top: 50px;
+    display: flex;
+    flex-wrap: wrap;
+    width: 100vw;
+    margin-left: 0;
+    margin-right: 0;
+    padding: 0;
+}
+
+section {
+    overflow: hidden;
+    flex: 1 1 33%;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+section p {
+    line-height: 1.5;
+    font-size: large;
+    font-weight: 100;
+    font-style: italic;
+    color: #000000;
+}
+
+.textContainer {
+    color: #000000;
+    padding: 40px;
+    height: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+} 
+
+.miaLogoContainer .miaLogo {
+    width: 100%;
+    z-index: 10;                  
+    position: absolute;           
+    top: 50%;                    
+    left: 50%;                   
+    transform: translate(-50%, -50%); 
+    height: auto;                 
+    filter: invert(1);            
+    cursor: pointer;              
+}
+
+.fullWidthImage {
+    position: absolute;
+    top: 0;
+    left: 0;
+    min-width: 100%;
+    min-height: 100%;
+    height: auto;
+    box-shadow: 0 0;
+    object-fit: cover;
+    margin: 0;
+    padding: 0;
+}
+
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modalContent {
+    position: relative;
+    max-width: 90%;
+    max-height: 90%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modalContent img {
+    margin-top: 50px;
+    width: 568px;
+    border-radius: 13px;
+}
+
+section img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border: none;
+    transition: transform 0.3s ease;
+}
+
+section img:hover {
+    transform: scale(1.05);
+}
+
+.closeButton {
+    position: absolute;
+    top: 70px;
+    right: 20px;
+    color: white;
+    background-color: transparent;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 5px 10px;
+}
+
+
+.sectionStyle {
+    background-color: var(--color-style);
+}
+
+.sectionMission {
+    background-color: var(--color-mission);
+}
+
+.sectionMaterials {
+    background-color: var(--color-materials);
+}
+
+.sectionService {
+    background-color: var(--color-service);
+}
+
+.sectionService>.textContainer>p {
+    color: beige;
+    line-height: 1.5;
+}
+
+.sectionCustomers>.textContainer>p {
+    color: beige;
+    line-height: 1.5;
+}
+
+.sectionContest>.textContainer>p {
+    color: beige;
+    line-height: 1.5;
+}
+
+.sectionMaterials>.textContainer>p {
+    color: beige;
+    line-height: 1.5;
+}
+
+.sectionStyle>.textContainer>p {
+    color: beige;
+    line-height: 1.5;
+}
+
+.sectionService>.textContainer>p {
+    color: beige;
+    line-height: 1.5;
+}
+
+.sectionService>.textContainer>p {
+    color: beige;
+    line-height: 1.5;
+}
+
+.sectionService>.textContainer>h1 {
+    color: beige;
+}
+
+.sectionCustomers>.textContainer>h1 {
+    color: rgba(245, 245, 220, 0.824);
+
+}
+
+.sectionMaterials>.textContainer>h1 {
+    color: beige;
+}
+
+.sectionStyle>.textContainer>h1 {
+    color: beige;
+}
+
+.sectionCustomers {
+    background-color: var(--color-customers);
+}
+
+
+/* Responsive layout for mobile devices */
+@media (max-width: 1010px) {
+    section {
+        flex: 1 1 33.33%; /* Adjust to make 3 items in one line */
+        box-sizing: border-box; /* Ensures proper sizing with padding/margins */
+      }
+      
+      .container {
+        display: flex; /* Use flexbox to arrange items */
+        flex-wrap: wrap; /* Wrap items to the next line if there's not enough space */
+        gap: 20px; /* Optional: Add space between items */
+      }
+
+    .fullWidthImage {
+        position: relative;
+    }
+    .fullWidthImage:last-child {
+        position: relative;
+        width: 100vw;
+    }
+}
+
+@media (max-width: 768px) {
+    .ordnung {
+        flex-direction: column;
+    }
+
+    section {
+        flex: 1 1 100%;
+    }
+}

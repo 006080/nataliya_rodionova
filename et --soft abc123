@@ -1,0 +1,77 @@
+[33md86c56d[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m rew
+[33mada19c8[m rewiev_layout
+[33m0277991[m layout
+[33me4085af[m section
+[33m4889473[m review
+[33md1bf8da[m com
+[33mebae337[m commit
+[33mde37ed4[m 300
+[33m3f103ed[m 5
+[33mc153b4c[m count
+[33m0c4fdcb[m URL_added
+[33mbd50264[m limit
+[33m8b4b84b[m URL
+[33m7da2c4e[m code
+[33ma19d7aa[m Merge pull request #8 from grabinskij/main
+[33m393d179[m Merge pull request #11 from grabinskij/feature/reviews-v2
+[33m0162872[m Preparation for deploy
+[33m1bbe47e[m Merge branch 'main' into feature/reviews-v2
+[33m2d7957d[m Fix layout
+[33mbe4f1f2[m Merge pull request #7 from grabinskij/main
+[33m5898c45[m Merge pull request #10 from grabinskij/final-reviews
+[33m9297825[m Merge pull request #6 from grabinskij/final-reviews
+[33m2ef11dd[m Fix layout
+[33m4f7937d[m Merge pull request #9 from grabinskij/refactor/reviews
+[33mf71ba6a[m Fix layout
+[33mb54d1db[m Fix layout
+[33md73a3e2[m Merge pull request #8 from grabinskij/refactor/reviews
+[33ma991879[m Refactor server code
+[33ma0e2d1a[m Merge branch 'main' of github.com:grabinskij/Varona
+[33m9a62b10[m Merge pull request #7 from grabinskij/fix/vercel-env
+[33m0056435[m Deploy to the server
+[33mf8ec2a8[m Deploy to the server
+[33mf3ef06c[m Merge pull request #6 from grabinskij/fix/vercel-env
+[33mc2d80aa[m Fix vercel.json file
+[33m497f274[m Merge pull request #5 from grabinskij/fix/vercel
+[33m3e850a0[m Fix layout
+[33m5f89106[m Fix layout
+[33m8b9b9d5[m Fix vercel.json file
+[33m0c52d09[m Merge pull request #4 from grabinskij/feature/reviews-section
+[33m658dae9[m Fix vercel.json
+[33m0edf26c[m Merge pull request #3 from grabinskij/feature/reviews-section
+[33m8c33fbc[m Merge remote-tracking branch 'origin/main' into feature/reviews-section
+[33m7fa12f4[m Adapt Express Server for Vercel
+[33mb3f9534[m Merge pull request #2 from grabinskij/main
+[33med3d10f[m Merge branch 'main' into main
+[33mbbcf92a[m Merge pull request #2 from grabinskij/feature/reviews-section
+[33me406c22[m Add .env.production to .gitignore
+[33mfb3cebe[m Crete functiionality to store reviews in the database and show them after aproval
+[33m9e529e4[m review
+[33mb5fd43e[m logo
+[33md7b3fd9[m servies_text
+[33m98693dd[m our_service_modify
+[33mce797ee[m rewiewendpoint
+[33mb80c419[m formTerms
+[33mcf248b8[m correctForm
+[33m91c8f9e[m http
+[33mac467a4[m video
+[33m98cdbd3[m modalImg
+[33m7dc469b[m img
+[33m4049093[m podium
+[33m7d9ff9e[m commit
+[33mc9ab095[m contactFormisWorking
+[33mcd917c4[m form
+[33m42be4f2[m contactsMobile
+[33mef8fe2d[m contactForm
+[33m3ba47bf[m review
+[33m505b4b0[m cotacts
+[33m3c186b5[m errors
+[33m21fa13a[m headre
+[33m02bd5c6[m renew
+[33m79ea19f[m favicon
+[33m53b54dd[m meta
+[33m6a1d5c2[m SEO
+[33m8e3208f[m header_bugs_fixed
+[33m9a39055[m -svg
+[33m107dedf[m font_dependences
+[33mc882c1a[m repushed
