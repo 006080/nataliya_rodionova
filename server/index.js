@@ -106,10 +106,10 @@ app.use(cors({
 
 const feedbackSchema = Joi.object({
     name: Joi.string().min(3).max(50).required(),
-    surname: Joi.string().min(3).max(50).required(),
+    surname: Joi.string().min(2).max(50).required(),
     email: Joi.string().email().required(),
     phone: Joi.string().pattern(/^[0-9]{10,15}$/).allow(""),
-    message: Joi.string().min(10).max(1000).required(),
+    message: Joi.string().min(2).max(1000).required(),
     captchaToken: Joi.string().required(),
     terms: Joi.string().valid("yes").required() 
   });
@@ -127,7 +127,7 @@ async function verifyCaptcha(token) {
 const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
-      user: process.env.EMAIL_USER, 
+      user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS, 
     },
   });
