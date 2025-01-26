@@ -18,7 +18,13 @@ const Header = () => {
   const navRef = useOutsideClick(() => openMenu(false))
 
   // Check if we're on the Contacts page
-  // const isContactPage = window.location.pathname === "/contacts";
+  const isContactPage = window.location.pathname === "/contacts";
+
+  const paths = ["/ourservice", "/reviews", "/shop", "/contacts"];
+
+  if (isContactPage) {
+    paths.push("/legalnotice", "/privacypolicy");
+  }
 
   const handleCartClick = () => {
     setCartIsOpen(!cartIsOpen);
@@ -46,8 +52,18 @@ const Header = () => {
         
         <div className={styles.navbar}>
           <ul className={styles.navLinks}>
-            {["/ourservice", "/reviews", "/shop", "/contacts"].map((path, index) => {
-              const label = path.slice(1).toUpperCase().replace(/_/g, ' ');
+            {paths.map((path, index) => {
+              let label = path.slice(1).toUpperCase().replace(/_/g, ' ');
+
+              if (isContactPage) {
+                if (path === "/legalnotice") {
+                  label = "LEGAL NOTICE";
+                }
+                if (path === "/privacypolicy") {
+                  label = "PRIVACY POLICY";
+                }
+              } 
+
               return (
                 <li key={index}>
                   <p 
@@ -92,7 +108,7 @@ const Header = () => {
         {menu && (
           <div className={styles.dropdownMenu}>
             <ul className={styles.dropdownLinks}>
-              {["/ourservice", "/reviews", "/shop", "/contacts"].map((path, index) => {
+              {paths.map((path, index) => {
                 const label = path.slice(1).toUpperCase().replace(/_/g, ' ');
                 return (
                   <li key={index}>
@@ -110,8 +126,16 @@ const Header = () => {
         <div className={styles.modalOverlay} onClick={() => openMenu(false)}>
           <div className={styles.modalContent} ref={navRef}>
             <ul>
-              {["/ourservice", "/reviews", "/shop", "/contacts"].map((path, index) => {
-                const label = path.slice(1).toUpperCase().replace(/_/g, ' ');
+              {["/ourservice", "/reviews", "/shop", "/contacts", "/legalnotice", "/privacypolicy"].map((path, index) => {
+                let label = path.slice(1).toUpperCase().replace(/_/g, ' ');
+
+                if (path === "/legalnotice") {
+                  label = "LEGAL NOTICE";
+                }
+                if (path === "/privacypolicy") {
+                  label = "PRIVACY POLICY";
+                }
+
                 return (
                   <li key={index}>
                     <p onClick={() => { navigate(path); openMenu(false); }}>{label}</p>

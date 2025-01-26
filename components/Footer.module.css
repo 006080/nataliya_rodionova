@@ -4,9 +4,30 @@
   max-width: 100%;
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
   background-color: rgb(0, 0, 0);
   color: white;
   align-items: center;
-  justify-content: center;
+  justify-content: space-evenly;
   font-size: small;
+}
+.termsNav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+  list-style: none;
+}
+@media (max-width: 767px) {
+  .termsNav {
+    margin-left: -40px;
+  }
+}
+
+.termsLink a {
+  text-decoration: none;
+  white-space: nowrap;
+  color: inherit;
+  padding: 10px;
+  margin: 0 10px;
 }

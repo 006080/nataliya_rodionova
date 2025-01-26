@@ -1,0 +1,118 @@
+.termsBody {
+  background-color: white;
+  display: flex;
+  justify-content: center;
+  line-height: 24px;
+  font-size: 18px;
+}
+.termsBody button {
+  outline: none;
+  border: none;
+}
+.termsBody a {
+  display: block;
+  word-wrap: break-word;
+  text-decoration: none;
+}
+.termsBox {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+  height: 120px;
+}
+.termsBody .termsBox a {
+  padding: 10px;
+}
+.termsBoxButtonWrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.termsBoxButton {
+  background: none;
+  outline: none;
+  border: none;
+}
+.termsBoxButton button {
+  padding: 0;
+}
+.termsBoxButton a {
+  display: inline-block;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+.termsBox h1 {
+  margin: 0 auto;
+  color: #000;
+}
+@media (max-width: 950px) {
+  .termsBox {
+    display: block;
+    margin-bottom: 100px;
+  }
+}
+
+.termsContainer {
+  max-width: 1000px;
+  width: 100%;
+  margin: 80px auto;
+  padding: 0 40px;
+  color: black;
+}
+.termsContainer h1 {
+  text-align: center;
+  font-size: 2.4rem;
+  padding: 30px 0;
+  font-weight: bold;
+  color: #000;
+}
+
+.termsContainer a {
+  padding: 0;
+}
+@media (max-width: 767px) {
+  .termsContainer h1{
+    font-size: 1.4rem;
+  }
+}
+
+.termsContainer h2 {
+  font-size: 1.6rem;
+  font-weight: bold;
+  color: #000;
+}
+@media (max-width: 767px) {
+  .termsContainer h2 {
+    font-size: 1.2rem;
+  }
+}
+.termsContainer h5 {
+  margin-bottom: 0;
+  margin-top: 10px;
+  font-size: 1.2rem;
+}
+@media (max-width: 767px) {
+  .termsContainer h5 {
+    font-size: 1.1rem;
+  }
+}
+
+.termsContainer p {
+  font-size: 18px;
+  margin-bottom: 20px;
+}
+@media (max-width: 767px) {
+  .termsContainer p {
+    font-size: 16px;
+    margin-bottom: 15px;
+  }
+}
+
+@media (max-width: 767px) {
+  .termsContainer {
+    padding: 0 10px 0 20px;
+  }
+}

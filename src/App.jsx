@@ -7,6 +7,8 @@ import Contacts from "./Pages/Contacts";
 import Shop from "./Pages/Shop";
 import Footer from "../components/Footer";
 import { CartProvider } from '../components/CartContext';
+import { LegalNotice } from "./Pages/LegalNotice";
+import { PrivacyPolicy } from "./Pages/PrivacyPolicy";
 // import { position } from "@cloudinary/url-gen/qualifiers/timeline";
 
 const App = () => {
@@ -18,6 +20,8 @@ const App = () => {
           <Route style={{position: 'absolute'}}  path="/" element={<Home />} />
           <Route style={{position: 'relative'}}  path="/ourservice" element={<OurService />} />
           <Route style={{position: 'relative'}}  path="/reviews" element={<Reviews />} />
+          <Route style={{position: 'relative'}}  path="/legalnotice" element={<LegalNotice />} />
+          <Route style={{position: 'relative'}}  path="/privacypolicy" element={<PrivacyPolicy />} />
           <Route path="/contacts" element={<Contacts />} />
           <Route path="/shop" element={<Shop />} />
         </Routes>
