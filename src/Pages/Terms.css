@@ -1,0 +1,47 @@
+/* Terms.css */
+.terms-container {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .terms-heading {
+    margin-top: 100px;
+    text-align: center;
+    color: #333;
+    font-size: 22px;
+    margin-bottom: 20px;
+  }
+  
+  .terms-section {
+    margin-bottom: 30px;
+  }
+  
+  .section-heading {
+    font-size: 20px;
+    color: #444;
+    margin-bottom: 10px;
+  }
+  
+  .section-text {
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 10px;
+  }
+  
+  ul.shipping-list {
+    padding-left: 20px;
+    list-style-type: disc;
+  }
+  
+  ul.shipping-list li {
+    font-size: 16px;
+    color: #555;
+  }
+  
+  strong {
+    color: #000;
+  }
+  

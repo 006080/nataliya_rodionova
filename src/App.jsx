@@ -6,7 +6,9 @@ import OurService from "./Pages/OurService";
 import Contacts from "./Pages/Contacts";
 import Shop from "./Pages/Shop";
 import Footer from "../components/Footer";
+import Terms from "./Pages/Terms"; // Assuming your Terms page is at this path
 import { CartProvider } from '../components/CartContext';
+import ReturnPolicy from "./Pages/ReturnPolicy";
 // import { position } from "@cloudinary/url-gen/qualifiers/timeline";
 
 const App = () => {
@@ -14,10 +16,12 @@ const App = () => {
     <CartProvider>
       <Router>
         <Header />
-        <Routes>
+        <Routes> 
           <Route style={{position: 'absolute'}}  path="/" element={<Home />} />
           <Route style={{position: 'relative'}}  path="/ourservice" element={<OurService />} />
           <Route style={{position: 'relative'}}  path="/reviews" element={<Reviews />} />
+          <Route style={{position: 'relative'}}  path="/terms" element={<Terms />} />
+          <Route style={{position: 'relative'}}  path="/return" element={<ReturnPolicy/>} />
           <Route path="/contacts" element={<Contacts />} />
           <Route path="/shop" element={<Shop />} />
         </Routes>
