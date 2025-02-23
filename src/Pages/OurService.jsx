@@ -4,8 +4,8 @@ import { AdvancedImage } from '@cloudinary/react'
 import { auto } from '@cloudinary/url-gen/actions/resize'
 import { autoGravity } from '@cloudinary/url-gen/qualifiers/gravity'
 import styles from './OurService.module.css'
-import { position } from '@cloudinary/url-gen/qualifiers/timeline'
-import { width } from '@fortawesome/free-solid-svg-icons/fa0'
+// import { position } from '@cloudinary/url-gen/qualifiers/timeline'
+// import { width } from '@fortawesome/free-solid-svg-icons/fa0'
 
 const cld = new Cloudinary({
   cloud: {

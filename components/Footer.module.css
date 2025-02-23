@@ -11,6 +11,19 @@
   font-size: small;
 }
 
+.paymentIcons {
+  display: flex;
+  gap: 10px; /* Adjust spacing between icons */
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.paymentIcon {
+  width: 45px; /* Adjust icon size */
+  height: auto;
+}
+
+
 .foot {
   cursor: pointer;
 font-weight: 400;
