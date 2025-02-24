@@ -2,7 +2,7 @@
 import Form from "../../components/Form";
 import styles from "./Contacts.module.css";
 
-const Contacts = ({ backgroundImage }) => {
+const Contacts = ({}) => {
   return (
     <div className={styles.background}>
       <div className={styles.contactContainer}>

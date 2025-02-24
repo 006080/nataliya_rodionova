@@ -11,15 +11,23 @@
   font-size: small;
 }
 
+/* .iconsLine {
+  width: 90vw;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  justify-items: center;
+} */
+
 .paymentIcons {
   display: flex;
   gap: 10px; /* Adjust spacing between icons */
   justify-content: center;
-  margin-top: 10px;
+  /* margin-top: 10px; */
 }
 
 .paymentIcon {
-  width: 45px; /* Adjust icon size */
+  width: 50px; /* Adjust icon size */
   height: auto;
 }
 
