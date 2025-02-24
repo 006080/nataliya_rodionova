@@ -15,7 +15,7 @@ const CardProduct = ({ name, image, price, description }) => {
 
   const itemAdd = () => {
     if (count > 0) {
-      const product = { name, price, quantity: count };
+      const product = { name, image, price, quantity: count };
       addToCart(product);
       setCount(0); // Reset the count after adding to cart
     }

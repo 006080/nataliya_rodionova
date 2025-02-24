@@ -15,6 +15,23 @@
   backdrop-filter: blur(7px);
 }
 
+.item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.itemImageContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.itemDetails {
+  flex-grow: 1;
+}
+
+
 .header {
   display: flex;
   justify-content: space-between;
@@ -28,6 +45,7 @@
 }
 
 .cartSummary h3 {
+  color: #252525;
   margin: 0 0 10px 0;
   font-size: 18px;
 }
