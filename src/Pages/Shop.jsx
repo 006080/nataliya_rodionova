@@ -19,8 +19,7 @@ const collarImages = [
 const scarfImages = [
   cld.image("image_6483441_8_lr6b1a").toURL(),
   cld.image("image_6483441_6_qhuykn").toURL(),
-  cld.image("image_6483441_6_qhuykn").toURL(),
-  cld.image("image_6483441_6_qhuykn").toURL(),
+  cld.image("image_6483441_9_txsndd").toURL(),
 ];
 
 const trousersImages = [
