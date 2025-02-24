@@ -31,6 +31,10 @@ const CartSummary = ({ onClose }) => {
       </div>
       <p>Total Items: {totalItems}</p>
       <p>Total Price: ${totalPrice.toFixed(2)}</p>
+      {/* Conditional rendering for Checkout button */}
+      {cartItems.length > 0 && (
+        <button style={{backgroundColor:"black", marginBottom:"15px", marginTop:'15px'}} >Checkout</button>
+      )}
     </div>
   );
 };
