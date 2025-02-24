@@ -20,6 +20,8 @@
   }
   
   .section-heading {
+    font-family: "Playfair Display", serif;
+    font-style: italic;
     font-size: 20px;
     color: #444;
     margin-bottom: 10px;

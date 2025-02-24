@@ -4,8 +4,6 @@ import { AdvancedImage } from "@cloudinary/react";
 import { auto } from "@cloudinary/url-gen/actions/resize";
 import { autoGravity } from "@cloudinary/url-gen/qualifiers/gravity";
 import styles from "./Footer.module.css";
-import { width } from "@fortawesome/free-solid-svg-icons/fa0";
-import { BiBorderRadius } from "react-icons/bi";
 
 const cld = new Cloudinary({
   cloud: {
@@ -83,7 +81,7 @@ const Footer = () => {
                   filter: "invert(1)",
                   width: "22px",
                   margin: "5px",
-                  opacity: 0.8,
+                  opacity: 0.9,
                 }}
                 className={styles.paymentIcon}
                 cldImg={getImage(
@@ -99,7 +97,7 @@ const Footer = () => {
                 filter: "invert(1)",
                 width: "22px",
                 margin: "5px",
-                opacity: 0.8,
+                opacity: 0.9,
               }}
               cldImg={getImage(
                 "5282541_fb_social_media_facebook_facebook_logo_social_network_icon_e8ixwq"
@@ -113,7 +111,7 @@ const Footer = () => {
                 filter: "invert(1)",
                 width: "22px",
                 margin: "5px",
-                opacity: 0.8,
+                opacity: 0.9,
               }}
               cldImg={getImage(
                 "5282544_camera_instagram_social_media_social_network_instagram_logo_icon_jycw7z"

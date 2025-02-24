@@ -3,12 +3,11 @@ import styles from "./ReturnPolicy.module.css"; // Make sure to create a corresp
 const ReturnPolicy = () => {
   return (
     <div className={styles.returnPolicyContainer}>
-      <h2 className={styles.heading}>Return Policy</h2>
 
       <section className={styles.section}>
-        <h3 className={styles.subheading}>Return Policy</h3>
+        <h3 style={{marginTop:'70px'}} className={styles.subheading}>Return Policy</h3>
         <p className={styles.text}>
-          You may return your items within <strong>14 days</strong> of receiving your order. 
+          You may return your items within 14 days of receiving your order. 
           To be eligible for a return, the item must be unused and in the same condition that you received it. 
           It must also be in the original packaging.
         </p>
@@ -27,7 +26,7 @@ const ReturnPolicy = () => {
       <section className={styles.section}>
         <h3 className={styles.subheading}>How to Initiate a Return</h3>
         <p className={styles.text}>
-          To initiate a return, please contact our customer service team at <strong>support@example.com</strong> 
+          To initiate a return, please contact our customer service team at <strong>nataliiarodionova00gmail.com  </strong> 
           with your order number and the item(s) you wish to return. Our team will provide instructions on how to proceed.
         </p>
       </section>
