@@ -23,11 +23,10 @@ const Checkout = () => {
           cartItems.map((item) => (
             <div key={item.name} className={styles.cartItem}>
               <img src={item.image} alt={item.name} className={styles.productImage} />
-         <div>
+         <div></div>
                 <p><strong>{item.name}</strong></p>
-                <p style={{fontStyle:'italic'}}>Quantity: {item.quantity}</p>
-                <p style={{fontStyle:'italic'}}>Price: ${item.price}</p>
-              </div>
+                <p>Quantity: {item.quantity}</p>
+                <p>Price: ${item.price}</p>
               </div>
 
           ))
