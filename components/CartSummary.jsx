@@ -18,7 +18,7 @@ const CartSummary = ({ onClose }) => {
   return (
     <div className={styles.cartSummary} ref={cartRef}>
       <div className={styles.header}>
-        <h3>Order Summary</h3>
+        <h3 style={{fontWeight:'300', fontStyle:'italic'}}>Order Summary</h3>
         <FontAwesomeIcon icon={faTimes} className={styles.closeIcon} onClick={onClose} />
       </div>
 
@@ -29,9 +29,11 @@ const CartSummary = ({ onClose }) => {
               <div key={item.name} className={styles.item}>
                 <img src={item.image} alt={item.name} className={styles.productImage} />
                 <div className={styles.itemDetails}>
-                  <p>{item.name}</p>
-                  <p style={{ color: "#575757" }}>Quantity: {item.quantity}</p>
-                  <p style={{ color: "#575757" }}>Price: ${item.price}</p>
+                  <p style={{fontFamily: "Playfair Display", fontStyle: 'italic'}}>{item.name}</p>
+                  <div style={{lineHeight:'1'}}>
+                  <p style={{fontSize:'14px', fontStyle:'italic',fontWeight:'200' }}>Quantity: {item.quantity}</p>
+                  <p style={{ fontSize:'14px', fontStyle:'italic', fontWeight:'200' }}>${item.price}</p>
+                  </div>
                   <button
                     className={styles.removeButton}
                     onClick={() => removeFromCart(item.name)}
@@ -45,7 +47,7 @@ const CartSummary = ({ onClose }) => {
 
           <p style={{ marginTop: "10px" }}>Total Items: {totalItems}</p>
           <p>Total Price: ${totalPrice.toFixed(2)}</p>
-          <p style={{ fontSize: "12px", color: "#575757" }}>
+          <p style={{ fontSize:'12px', marginBottom:'10px', fontStyle:'italic', fontWeight:'200' }}>
             Shipping & taxes calculated at checkout
           </p>
 
