@@ -15,6 +15,12 @@
   backdrop-filter: blur(7px);
 }
 
+.productImage {
+  width: 80px;
+  padding: 10px;
+
+}
+
 .item {
   display: flex;
   align-items: center;

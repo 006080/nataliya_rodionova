@@ -106,4 +106,3 @@ CardProduct.propTypes = {
 };
 
 export default CardProduct;
-

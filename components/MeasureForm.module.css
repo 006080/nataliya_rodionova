@@ -1,4 +1,4 @@
-/* General styles for the form container */
+/* 
 form {
     max-width: 600px;
     margin: 0 auto;
@@ -8,7 +8,7 @@ form {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
   
-  /* Heading style */
+
   h2 {
     text-align: center;
     color: #333;
@@ -16,12 +16,12 @@ form {
     font-size: 24px;
   }
   
-  /* Styles for each form group (input + label) */
+
   div {
     margin-bottom: 15px;
   }
   
-  /* Label style */
+
   label {
     display: block;
     font-size: 16px;
@@ -29,7 +29,7 @@ form {
     margin-bottom: 5px;
   }
   
-  /* Input field style */
+
   input[type="number"] {
     width: 100%;
     padding: 10px;
@@ -41,19 +41,19 @@ form {
     transition: border-color 0.3s;
   }
   
-  /* Input field focus style */
+  
   input[type="number"]:focus {
     border-color: #4CAF50;
   }
   
-  /* Error message style */
+
   p {
     font-size: 14px;
     color: red;
     margin-top: 5px;
   }
   
-  /* Submit button style */
+
   button[type="submit"] {
     background-color: #4CAF50;
     color: white;
@@ -66,8 +66,8 @@ form {
     transition: background-color 0.3s;
   }
   
-  /* Submit button hover effect */
+
   button[type="submit"]:hover {
     background-color: #45a049;
   }
-  
+   */
