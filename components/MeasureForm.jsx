@@ -32,12 +32,16 @@ const MeasureForm = ({ setIsMeasureFormValid }) => {
         <input type="number" name="height" value={measurements.height} onChange={handleChange} required />
       </label>
       <label>
-        Weight (kg):
-        <input type="number" name="weight" value={measurements.weight} onChange={handleChange} required />
+        Chest (kg):
+        <input type="number" name="chest" value={measurements.chest} onChange={handleChange} required />
       </label>
       <label>
-        Chest (cm):
-        <input type="number" name="chest" value={measurements.chest} onChange={handleChange} required />
+        Waist (cm):
+        <input type="number" name="waist " value={measurements.waist} onChange={handleChange} required />
+      </label>
+      <label>
+        Hips (cm):
+        <input type="number" name="hips" value={measurements.hips} onChange={handleChange} required />
       </label>
       <button type="submit" className={styles.submitButton} disabled={isSubmitted}>
         {isSubmitted ? "Measurements Submitted" : "Submit Measurements"}

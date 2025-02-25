@@ -27,7 +27,7 @@
   color: inherit !important;
   border: none !important;
   box-shadow: none !important;
-  cursor: default !important;
+  cursor: pointer;
 }
 
 .productImage {
