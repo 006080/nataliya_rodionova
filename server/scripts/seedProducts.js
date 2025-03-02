@@ -1,61 +1,55 @@
-// scripts/seedProducts.js
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import Product from '../Models/Product.js';
+import { Cloudinary } from '@cloudinary/url-gen';
 
-// Load environment variables
 dotenv.config({ path: './.env.local' });
 
-// Sample product data
+const cld = new Cloudinary({
+  cloud: {
+    cloudName: "dwenvtwyx",
+  },
+});
+
+
 const productData = [
   {
-    name: 'Silk Scarf',
-    description: 'Luxury silk scarf with elegant pattern',
-    price: 100.0,
-    imageUrl: '/images/products/silk-scarf.jpg',
+    name: 'COLLAR',
+    description: 'Made entirely from 100% cotton, this collar ensures comfort and breathability. The ruffled style, adorned with delicate lace detailing, exudes vintage elegance. Convenient drawstrings at the front allow for easy closure or adjustment.',
+    price: 180.0,
+    // Store the primary image in imageUrl, and additional images in an array if needed
+    imageUrl: 'https://res.cloudinary.com/dwenvtwyx/image/upload/collar_vzz5yo',
+    imageUrls: ['https://res.cloudinary.com/dwenvtwyx/image/upload/collar_vzz5yo'],
     status: 'AVAILABLE',
     category: 'Accessories',
-    tags: ['silk', 'luxury', 'scarf', 'fashion']
+    tags: ['collar', 'cotton', 'vintage', 'lace', 'handcrafted']
   },
   {
-    name: 'Cap',
-    description: 'Elegant cap with a matching scarf',
-    price: 50.0,
-    imageUrl: '/images/products/cap.jpg',
+    name: 'SCARF',
+    description: 'Made entirely from 100% cotton, this scarf ensures comfort and breathability. The ruffled style, adorned with delicate lace detailing, exudes vintage elegance. Convenient drawstrings at the front allow for easy closure or adjustment.',
+    price: 180.0,
+    imageUrl: 'https://res.cloudinary.com/dwenvtwyx/image/upload/image_6483441_8_lr6b1a',
+    imageUrls: [
+      'https://res.cloudinary.com/dwenvtwyx/image/upload/image_6483441_8_lr6b1a',
+      'https://res.cloudinary.com/dwenvtwyx/image/upload/image_6483441_6_qhuykn',
+      'https://res.cloudinary.com/dwenvtwyx/image/upload/image_6483441_9_txsndd'
+    ],
     status: 'AVAILABLE',
     category: 'Accessories',
-    tags: ['cap', 'headwear', 'fashion']
+    tags: ['scarf', 'cotton', 'vintage', 'lace', 'handcrafted']
   },
   {
-    name: 'Leather Wallet',
-    description: 'Handcrafted genuine leather wallet',
-    price: 75.0,
-    imageUrl: '/images/products/wallet.jpg',
+    name: 'TROUSERS',
+    description: 'Made entirely from 100% cotton, these trousers ensure comfort and breathability. The ruffled style, adorned with delicate lace detailing, exudes vintage elegance. Convenient drawstrings at the front allow for easy closure or adjustment.',
+    price: 180.0,
+    imageUrl: 'https://res.cloudinary.com/dwenvtwyx/image/upload/trousers_x3ryc0',
+    imageUrls: ['https://res.cloudinary.com/dwenvtwyx/image/upload/trousers_x3ryc0'],
     status: 'AVAILABLE',
-    category: 'Accessories',
-    tags: ['leather', 'wallet', 'handcrafted']
-  },
-  {
-    name: 'Sunglasses',
-    description: 'UV-protected stylish sunglasses',
-    price: 120.0,
-    imageUrl: '/images/products/sunglasses.jpg',
-    status: 'AVAILABLE',
-    category: 'Accessories',
-    tags: ['sunglasses', 'uv-protection', 'summer']
-  },
-  {
-    name: 'Tote Bag',
-    description: 'Eco-friendly canvas tote bag',
-    price: 45.0,
-    imageUrl: '/images/products/tote-bag.jpg',
-    status: 'AVAILABLE',
-    category: 'Bags',
-    tags: ['bag', 'eco-friendly', 'canvas']
+    category: 'Clothing',
+    tags: ['trousers', 'cotton', 'vintage', 'lace', 'handcrafted']
   }
 ];
 
-// Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     console.log('Connected to MongoDB');
@@ -66,24 +60,29 @@ mongoose.connect(process.env.MONGO_URI)
     process.exit(1);
   });
 
-// Seed function
 async function seedProducts() {
   try {
-    // Clear existing products (optional - remove if you don't want to clear the collection)
-    await Product.deleteMany({});
-    console.log('Cleared existing products');
+    // await Product.deleteMany({});
+    // console.log('Cleared existing products');
 
-    // Insert new products
+    const hasImageUrlsField = Object.keys(Product.schema.paths).includes('imageUrls');
+    if (!hasImageUrlsField) {
+      console.log('Note: Your Product schema might need to be updated to support multiple images');
+      console.log('Consider adding an imageUrls array field to your schema');
+    }
+
     const result = await Product.insertMany(productData);
     console.log(`${result.length} products inserted successfully`);
-    
-    // Display the inserted products with their IDs
+
     console.log('Inserted products with their MongoDB IDs:');
     result.forEach(product => {
       console.log(`${product.name}: ${product._id}`);
     });
 
-    // Close the connection
+    console.log('\nProduct data inserted successfully. You might need to:');
+    console.log('1. Update your Product schema to support multiple images if needed');
+    console.log('2. Update your Shop component to handle the new data structure');
+
     mongoose.connection.close();
   } catch (error) {
     console.error('Error seeding products:', error);

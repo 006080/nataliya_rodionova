@@ -17,8 +17,8 @@ import { v2 as cloudinary } from 'cloudinary';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import bodyParser from "body-parser";
 // import { Buffer } from "node:buffer";
-// import paypalRoutes from './routes/paypal.js';
-import paymentRoutes from './routes/payment.js';
+import paypalRoutes from './routes/paypal.js';
+// import paymentRoutes from './routes/payment.js';
 import productRoutes from './routes/product.js';
 
 dotenv.config({ path: './.env.local' });
@@ -484,10 +484,10 @@ app.get('/api/reviews', async (req, res) => {
 //   });
 
 
-// app.use(paypalRoutes);
+app.use(paypalRoutes);
 
 app.use(productRoutes);
-app.use(paymentRoutes);
+// app.use(paymentRoutes);
 
 //===========================================================
 
