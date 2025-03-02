@@ -4,9 +4,12 @@ import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import styles from "./CartSummary.module.css";
 import { useCart } from "./CartContext";
 import useOutsideClick from "../src/hooks/useOutsideClick";
+import { useNavigate } from "react-router-dom";
 
 const CartSummary = ({ onClose }) => {
   const { cartItems, removeFromCart } = useCart();
+
+  const navigate = useNavigate();
 
   const cartRef = useOutsideClick(() => onClose());
 
@@ -31,6 +34,7 @@ const CartSummary = ({ onClose }) => {
       </div>
       <p>Total Items: {totalItems}</p>
       <p>Total Price: ${totalPrice.toFixed(2)}</p>
+      <button onClick={() => navigate("/cart")}>View Cart</button>
     </div>
   );
 };
