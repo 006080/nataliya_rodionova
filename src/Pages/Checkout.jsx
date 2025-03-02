@@ -1,42 +1,41 @@
-import { useState } from "react";
-import { useCart } from "../../components/CartContext"; 
-import MeasureForm from "../../components/MeasureForm";
-import styles from "./Checkout.module.css";
-import PayPalPayment from "../../components/PayPalPayment";
+import { useState } from 'react'
+import { useCart } from '../../components/CartContext'
+import MeasureForm, { MeasurementsProvider } from '../../components/MeasureForm'
+import styles from './Checkout.module.css'
+import PayPalPayment from '../../components/PayPalPayment'
 
 const Checkout = () => {
-  const { cartItems, removeFromCart } = useCart(); 
-  const [isMeasureFormValid, setIsMeasureFormValid] = useState(false);
-  const [orderComplete, setOrderComplete] = useState(false);
-  const [orderData, setOrderData] = useState(null);
+  const { cartItems, removeFromCart } = useCart()
+  const [isMeasureFormValid, setIsMeasureFormValid] = useState(false)
+  const [orderComplete, setOrderComplete] = useState(false)
+  const [orderData, setOrderData] = useState(null)
 
-  const totalPrice = cartItems?.reduce(
-    (total, item) => total + item.price * item.quantity, 
+  const totalPrice =
+    cartItems?.reduce((total, item) => total + item.price * item.quantity, 0) ||
     0
-  ) || 0;
 
   const handleMeasureFormValid = (isValid) => {
-    setIsMeasureFormValid(isValid);
-  };
+    setIsMeasureFormValid(isValid)
+  }
 
   const handlePaymentSuccess = (data) => {
-    setOrderComplete(true);
-    setOrderData(data);
-    removeFromCart(); 
-  };
+    setOrderComplete(true)
+    setOrderData(data)
+    removeFromCart()
+  }
 
   const handlePaymentCancel = () => {
-    console.log('Payment was cancelled');
-  };
+    console.log('Payment was cancelled')
+  }
 
-  const formattedCartItems = cartItems.map(item => ({
+  const formattedCartItems = cartItems.map((item) => ({
     id: item.id || `product-${item.name.toLowerCase().replace(/\s+/g, '-')}`,
     name: item.name,
     price: Number(item.price),
     quantity: Number(item.quantity),
     description: item.description || `${item.name} product`,
-    image: item.image
-  }));
+    image: item.image,
+  }))
 
   if (orderComplete) {
     return (
@@ -64,57 +63,61 @@ const Checkout = () => {
           Continue Shopping
         </button>
       </div>
-    );
+    )
   }
 
   return (
-    <div className={styles.checkoutContainer}>
-      <h2>Checkout</h2>
+    <MeasurementsProvider>
+      <div className={styles.checkoutContainer}>
+        <h2>Checkout</h2>
 
-      <div className={styles.orderSummary}>
-        {cartItems?.length > 0 ? (
-          cartItems.map((item) => (
-            <div key={item.id || item.name} className={styles.cartItem}>
-              <img 
-                src={item.image} 
-                alt={item.name} 
-                className={styles.productImage} 
-              />
-              <div>
-                <p><strong>{item.name}</strong></p>
-                <p>Quantity: {item.quantity}</p>
-                <p>Price: €{item.price.toFixed(2)}</p>
+        <div className={styles.orderSummary}>
+          {cartItems?.length > 0 ? (
+            cartItems.map((item) => (
+              <div key={item.id || item.name} className={styles.cartItem}>
+                <img
+                  src={item.image}
+                  alt={item.name}
+                  className={styles.productImage}
+                />
+                <div>
+                  <p>
+                    <strong>{item.name}</strong>
+                  </p>
+                  <p>Quantity: {item.quantity}</p>
+                  <p>Price: €{item.price.toFixed(2)}</p>
+                </div>
               </div>
-            </div>
-          ))
-        ) : (
-          <p>Your cart is empty</p>
-        )}
-        <h3 className={styles.sum}>Total Price: €{totalPrice.toFixed(2)}</h3>
-      </div>
-
-      {/* Updated to pass the correct prop */}
-      <MeasureForm onFormValid={handleMeasureFormValid} />
-
-      <button 
-        onClick={() => setIsMeasureFormValid(true)} 
-        className={styles.submitButton}
-        disabled={isMeasureFormValid}
-      >
-        Proceed to Payment
-      </button>
-
-      {isMeasureFormValid && (
-        <div className={styles.paypalContainer}>
-          <PayPalPayment
-            cart={formattedCartItems}
-            onSuccess={handlePaymentSuccess}
-            onCancel={handlePaymentCancel}
-          />
+            ))
+          ) : (
+            <p>Your cart is empty</p>
+          )}
+          <h3 className={styles.sum}>Total Price: €{totalPrice.toFixed(2)}</h3>
         </div>
-      )} 
-    </div>
-  );
-};
 
-export default Checkout;
+        {/* Updated to pass the correct prop */}
+        <MeasureForm onFormValid={handleMeasureFormValid} />
+
+        <button
+          onClick={() => setIsMeasureFormValid(true)}
+          className={styles.submitButton}
+          disabled={isMeasureFormValid}
+        >
+          Proceed to Payment
+        </button>
+
+        {isMeasureFormValid && (
+          <div className={styles.paypalContainer}>
+            <PayPalPayment
+              cart={formattedCartItems}
+              onSuccess={handlePaymentSuccess}
+              onCancel={handlePaymentCancel}
+            />
+          </div>
+        )}
+      </div>
+    </MeasurementsProvider>
+  )
+}
+
+export default Checkout

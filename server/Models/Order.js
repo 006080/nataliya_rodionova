@@ -19,6 +19,12 @@ const OrderSchema = new mongoose.Schema({
     quantity: Number,
     price: Number
   }],
+  measurements: {
+    height: String,
+    chest: String,
+    waist: String,
+    hips: String
+  },
   customer: {
     name: String,
     email: String,

@@ -10,7 +10,7 @@ router.post("/api/orders", async (req, res) => {
   try {
     console.log("Received request to create order:", req.body);
 
-    const { cart } = req.body;
+    const { cart, measurements } = req.body;
     
     // Validate cart data
     if (!cart || !Array.isArray(cart) || cart.length === 0) {
@@ -34,7 +34,13 @@ router.post("/api/orders", async (req, res) => {
       }
     }
 
-    const order = await createPayPalOrder(cart);
+    if (measurements) {
+      if (typeof measurements !== 'object') {
+        return res.status(400).json({ error: "Measurements must be an object" });
+      }
+    }
+
+    const order = await createPayPalOrder(cart, measurements);
 
     if (!order || !order.id) {
       return res.status(500).json({ error: "Failed to create order" });
@@ -98,6 +104,7 @@ router.get("/api/orders/:orderID", async (req, res) => {
       items: order.items,
       totalAmount: order.totalAmount,
       currency: order.currency,
+      measurements: order.measurements,
       createdAt: order.createdAt,
       customer: order.customer
     });

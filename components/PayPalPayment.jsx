@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { PayPalButtons, PayPalScriptProvider } from '@paypal/react-paypal-js'
+import { useMeasurements } from './MeasureForm';
 import styles from './PayPalPayment.module.css'
 
 const getApiUrl = () => {
@@ -14,6 +15,7 @@ function PayPalPayment({ cart = [], onSuccess, onCancel }) {
   const [paymentStatus, setPaymentStatus] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState(null)
+  const { measurements } = useMeasurements();
 
     const formatCartItems = (cartItems) => {
       return cartItems.map(item => ({
@@ -42,7 +44,8 @@ function PayPalPayment({ cart = [], onSuccess, onCancel }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             //  cart 
-             cart: formattedCart
+             cart: formattedCart,
+             measurements: measurements
         }),
       })
 

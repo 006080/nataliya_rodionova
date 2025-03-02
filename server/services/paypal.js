@@ -46,7 +46,7 @@ const formatPrice = (price) => {
   return Number(price).toFixed(2);
 };
 
-const createPayPalOrder = async (cartItems) => {
+const createPayPalOrder = async (cartItems, measurements = null) => {
   const accessToken = await getPayPalAccessToken();
 
   // Map cart items to PayPal format and calculate total
@@ -128,7 +128,8 @@ const createPayPalOrder = async (cartItems) => {
       items: orderItems,
       totalAmount: totalAmount,
       currency: 'EUR',
-      createdAt: new Date()
+      createdAt: new Date(),
+      ...(measurements && { measurements })
     });
 
 
@@ -195,3 +196,6 @@ const capturePayPalOrder = async (orderId) => {
 };
 
 export { getPayPalAccessToken, createPayPalOrder, capturePayPalOrder };
+
+
+
