@@ -30,17 +30,20 @@ const Home = () => {
 
   return (
     <div className={styles.fon}>
+
       <AdvancedImage 
         cldImg={backgroundImage}
         className={styles.backgroundImage}
         modifiers={[auto({ aspectRatio: 'auto' })]} // Adjust the image size automatically
       />
+       
       <div className={styles.sloganBlog}>
         <h1>Unveil Timeless Beauty</h1>
         <h2>Masterpieces in Wool Designs</h2>
         <Button className={styles.homeButton} onClick={handleClick}>
           Shop Now
         </Button>
+      
       </div>
     </div>
   );
