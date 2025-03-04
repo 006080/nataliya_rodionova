@@ -1,21 +1,18 @@
-// routes/payment.js
 import express from 'express';
-import { createPayment, capturePayment } from '../services/payment.js';
+import PaymentService from '../services/paymentService.js';
 import Order from '../Models/Order.js';
+import { validatePaymentRequest } from '../middleware/paymentValidator.js';
 
 const router = express.Router();
 
-// Create a payment (generic endpoint for any payment provider)
-router.post("/api/payments", async (req, res) => {
+router.post("/api/payments", validatePaymentRequest, async (req, res) => {
   try {
-    const { cart, paymentProvider = 'paypal'} = req.body;
-
-    // Validate cart data
+    const { cart, measurements, paymentMethod = 'paypal' } = req.body;
+    
     if (!cart || !Array.isArray(cart) || cart.length === 0) {
       return res.status(400).json({ error: "Invalid cart data" });
     }
     
-    // Validate each cart item
     for (const item of cart) {
       if (!item.id || !item.name || !item.price || !item.quantity) {
         return res.status(400).json({ 
@@ -31,35 +28,98 @@ router.post("/api/payments", async (req, res) => {
         return res.status(400).json({ error: "Quantity must be a positive integer" });
       }
     }
-    
-    // Validate payment provider
-    const supportedProviders = ['paypal', 'stripe', 'mollie'];
-    if (!supportedProviders.includes(paymentProvider)) {
-      return res.status(400).json({ error: `Unsupported payment provider: ${paymentProvider}` });
+
+    if (measurements && typeof measurements !== 'object') {
+      return res.status(400).json({ error: "Measurements must be an object" });
     }
 
-    const payment = await createPayment(cart, paymentProvider);
-    res.json(payment);
+    try {
+      const paymentService = new PaymentService(paymentMethod);
+      
+      const payment = await paymentService.createPayment(cart, measurements);
+      
+      res.json(payment);
+    } catch (error) {
+      if (error.message.includes('not implemented')) {
+        return res.status(400).json({ 
+          error: `Payment method '${paymentMethod}' is not available` 
+        });
+      }
+      throw error;
+    }
   } catch (error) {
     console.error("Error creating payment:", error);
     res.status(500).json({ 
-      error: "Payment creation failed",
+      error: "Failed to create payment",
       message: error.message 
     });
   }
 });
 
-// Capture a payment (generic endpoint for any payment provider)
 router.post("/api/payments/:paymentId/capture", async (req, res) => {
   try {
     const { paymentId } = req.params;
-    const { paymentProvider = 'paypal' } = req.body;
+    const { orderReference, paymentMethod = 'paypal' } = req.body;
     
     if (!paymentId) {
       return res.status(400).json({ error: "Payment ID is required" });
     }
     
-    const captureData = await capturePayment(paymentId, paymentProvider);
+    if (!orderReference) {
+      return res.status(400).json({ error: "Order reference is required" });
+    }
+    
+    // Check if order exists and is not already paid
+    let order;
+    
+    switch (paymentMethod) {
+      case 'paypal':
+        order = await Order.findOne({ 'paymentIds.paypalOrderId': paymentId });
+        break;
+      case 'stripe':
+        order = await Order.findOne({ 'paymentIds.stripePaymentIntentId': paymentId });
+        break;
+      case 'mollie':
+        order = await Order.findOne({ 'paymentIds.molliePaymentId': paymentId });
+        break;
+      default:
+        return res.status(400).json({ error: "Invalid payment method" });
+    }
+    
+    if (!order) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+    
+    if (order.isPaid) {
+      return res.status(400).json({ 
+        error: "This order has already been paid",
+        orderId: order._id,
+        status: 'COMPLETED' 
+      });
+    }
+    
+    const paymentService = new PaymentService(paymentMethod);
+    
+    const captureData = await paymentService.capturePayment(paymentId, orderReference);
+    
+    await Order.findByIdAndUpdate(order._id, {
+      $push: {
+        paymentAttempts: {
+          provider: paymentMethod,
+          paymentId: paymentId,
+          status: captureData.status,
+          amount: order.totalAmount,
+          timestamp: new Date()
+        }
+      }
+    });
+    
+    // Process order completion (could trigger email, etc.)
+    if (captureData.status === 'COMPLETED') {
+      // You could send order confirmation email here
+      console.log(`Payment ${paymentId} for order ${orderReference} completed successfully`);
+    }
+    
     res.json(captureData);
   } catch (error) {
     console.error("Error capturing payment:", error);
@@ -67,80 +127,6 @@ router.post("/api/payments/:paymentId/capture", async (req, res) => {
       error: "Failed to capture payment",
       message: error.message
     });
-  }
-});
-
-// Get order status by payment ID (useful for order confirmation page)
-router.get("/api/payments/:paymentId", async (req, res) => {
-  try {
-    const { paymentId } = req.params;
-    const { paymentProvider = 'paypal' } = req.query;
-    
-    if (!paymentId) {
-      return res.status(400).json({ error: "Payment ID is required" });
-    }
-    
-    const order = await Order.findOne({ paymentId, paymentProvider })
-      .populate('items.productId');
-    
-    if (!order) {
-      return res.status(404).json({ error: "Order not found" });
-    }
-    
-    res.json({
-      id: order._id,
-      paymentId: order.paymentId,
-      paymentProvider: order.paymentProvider,
-      status: order.status,
-      items: order.items,
-      totalAmount: order.totalAmount,
-      currency: order.currency,
-      customer: order.customer,
-      createdAt: order.createdAt,
-      updatedAt: order.updatedAt
-    });
-  } catch (error) {
-    console.error("Error fetching order:", error);
-    res.status(500).json({ error: "Failed to fetch order details" });
-  }
-});
-
-// Get all orders for a customer (e.g. for order history)
-router.get("/api/orders", async (req, res) => {
-  try {
-    const { email, limit = 10, page = 1 } = req.query;
-    
-    if (!email) {
-      return res.status(400).json({ error: "Customer email is required" });
-    }
-    
-    const skip = (page - 1) * limit;
-    
-    const orders = await Order.find({ 
-      'customer.email': email,
-      status: 'COMPLETED'
-    })
-    .sort({ createdAt: -1 })
-    .skip(skip)
-    .limit(Number(limit))
-    .select('-paymentDetails');
-    
-    const totalOrders = await Order.countDocuments({ 
-      'customer.email': email,
-      status: 'COMPLETED'
-    });
-    
-    res.json({
-      orders,
-      pagination: {
-        total: totalOrders,
-        page: Number(page),
-        pages: Math.ceil(totalOrders / limit)
-      }
-    });
-  } catch (error) {
-    console.error("Error fetching customer orders:", error);
-    res.status(500).json({ error: "Failed to fetch order history" });
   }
 });
 

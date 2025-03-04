@@ -1,23 +1,20 @@
-// Replace your existing PayPal routes with these
 import express from 'express';
 import { createPayPalOrder, capturePayPalOrder } from '../services/paypal.js';
 import Order from '../Models/Order.js';
 
 const router = express.Router();
 
-// Create a new PayPal order
+
 router.post("/api/orders", async (req, res) => {
   try {
     console.log("Received request to create order:", req.body);
 
     const { cart, measurements } = req.body;
     
-    // Validate cart data
     if (!cart || !Array.isArray(cart) || cart.length === 0) {
       return res.status(400).json({ error: "Invalid cart data" });
     }
     
-    // Validate each cart item
     for (const item of cart) {
       if (!item.id || !item.name || !item.price || !item.quantity) {
         return res.status(400).json({ 
@@ -56,7 +53,6 @@ router.post("/api/orders", async (req, res) => {
   }
 });
 
-// Capture a PayPal payment
 router.post("/api/orders/:orderID/capture", async (req, res) => {
   try {
     const { orderID } = req.params;
@@ -67,7 +63,6 @@ router.post("/api/orders/:orderID/capture", async (req, res) => {
     
     const captureData = await capturePayPalOrder(orderID);
     
-    // Process order completion (could trigger email, etc.)
     if (captureData.status === 'COMPLETED') {
       // You could send order confirmation email here
       console.log(`Order ${orderID} completed successfully`);
@@ -83,7 +78,7 @@ router.post("/api/orders/:orderID/capture", async (req, res) => {
   }
 });
 
-// Get order status (useful for order confirmation page)
+// Get order status
 router.get("/api/orders/:orderID", async (req, res) => {
   try {
     const { orderID } = req.params;

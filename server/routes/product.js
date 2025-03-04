@@ -1,4 +1,3 @@
-// routes/product.js
 import express from 'express';
 import { 
   getProducts, 
@@ -10,7 +9,6 @@ import {
 
 const router = express.Router();
 
-// Get all products (with filtering and pagination)
 router.get("/api/products", async (req, res) => {
   try {
     const { 
@@ -21,7 +19,6 @@ router.get("/api/products", async (req, res) => {
       status = 'AVAILABLE'
     } = req.query;
     
-    // Parse tags if provided as a comma-separated string
     const parsedTags = tags ? tags.split(',') : [];
     
     const options = { 
@@ -43,7 +40,6 @@ router.get("/api/products", async (req, res) => {
   }
 });
 
-// Get a single product by ID
 router.get("/api/products/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -58,12 +54,10 @@ router.get("/api/products/:id", async (req, res) => {
   }
 });
 
-// Create a new product
 router.post("/api/products", async (req, res) => {
   try {
     const productData = req.body;
     
-    // Basic validation
     if (!productData.name || !productData.price) {
       return res.status(400).json({ 
         error: "Product name and price are required" 
@@ -81,7 +75,6 @@ router.post("/api/products", async (req, res) => {
   }
 });
 
-// Update a product
 router.put("/api/products/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -98,7 +91,6 @@ router.put("/api/products/:id", async (req, res) => {
   }
 });
 
-// Delete a product
 router.delete("/api/products/:id", async (req, res) => {
   try {
     const { id } = req.params;

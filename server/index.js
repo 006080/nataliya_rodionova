@@ -16,18 +16,25 @@ import Joi from 'joi';
 import { v2 as cloudinary } from 'cloudinary';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import bodyParser from "body-parser";
-// import { Buffer } from "node:buffer";
-import paypalRoutes from './routes/paypal.js';
-// import paymentRoutes from './routes/payment.js';
+import webhookRoutes from './routes/webhooks.js';
 import productRoutes from './routes/product.js';
+import paymentRoutes from './routes/payment.js';
+import { logTransaction } from './middleware/transactionLogger.js';
+import { startPaymentStatusChecker } from './services/paymentStatusChecker.js';
+
 
 dotenv.config({ path: './.env.local' });
 
-
 const app = express();
+
+app.use('/api/webhooks', bodyParser.raw({ type: 'application/json' }));
+
 app.use(cors());
 // app.use(express.json());
 app.use(bodyParser.json());
+
+app.use(bodyParser.urlencoded({ extended: true }));
+
 const server = http.createServer(app);
 
 // Load environment variables
@@ -144,7 +151,7 @@ const transporter = nodemailer.createTransport({
 
 
 // MongoDB Connection
-mongoose.connect(MONGO_URI)
+mongoose.connect(MONGO_URI) 
     .then(() => {
         console.log('Connected to MongoDB');
         // setupChangeStream();
@@ -305,191 +312,13 @@ app.get('/api/reviews', async (req, res) => {
 
 
 
-//===========================================================
-// const getPayPalAccessToken = async () => {
-//     const clientId = process.env.PAYPAL_CLIENT_ID;
-//     const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
-  
-//     if (!clientId || !clientSecret) {
-//       throw new Error("PayPal Client ID or Secret is missing!");
-//     }
-  
-//     const auth = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
-
-//     try {
-//     const response = await fetch("https://api-m.sandbox.paypal.com/v1/oauth2/token", {
-//         method: "POST",
-//         headers: {
-//             "Authorization": `Basic ${auth}`,
-//             "Content-Type": "application/x-www-form-urlencoded",
-//         },
-//         body: "grant_type=client_credentials",
-//     });
-
-//     if (!response.ok) {
-//         throw new Error(`PayPal token request failed: ${response.status} ${response.statusText}`);
-//       }
-  
-//     const data = await response.json();
-  
-//     if (!data.access_token) {
-//         throw new Error("❌ Failed to get PayPal access token");
-//     }
-  
-//     return data.access_token;
-
-//     } catch (error) {
-//         console.error("PayPal token error:", error);
-//         throw new Error("Failed to authenticate with PayPal");
-//     }
-//   };
-  
-  
-//   const createPayPalOrder = async (cart = []) => {
-//     const accessToken = await getPayPalAccessToken(); 
-  
-//     const orderData = {
-//         intent: "CAPTURE",
-//         purchase_units: [
-//           {
-//               items: [
-//                   {
-//                       name: 'Scarf',
-//                       description: 'Super scarf',
-//                       quantity: 1,
-//                       unit_amount: {
-//                           currency_code: 'EUR',
-//                           value: '100.00'
-//                       }
-//                   }
-//               ],
-  
-//               amount: {
-//                   currency_code: 'EUR',
-//                   value: '100.00',
-//                   breakdown: {
-//                       item_total: {
-//                           currency_code: 'EUR',
-//                           value: '100.00'
-//                       }
-//                   }
-//               }
-//           }
-//         ],
-//         payment_source: {
-//             paypal: {
-//                 experience_context: {
-//                     brand_name: 'VARONA'
-//                 },
-//             },
-//           },
-//     };
-  
-//     try {
-//     const response = await fetch("https://api-m.sandbox.paypal.com/v2/checkout/orders", {
-//         method: "POST",
-//         headers: {
-//             "Content-Type": "application/json",
-//             "Authorization": `Bearer ${accessToken}`,
-//             "PayPal-Request-Id": `order-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-//         },
-//         body: JSON.stringify(orderData),
-//     });
-
-//     if (!response.ok) {
-//         const errorText = await response.text();
-//         console.error("PayPal order creation failed:", errorText);
-//         throw new Error(`Failed to create PayPal order: ${response.status}`);
-//       }
-  
-//     const data = await response.json();
-//     console.log("🟢 PayPal API Response:", data); 
-
-//     return data;
-
-//     } catch (error) {
-//         console.error("Error in createPayPalOrder:", error);
-//         throw error;
-//     }
-//   };
-  
-
-//   app.post("/api/orders", async (req, res) => {
-//     try {
-//         console.log("📩 Received request to create order:", req.body);
-  
-//         const { cart } = req.body;
-//         if (!cart || !Array.isArray(cart)) {
-//           return res.status(400).json({ error: "Invalid cart data" });
-//         }
-
-//         const order = await createPayPalOrder(cart); // Make sure this function returns the order object
-//         console.log("🟢 PayPal Order Created:", order); 
-  
-//         if (!order || !order.id) {
-//             return res.status(500).json({ error: "Failed to create order" });
-//           }
-  
-//         res.json({ id: order.id });  // ✅ Ensure response includes the order ID
-
-//     } catch (error) {
-//         console.error("❌ Error creating order:", error);
-//         res.status(500).json({ 
-//           error: "Internal Server Error",
-//           message: error.message 
-//         });
-//       }
-//   });
-  
-//   app.post("/api/orders/:orderID/capture", async (req, res) => {
-//     try {
-//         const { orderID } = req.params;
-
-//         if (!orderID) {
-//             return res.status(400).json({ error: "Order ID is required" });
-//           }
-  
-//         const accessToken = await getPayPalAccessToken();
-//         const response = await fetch(`https://api-m.sandbox.paypal.com/v2/checkout/orders/${orderID}/capture`, {
-//             method: "POST",
-//             headers: {
-//                 "Content-Type": "application/json",
-//                 "Authorization": `Bearer ${accessToken}`,
-//                 "PayPal-Request-Id": `capture-${orderID}-${Date.now()}` // Idempotency key
-//             }
-//         });
-
-//         if (!response.ok) {
-//             const errorText = await response.text();
-//             console.error("PayPal capture failed:", errorText);
-//             return res.status(response.status).json({ 
-//               error: "Failed to capture payment",
-//               details: errorText
-//             });
-//           }
-  
-//           const data = await response.json();
-    
-//           // Handle successful payment here (update database, send confirmation email, etc.)
-          
-//           res.json(data);
-
-//         } catch (error) {
-//             console.error("Error capturing order:", error);
-//             res.status(500).json({ 
-//               error: "Failed to capture order",
-//               message: error.message
-//             });
-//           }
-//   });
-
-
-app.use(paypalRoutes);
-
+startPaymentStatusChecker();
 app.use(productRoutes);
-// app.use(paymentRoutes);
+app.use(paymentRoutes);
+app.use(webhookRoutes);
+app.use(logTransaction);
 
-//===========================================================
+
 
 app.use((req, res) => {
     res.status(404).json({ error: 'Endpoint not found' });

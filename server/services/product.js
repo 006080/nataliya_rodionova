@@ -1,4 +1,3 @@
-// services/product.js
 import Product from '../Models/Product.js';
 
 /**

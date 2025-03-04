@@ -1,15 +1,15 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import Product from '../Models/Product.js';
-import { Cloudinary } from '@cloudinary/url-gen';
+// import { Cloudinary } from '@cloudinary/url-gen';
 
 dotenv.config({ path: './.env.local' });
 
-const cld = new Cloudinary({
-  cloud: {
-    cloudName: "dwenvtwyx",
-  },
-});
+// const cld = new Cloudinary({
+//   cloud: {
+//     cloudName: "dwenvtwyx",
+//   },
+// });
 
 
 const productData = [
@@ -62,8 +62,8 @@ mongoose.connect(process.env.MONGO_URI)
 
 async function seedProducts() {
   try {
-    // await Product.deleteMany({});
-    // console.log('Cleared existing products');
+    await Product.deleteMany({});
+    console.log('Cleared existing products');
 
     const hasImageUrlsField = Object.keys(Product.schema.paths).includes('imageUrls');
     if (!hasImageUrlsField) {
