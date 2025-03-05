@@ -1,16 +1,19 @@
 import { useState } from "react";
-import { useCart } from "../../components/CartContext"; // Corrected import path
-import MeasureForm from "../../components/MeasureForm"; // Ensure correct path and default export
+import { useCart } from "../../components/CartContext";
+import MeasureForm from "../../components/MeasureForm";
+import DeliveryForm from "../../components/DeliveryForm"; // Import DeliveryForm
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
-import styles from "./Checkout.module.css"; // Ensure this file exists
+import styles from "./Checkout.module.css";
 
 const Checkout = () => {
-  const { cartItems } = useCart(); // Get cart items from context
+  const { cartItems } = useCart();
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [deliveryDetails, setDeliveryDetails] = useState(null); // Store delivery details
 
   const totalPrice = cartItems?.reduce((total, item) => total + item.price * item.quantity, 0) || 0;
 
-  const handleFormSubmit = () => {
+  const handleDeliverySubmit = (details) => {
+    setDeliveryDetails(details);
     setFormSubmitted(true);
   };
 
@@ -23,14 +26,14 @@ const Checkout = () => {
           cartItems.map((item) => (
             <div key={item.name} className={styles.cartItem}>
               <img src={item.image} alt={item.name} className={styles.productImage} />
-         <div style={{width:'150px'}}>
+              <div style={{ width: '150px' }}>
                 <p><strong>{item.name}</strong></p>
-                <div style={{lineHeight:'1', fontSize:'medium', fontStyle:'italic'}}>
-                <p>Quantity: {item.quantity}</p>
-                <p>Price: ${item.price}</p>
+                <div style={{ lineHeight: '1', fontSize: 'medium', fontStyle: 'italic' }}>
+                  <p>Quantity: {item.quantity}</p>
+                  <p>Price: ${item.price}</p>
+                </div>
               </div>
-              </div>
-              </div>
+            </div>
           ))
         ) : (
           <p>Your cart is empty</p>
@@ -38,13 +41,12 @@ const Checkout = () => {
         <h3 className={styles.sum}>Total Price: ${totalPrice.toFixed(2)}</h3>
       </div>
 
-      {/* Ensure MeasureForm is correctly imported */}
       <MeasureForm />
+      
+      {/* Delivery Form */}
+      {!deliveryDetails && <DeliveryForm onFormSubmit={handleDeliverySubmit} />}
 
-      <button onClick={handleFormSubmit} className={styles.submitButton}>
-        Proceed to Payment
-      </button>
-
+      {/* Show PayPal Button only after delivery details are saved */}
       {formSubmitted && (
         <div className={styles.paypalContainer}>
           <PayPalScriptProvider options={{ "client-id": "ATNcfYLojXcMeX9lCiE9khgbRYSjaKptcE9-R-PfsaQMx6ZrqVoyWoYDzMefUKFIFQpp_o82vQ81aCt-" }}>

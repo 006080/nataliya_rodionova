@@ -17,10 +17,10 @@ const MeasureForm = ({ setIsMeasureFormValid }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (measurements.height && measurements.weight && measurements.chest) {
-      setIsSubmitted(true);
-      setIsMeasureFormValid(true); // Enable PayPal button
+      setIsSubmitted(false);
+      setIsMeasureFormValid(false); // Enable PayPal button
     } else {
-      alert("Please fill out all fields before submitting.");
+      alert("Your measurements have been successfully added.");
     }
   };
 
@@ -32,7 +32,7 @@ const MeasureForm = ({ setIsMeasureFormValid }) => {
         <input type="number" name="height" value={measurements.height} onChange={handleChange} required />
       </label>
       <label>
-        Chest (kg):
+        Chest (cm):
         <input type="number" name="chest" value={measurements.chest} onChange={handleChange} required />
       </label>
       <label>
