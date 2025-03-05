@@ -23,12 +23,14 @@ const Checkout = () => {
           cartItems.map((item) => (
             <div key={item.name} className={styles.cartItem}>
               <img src={item.image} alt={item.name} className={styles.productImage} />
-         <div></div>
+         <div style={{width:'150px'}}>
                 <p><strong>{item.name}</strong></p>
+                <div style={{lineHeight:'1', fontSize:'medium', fontStyle:'italic'}}>
                 <p>Quantity: {item.quantity}</p>
                 <p>Price: ${item.price}</p>
               </div>
-
+              </div>
+              </div>
           ))
         ) : (
           <p>Your cart is empty</p>
