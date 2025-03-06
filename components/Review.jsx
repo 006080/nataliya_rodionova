@@ -95,9 +95,22 @@ const Review = ({ setReviews, setError }) => {
     e.preventDefault();
     if (isSubmitting) return;
 
-    const { name, rating, message } = reviewFields;
-    if (!name.trim() || !rating || !message.trim()) {
-      alert("Please complete all required fields");
+    const { name, rating, message, image } = reviewFields;
+
+    if (!name.trim()) {
+      alert("Please enter your name");
+      return;
+    }
+    if (!rating) {
+      alert("Please provide a rating");
+      return;
+    }
+    if (!message.trim()) {
+      alert("Please write a review message");
+      return;
+    }
+    if (!image) {
+      alert("Please upload an image with your review");
       return;
     }
 
@@ -109,9 +122,7 @@ const Review = ({ setReviews, setError }) => {
       formData.append("name", name.trim());
       formData.append("rating", rating);
       formData.append("message", message.trim());
-      if (reviewFields.image) {
-        formData.append("image", reviewFields.image);
-      }
+      formData.append("image", image);
 
       const response = await fetch(getApiUrl(), {
         method: "POST",
@@ -141,7 +152,7 @@ const Review = ({ setReviews, setError }) => {
         <h2>Leave a Review</h2>
 
         <label className={styles.imageUpload}>
-          <span>Add Image (Optional)</span>
+          <span>Add Image</span>
           <input type="file" accept="image/*" onChange={handleImageChange} className={styles.fileInput} />
           {reviewFields.preview && (
             <img
