@@ -2,8 +2,6 @@ import Order from '../Models/Order.js';
 import { Buffer } from "node:buffer";
 
 
-//add dotenv !!!
-
 const getPayPalAccessToken = async () => {
   const clientId = process.env.PAYPAL_CLIENT_ID;
   const clientSecret = process.env.PAYPAL_CLIENT_SECRET;

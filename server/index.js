@@ -7,7 +7,6 @@ import rateLimit from 'express-rate-limit';
 import Review from './Models/Review.js';
 import Feedback from './Models/Feedback.js';
 // import User from '../Models/User.js'; // Uncomment if needed
-// import { Server } from 'socket.io'; // Uncomment if needed
 import http from 'http';
 import sanitizeHtml from 'sanitize-html';
 import helmet from 'helmet';
@@ -16,11 +15,10 @@ import Joi from 'joi';
 import { v2 as cloudinary } from 'cloudinary';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import bodyParser from "body-parser";
-import webhookRoutes from './routes/webhooks.js';
+import paypalRoutes from './routes/paypal.js';
 import productRoutes from './routes/product.js';
-import paymentRoutes from './routes/payment.js';
 import { logTransaction } from './middleware/transactionLogger.js';
-import { startPaymentStatusChecker } from './services/paymentStatusChecker.js';
+// import { startPaymentStatusChecker } from './services/paymentStatusChecker.js';
 
 
 
@@ -325,25 +323,10 @@ app.get('/api/reviews', async (req, res) => {
 });
 
 
-// app.use('/api/webhooks/stripe', (req, res, next) => {
-//     if (req.originalUrl.startsWith('/api/webhooks/stripe') && req.method === 'POST') {
-//       req.rawBody = '';
-//       req.on('data', (chunk) => {
-//         req.rawBody += chunk.toString();
-//       });
-//       req.on('end', () => {
-//         next();
-//       });
-//     } else {
-//       next();
-//     }
-//   });
 
-
-app.use('/', webhookRoutes); 
-startPaymentStatusChecker();
+// startPaymentStatusChecker();
 app.use(productRoutes);
-app.use(paymentRoutes);
+app.use(paypalRoutes);
 app.use(logTransaction);
 
 
