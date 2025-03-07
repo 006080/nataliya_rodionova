@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
 import styles from "./Form.module.css";
-import SubmitModal from "./SubmitModal";
+import SubmitForm from "./SubmitForm";
 
 const Form = () => {
   const [formFields, setFormFields] = useState({
@@ -187,7 +187,7 @@ const Form = () => {
           size="invisible"
           ref={recaptchaRef}
         />
-      {openModal && <SubmitModal onClose={() => setOpenModal(false)} />}
+      {openModal && <SubmitForm onClose={() => setOpenModal(false)} />}
     </>
   );
 };

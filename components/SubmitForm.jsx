@@ -2,7 +2,7 @@ import { Cloudinary } from "@cloudinary/url-gen";
 import { AdvancedImage } from "@cloudinary/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
-import styles from "./SubmitModal.module.css";
+import styles from "./SubmitForm.module.css";
 
 // Initialize Cloudinary instance
 const cld = new Cloudinary({
@@ -15,7 +15,7 @@ const cld = new Cloudinary({
 const getImage = (imageId) =>
   cld.image(imageId).format("auto").quality("auto");
 
-const SubmitModal = ({ onClose }) => {
+const SubmitForm = ({ onClose }) => {
   return (
     <div className={styles.submitModal}>
       {/* Replace local image with Cloudinary image */}
@@ -25,7 +25,7 @@ const SubmitModal = ({ onClose }) => {
         alt="Sticker"
       />
       <div className={styles.header}>
-        <h3 style={{ textAlign: "center" }}>Thank you!</h3>
+        <h3 style={{ textAlign: "center" }}>Form submitted successfully!</h3>
         <FontAwesomeIcon
           icon={faTimes}
           className={styles.closeIcon}
@@ -34,7 +34,7 @@ const SubmitModal = ({ onClose }) => {
       </div>
       <div className={styles.itemList}>
         <div className={styles.item}>
-          <p>Form submitted successfully!</p>
+          <p>Please be patient as we process your message.</p>
           <button
             onClick={onClose}
             style={{ backgroundColor: "white", color: "black" }}
@@ -47,4 +47,4 @@ const SubmitModal = ({ onClose }) => {
   );
 };
 
-export default SubmitModal;
+export default SubmitForm;
