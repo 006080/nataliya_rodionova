@@ -8,14 +8,9 @@ import Shop from "./Pages/Shop";
 import Footer from "../components/Footer";
 import Terms from "./Pages/Terms"; 
 import { CartProvider } from '../components/CartContext';
-import CartPage from "./Pages/CartPage";
-import CompleteOrder from "../components/CompleteOrder";
-import CancelOrder from "../components/CancelOrder";
 // import { position } from "@cloudinary/url-gen/qualifiers/timeline";
 import ReturnPolicy from "./Pages/ReturnPolicy";
 import Checkout from "./Pages/Checkout";
-import PaymentSuccess from "./Pages/PaymentSuccess";
-import PaymentCancel from "./Pages/PaymentCancel";
 
 const AppContent = () => {
   const location = useLocation();  // Get current route

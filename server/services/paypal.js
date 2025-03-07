@@ -1,7 +1,10 @@
 import Order from '../Models/Order.js';
 import { Buffer } from "node:buffer";
 
-
+/**
+ * Get PayPal access token for API authentication
+ * @returns {Promise<string>} PayPal access token
+ */
 const getPayPalAccessToken = async () => {
   const clientId = process.env.PAYPAL_CLIENT_ID;
   const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
@@ -39,12 +42,23 @@ const getPayPalAccessToken = async () => {
   }
 };
 
+/**
+ * Format price to always have 2 decimal places
+ * @param {number} price - The price to format
+ * @returns {string} Formatted price with 2 decimal places
+ */
 const formatPrice = (price) => {
-  // Ensure price is always formatted with 2 decimal places
   return Number(price).toFixed(2);
 };
 
-const createPayPalOrder = async (cartItems, measurements = null) => {
+/**
+ * Create a PayPal order and save it in MongoDB
+ * @param {Array} cartItems - Array of cart items
+ * @param {Object} measurements - Measurements data
+ * @param {Object} deliveryDetails - Delivery details
+ * @returns {Object} Created PayPal order data
+ */
+const createPayPalOrder = async (cartItems, measurements, deliveryDetails) => {
   const accessToken = await getPayPalAccessToken();
 
   // Map cart items to PayPal format and calculate total
@@ -85,7 +99,11 @@ const createPayPalOrder = async (cartItems, measurements = null) => {
     payment_source: {
       paypal: {
         experience_context: {
-          brand_name: 'VARONA'
+          brand_name: 'VARONA',
+          shipping_preference: 'GET_FROM_FILE',
+          // user_action: 'PAY_NOW',
+          // return_url: process.env.FRONTEND_URL_PROD + '/checkout',
+          // cancel_url: process.env.FRONTEND_URL_PROD + '/cart'
         },
       },
     },
@@ -127,10 +145,9 @@ const createPayPalOrder = async (cartItems, measurements = null) => {
       totalAmount: totalAmount,
       currency: 'EUR',
       createdAt: new Date(),
-      ...(measurements && { measurements })
+      measurements,
+      deliveryDetails
     });
-
-
     
     await newOrder.save();
     console.log("Order saved to database:", newOrder._id);
@@ -142,6 +159,11 @@ const createPayPalOrder = async (cartItems, measurements = null) => {
   }
 };
 
+/**
+ * Capture a PayPal payment and update the order in MongoDB
+ * @param {string} orderId - PayPal order ID
+ * @returns {Object} Captured payment data
+ */
 const capturePayPalOrder = async (orderId) => {
   try {
     const accessToken = await getPayPalAccessToken();
@@ -163,6 +185,24 @@ const capturePayPalOrder = async (orderId) => {
 
     const data = await response.json();
     
+    // Extract customer and shipping information
+    const customerInfo = data.payer ? {
+      'customer.name': `${data.payer.name.given_name} ${data.payer.name.surname}`,
+      'customer.email': data.payer.email_address,
+      'customer.paypalPayerId': data.payer.payer_id
+    } : {};
+    
+    const shippingInfo = data.purchase_units[0]?.shipping?.address ? {
+      shippingAddress: {
+        addressLine1: data.purchase_units[0].shipping.address.address_line_1,
+        addressLine2: data.purchase_units[0].shipping.address.address_line_2 || '',
+        adminArea1: data.purchase_units[0].shipping.address.admin_area_1 || '',
+        adminArea2: data.purchase_units[0].shipping.address.admin_area_2 || '',
+        postalCode: data.purchase_units[0].shipping.address.postal_code || '',
+        countryCode: data.purchase_units[0].shipping.address.country_code || ''
+      }
+    } : {};
+    
     // Update order in MongoDB
     const updatedOrder = await Order.findOneAndUpdate(
       { paypalOrderId: orderId },
@@ -170,21 +210,17 @@ const capturePayPalOrder = async (orderId) => {
         status: data.status,
         paymentDetails: data,
         updatedAt: new Date(),
-        // Extract customer info if available
-        ...(data.payer && {
-          'customer.name': `${data.payer.name.given_name} ${data.payer.name.surname}`,
-          'customer.email': data.payer.email_address,
-          'customer.paypalPayerId': data.payer.payer_id
-        }),
-        // Extract shipping address if available
-        ...(data.purchase_units[0]?.shipping && {
-          shippingAddress: data.purchase_units[0].shipping.address
-        })
+        ...customerInfo,
+        ...shippingInfo
       },
       { new: true }
     );
     
-    console.log("Order updated after capture:", updatedOrder._id);
+    if (!updatedOrder) {
+      console.error("Order not found in database:", orderId);
+    } else {
+      console.log("Order updated after capture:", updatedOrder._id);
+    }
     
     return data;
   } catch (error) {
@@ -194,6 +230,3 @@ const capturePayPalOrder = async (orderId) => {
 };
 
 export { getPayPalAccessToken, createPayPalOrder, capturePayPalOrder };
-
-
-
