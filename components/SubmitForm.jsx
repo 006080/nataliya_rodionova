@@ -24,7 +24,7 @@ const SubmitForm = ({ onClose }) => {
         cldImg={getImage("adesivo_vgxut0")} // Replace with your Cloudinary public ID
         alt="Sticker"
       />
-      <div className={styles.header}>
+      {/* <div className={styles.header}>
         <h3 style={{ textAlign: "center" }}>Form submitted successfully!</h3>
         <FontAwesomeIcon
           icon={faTimes}
@@ -42,7 +42,22 @@ const SubmitForm = ({ onClose }) => {
             OK
           </button>
         </div>
-      </div>
+      </div> */}
+           <div className={styles.header}>
+              <h3 style={{ textAlign: "center" }}>Form submitted successfully!</h3>
+              {/* Close Icon */}
+              <FontAwesomeIcon icon={faTimes} className={styles.closeIcon} onClick={onClose} />
+            </div>
+      
+            <div className={styles.itemList}>
+              <div className={styles.item}>
+                <p>Please be patient as we process your message.</p>
+                {/* Close Button */}
+                <button onClick={onClose} style={{ backgroundColor: "white", color: "black", marginBottom: "70px" }}>
+                  OK
+                </button>
+              </div>
+              </div>
     </div>
   );
 };
