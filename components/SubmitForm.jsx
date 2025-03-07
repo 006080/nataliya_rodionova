@@ -2,7 +2,7 @@ import { Cloudinary } from "@cloudinary/url-gen";
 import { AdvancedImage } from "@cloudinary/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
-import styles from "./SubmitModal.module.css";
+import styles from "./SubmitForm.module.css";
 
 // Initialize Cloudinary instance
 const cld = new Cloudinary({
@@ -15,7 +15,7 @@ const cld = new Cloudinary({
 const getImage = (imageId) =>
   cld.image(imageId).format("auto").quality("auto");
 
-const SubmitModal = ({ onClose }) => {
+const SubmitForm = ({ onClose }) => {
   return (
     <div className={styles.submitModal}>
       {/* Replace local image with Cloudinary image */}
@@ -24,8 +24,8 @@ const SubmitModal = ({ onClose }) => {
         cldImg={getImage("adesivo_vgxut0")} // Replace with your Cloudinary public ID
         alt="Sticker"
       />
-      <div className={styles.header}>
-        <h3 style={{ textAlign: "center" }}>Thank you!</h3>
+      {/* <div className={styles.header}>
+        <h3 style={{ textAlign: "center" }}>Form submitted successfully!</h3>
         <FontAwesomeIcon
           icon={faTimes}
           className={styles.closeIcon}
@@ -34,7 +34,7 @@ const SubmitModal = ({ onClose }) => {
       </div>
       <div className={styles.itemList}>
         <div className={styles.item}>
-          <p>Form submitted successfully!</p>
+          <p>Please be patient as we process your message.</p>
           <button
             onClick={onClose}
             style={{ backgroundColor: "white", color: "black" }}
@@ -42,9 +42,24 @@ const SubmitModal = ({ onClose }) => {
             OK
           </button>
         </div>
-      </div>
+      </div> */}
+           <div className={styles.header}>
+              <h3 style={{ textAlign: "center" }}>Form submitted successfully!</h3>
+              {/* Close Icon */}
+              <FontAwesomeIcon icon={faTimes} className={styles.closeIcon} onClick={onClose} />
+            </div>
+      
+            <div className={styles.itemList}>
+              <div className={styles.item}>
+                <p>Please be patient as we process your message.</p>
+                {/* Close Button */}
+                <button onClick={onClose} style={{ backgroundColor: "white", color: "black", marginBottom: "70px" }}>
+                  OK
+                </button>
+              </div>
+              </div>
     </div>
   );
 };
 
-export default SubmitModal;
+export default SubmitForm;

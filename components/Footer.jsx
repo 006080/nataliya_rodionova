@@ -29,7 +29,22 @@ const Footer = () => {
       <h4 className={styles.foot} onClick={() => navigate("/return")}>
         Return Policy
       </h4>
+      {/* <a style={{color:"white"}}
+        target="_blank"
+        href="https://thefashionvox.wordpress.com/2018/07/27/varona/"
+      >
+        <h4 className={styles.foot}>Press</h4>
+      </a> */}
 
+<a 
+  style={{ color: "white", textDecoration: "none", margin: '20px' }} 
+  target="_blank" 
+  href="https://thefashionvox.wordpress.com/2018/07/27/varona/"
+  onMouseEnter={(e) => e.target.style.textDecoration = "underline"}
+  onMouseLeave={(e) => e.target.style.textDecoration = "none"}
+>
+  Press
+</a>
       <div className={styles.iconsLine}>
         <div className={styles.paymentIcons}>
           <div className={styles.iconWrapper}>
@@ -77,13 +92,7 @@ const Footer = () => {
               rel="noopener noreferrer" // Ensures security when opening in a new tab
             >
               <AdvancedImage
-                style={{
-                  filter: "invert(1)",
-                  width: "22px",
-                  margin: "5px",
-                  opacity: 0.9,
-                }}
-                className={styles.paymentIcon}
+                className={styles.socialIcons}
                 cldImg={getImage(
                   "5282548_play_player_video_youtube_youtuble_logo_icon_tayhki"
                 )}

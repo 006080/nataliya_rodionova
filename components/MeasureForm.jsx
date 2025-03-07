@@ -150,7 +150,7 @@ const MeasureForm = ({ onFormValid }) => {
         onFormValid(true);
       }
     } else {
-      alert("Please fill out all fields before submitting.");
+      alert("Your measurements have been successfully added.");
     }
   };
 

@@ -89,7 +89,7 @@ const CartSummary = ({ onClose }) => {
           <p
             style={{
               fontSize: "12px",
-              marginBottom: "10px",
+              marginBottom: "15px",
               fontStyle: "italic",
               fontWeight: "200",
             }}
@@ -103,7 +103,7 @@ const CartSummary = ({ onClose }) => {
           </Link>
         </>
       ) : (
-        <p style={{ fontStyle: "italic", color: "gray" }}>Your cart is empty</p>
+        <p style={{ fontStyle: "italic", color: "gray", marginTop:'20px' }}>Your cart is empty</p>
       )}
     </div>
   );

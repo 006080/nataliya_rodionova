@@ -14,7 +14,9 @@
 }
 
 .sloganBlog {
-    text-align: left;
+    display: flex;
+    flex-direction: column;
+    align-content: flex-start;
     z-index: 1;
     padding: 20px;
     position: fixed;
@@ -34,7 +36,6 @@
     border-radius: 5px;
     cursor: pointer;
     font-size: 16px;
-    text-align: center;
     transition: background-color 0.3s;
 }
 
@@ -86,6 +87,21 @@ h2 {
     .backgroundImage {
         height: 100vh;
         object-fit: cover;
+    }
+
+    .homeButton {
+        margin-top: 0px;
+        font-family: "Roboto Serif", serif;
+        width: 120px;
+        height: 40px;
+        background-color: rgb(37, 40, 1);
+        color: rgb(204, 204, 204);
+        border: none;
+        padding: 8px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.3s;
     }
 }
 
