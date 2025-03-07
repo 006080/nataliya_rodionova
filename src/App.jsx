@@ -14,6 +14,8 @@ import CancelOrder from "../components/CancelOrder";
 // import { position } from "@cloudinary/url-gen/qualifiers/timeline";
 import ReturnPolicy from "./Pages/ReturnPolicy";
 import Checkout from "./Pages/Checkout";
+import PaymentSuccess from "./Pages/PaymentSuccess";
+import PaymentCancel from "./Pages/PaymentCancel";
 
 const App = () => {
   return (
@@ -30,8 +32,8 @@ const App = () => {
           <Route path="/contacts" element={<Contacts />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="/cart" element={<CartPage />} />
-          <Route path="/complete-order" element={<CompleteOrder />} />
-          <Route path="/cancel-order" element={<CancelOrder />} />
+          <Route path="/payment/success" element={<PaymentSuccess />} />
+          <Route path="/payment/cancel" element={<PaymentCancel />} />
           <Route path="/" element={<Shop />} />
           {/* <Route path="/product/:productId" element={<ProductPage />} /> */}
         </Routes>

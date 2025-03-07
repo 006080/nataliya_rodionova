@@ -23,22 +23,36 @@ import { logTransaction } from './middleware/transactionLogger.js';
 import { startPaymentStatusChecker } from './services/paymentStatusChecker.js';
 
 
-dotenv.config({ path: './.env.local' });
 
+dotenv.config({ path: './.env.local' });
 const app = express();
 
+app.use((req, res, next) => {
+    if (req.originalUrl.startsWith('/api/webhooks/stripe')) {
+      let rawBody = '';
+      req.on('data', (chunk) => {
+        rawBody += chunk.toString();
+      });
+      req.on('end', () => {
+        req.rawBody = rawBody;
+        next();
+      });
+    } else {
+      next();
+    }
+  });
+  
+  // Raw body parser only for webhook paths
 app.use('/api/webhooks', bodyParser.raw({ type: 'application/json' }));
 
 app.use(cors());
 // app.use(express.json());
 app.use(bodyParser.json());
-
 app.use(bodyParser.urlencoded({ extended: true }));
+
 
 const server = http.createServer(app);
 
-// Load environment variables
-dotenv.config({ path: './.env.local' });
 
 if (process.env.NODE_ENV === 'production') {
     app.set('trust proxy', true); 
@@ -311,11 +325,25 @@ app.get('/api/reviews', async (req, res) => {
 });
 
 
+// app.use('/api/webhooks/stripe', (req, res, next) => {
+//     if (req.originalUrl.startsWith('/api/webhooks/stripe') && req.method === 'POST') {
+//       req.rawBody = '';
+//       req.on('data', (chunk) => {
+//         req.rawBody += chunk.toString();
+//       });
+//       req.on('end', () => {
+//         next();
+//       });
+//     } else {
+//       next();
+//     }
+//   });
 
+
+app.use('/', webhookRoutes); 
 startPaymentStatusChecker();
 app.use(productRoutes);
 app.use(paymentRoutes);
-app.use(webhookRoutes);
 app.use(logTransaction);
 
 

@@ -1,4 +1,6 @@
 import PayPalGateway from './paypalGateway.js';
+import StripeGateway from './stripeGateway.js';
+import MollieGateway from './mollieGateway.js';
 import { v4 as uuidv4 } from 'uuid'; 
 
 class PaymentService {
@@ -12,11 +14,9 @@ class PaymentService {
       case 'paypal':
         return new PayPalGateway();
       case 'stripe':
-        // Will be implemented later
-        throw new Error('Stripe payment method not implemented yet');
+       return new StripeGateway();
       case 'mollie':
-        // Will be implemented later
-        throw new Error('Mollie payment method not implemented yet');
+        return new MollieGateway();
       default:
         throw new Error(`Unsupported payment method: ${method}`);
     }
