@@ -18,7 +18,6 @@ import bodyParser from "body-parser";
 import paypalRoutes from './routes/paypal.js';
 import productRoutes from './routes/product.js';
 import { logTransaction } from './middleware/transactionLogger.js';
-// import { startPaymentStatusChecker } from './services/paymentStatusChecker.js';
 
 
 
@@ -324,7 +323,6 @@ app.get('/api/reviews', async (req, res) => {
 
 
 
-// startPaymentStatusChecker();
 app.use(productRoutes);
 app.use(paypalRoutes);
 app.use(logTransaction);

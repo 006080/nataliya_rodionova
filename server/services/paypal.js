@@ -61,7 +61,6 @@ const formatPrice = (price) => {
 const createPayPalOrder = async (cartItems, measurements, deliveryDetails) => {
   const accessToken = await getPayPalAccessToken();
 
-  // Map cart items to PayPal format and calculate total
   let totalAmount = 0;
   
   const items = cartItems.map(item => {
