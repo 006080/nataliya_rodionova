@@ -214,10 +214,17 @@ const Shop = () => {
     fetchProducts();
   }, []);
 
+  const getApiUrl = () => {
+    if (import.meta.env.VITE_NODE_ENV === "production") {
+      return `${import.meta.env.VITE_API_BASE_URL_PROD}/api/products`;
+    }
+    return `${import.meta.env.VITE_API_BASE_URL_LOCAL}/api/products`;
+  };
+
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:4000/api/products');
+      const response = await fetch(`${getApiUrl()}`);
       
       if (!response.ok) {
         throw new Error(`HTTP error ${response.status}`);
