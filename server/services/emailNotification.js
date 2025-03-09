@@ -87,26 +87,34 @@ const formatOrderEmail = (order) => {
     </tr>`;
   }
 
+  // Get status specific styling and messaging
+  const statusInfo = getStatusInfo(order.status);
+
   return `
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Order Confirmation</title>
+  <title>${statusInfo.title}</title>
 </head>
 <body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.4; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f7f7f7;">
   <div style="background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden;">
     <!-- Header -->
-    <div style="background-color: #3a3a3a; padding: 25px; text-align: center;">
-      <h1 style="color: #ffffff; margin: 0; font-size: 24px; letter-spacing: 1px;">ORDER CONFIRMATION</h1>
+    <div style="background-color: ${statusInfo.headerColor}; padding: 25px; text-align: center;">
+      <h1 style="color: #ffffff; margin: 0; font-size: 24px; letter-spacing: 1px;">${statusInfo.headerText}</h1>
+    </div>
+    
+    <!-- Status Message -->
+    <div style="padding: 20px; background-color: ${statusInfo.messageBgColor}; text-align: center;">
+      <p style="margin: 0; font-size: 16px; color: ${statusInfo.messageColor};">${statusInfo.message}</p>
     </div>
     
     <!-- Order Info -->
     <div style="padding: 25px;">
       <p style="margin: 0 0 5px 0; font-size: 16px;"><strong>Order ID:</strong> ${order.paypalOrderId}</p>
       <p style="margin: 0 0 5px 0; font-size: 16px;"><strong>Date:</strong> ${new Date(order.createdAt).toLocaleString()}</p>
-      <p style="margin: 0 0 15px 0; font-size: 16px;"><strong>Status:</strong> <span style="color: #28a745; font-weight: bold;">${order.status}</span></p>
+      <p style="margin: 0 0 15px 0; font-size: 16px;"><strong>Status:</strong> <span style="color: ${statusInfo.statusColor}; font-weight: bold;">${order.status}</span></p>
       
       <div style="background-color: #f9f9f9; border-radius: 6px; padding: 15px; margin-bottom: 20px;">
         <h3 style="margin: 0 0 10px 0; color: #333; font-size: 16px;">CUSTOMER INFORMATION</h3>
@@ -144,9 +152,12 @@ const formatOrderEmail = (order) => {
         </tbody>
       </table>
       
+      <!-- Status-specific content -->
+      ${statusInfo.additionalContent}
+      
       <!-- Thank You Message -->
       <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eaeaea; text-align: center;">
-        <p style="font-size: 16px; color: #555;">Thank you for your order! We will process it as soon as possible.</p>
+        <p style="font-size: 16px; color: #555;">${statusInfo.thankYouMessage}</p>
         <p style="font-size: 14px; color: #777; margin-top: 20px;">If you have any questions, please contact us at ${process.env.EMAIL_USER}</p>
       </div>
     </div>
@@ -159,6 +170,112 @@ const formatOrderEmail = (order) => {
 </body>
 </html>
 `;
+};
+
+/**
+ * Get status-specific information for email customization
+ * @param {String} status - Order status
+ * @returns {Object} - Status-specific information
+ */
+const getStatusInfo = (status) => {
+  switch(status) {
+    case 'COMPLETED':
+      return {
+        title: 'Order Confirmation',
+        headerText: 'ORDER CONFIRMATION',
+        headerColor: '#3a3a3a',
+        statusColor: '#28a745', // green
+        messageBgColor: '#d4edda',
+        messageColor: '#155724',
+        message: 'Your payment has been successfully processed and your order is confirmed.',
+        thankYouMessage: 'Thank you for your order! We will process it as soon as possible.',
+        additionalContent: ''
+      };
+    case 'CREATED':
+      return {
+        title: 'Order Created',
+        headerText: 'ORDER CREATED',
+        headerColor: '#0056b3',
+        statusColor: '#0056b3', // blue
+        messageBgColor: '#cce5ff',
+        messageColor: '#004085',
+        message: 'Your order has been created and is waiting for payment.',
+        thankYouMessage: 'Thank you for choosing VARONA. Please complete your payment to proceed with your order.',
+        additionalContent: `
+        <div style="margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #0056b3; border-radius: 4px;">
+          <p style="margin: 0; font-size: 15px;">Please complete your payment to proceed with your order. If you encounter any issues, feel free to contact our support team.</p>
+        </div>`
+      };
+    case 'APPROVED':
+      return {
+        title: 'Order Approved',
+        headerText: 'ORDER APPROVED',
+        headerColor: '#28a745',
+        statusColor: '#28a745', // green
+        messageBgColor: '#d4edda',
+        messageColor: '#155724',
+        message: 'Your order has been approved and is now being processed.',
+        thankYouMessage: 'Thank you for your order! We are preparing it for fulfillment.',
+        additionalContent: ''
+      };
+    case 'SAVED':
+      return {
+        title: 'Order Saved',
+        headerText: 'ORDER SAVED',
+        headerColor: '#6c757d',
+        statusColor: '#6c757d', // gray
+        messageBgColor: '#e2e3e5',
+        messageColor: '#383d41',
+        message: 'Your order has been saved in our system.',
+        thankYouMessage: 'Thank you for your interest in VARONA. Your order details have been saved.',
+        additionalContent: `
+        <div style="margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #6c757d; border-radius: 4px;">
+          <p style="margin: 0; font-size: 15px;">This is a saved order that hasn't been completed yet. You can complete your purchase at any time.</p>
+        </div>`
+      };
+    case 'VOIDED':
+      return {
+        title: 'Order Voided',
+        headerText: 'ORDER VOIDED',
+        headerColor: '#dc3545',
+        statusColor: '#dc3545', // red
+        messageBgColor: '#f8d7da',
+        messageColor: '#721c24',
+        message: 'Your order has been voided and will not be processed.',
+        thankYouMessage: 'Thank you for your interest in VARONA. Feel free to place a new order at any time.',
+        additionalContent: `
+        <div style="margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #dc3545; border-radius: 4px;">
+          <p style="margin: 0; font-size: 15px;">This order has been voided. If this was not expected, please contact our customer support.</p>
+        </div>`
+      };
+    case 'PAYER_ACTION_REQUIRED':
+      return {
+        title: 'Action Required',
+        headerText: 'ACTION REQUIRED',
+        headerColor: '#fd7e14',
+        statusColor: '#fd7e14', // orange
+        messageBgColor: '#fff3cd',
+        messageColor: '#856404',
+        message: 'Your order requires additional action to complete the payment process.',
+        thankYouMessage: 'Thank you for choosing VARONA. Please complete the required actions to process your order.',
+        additionalContent: `
+        <div style="margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #fd7e14; border-radius: 4px;">
+          <p style="margin: 0; font-size: 15px;">Please check your email or PayPal account for additional instructions to complete your payment.</p>
+        </div>`
+      };
+    default:
+      return {
+        title: 'Order Update',
+        headerText: 'ORDER UPDATE',
+        headerColor: '#6c757d',
+        statusColor: '#6c757d', // gray
+        messageBgColor: '#e2e3e5',
+        messageColor: '#383d41',
+        message: `Your order status has been updated to: ${status}`,
+        thankYouMessage: 'Thank you for choosing VARONA. We appreciate your business.',
+        additionalContent: ''
+      };
+  }
 };
 
 // Simple text version for email clients that don't support HTML
@@ -208,8 +325,13 @@ ${address.countryCode || ''}
 `;
   }
 
+  // Get status-specific messaging
+  const statusInfo = getStatusInfo(order.status);
+
   return `
-ORDER CONFIRMATION - VARONA
+${statusInfo.headerText} - VARONA
+
+${statusInfo.message}
 
 Order ID: ${order.paypalOrderId}
 Date: ${new Date(order.createdAt).toLocaleString()}
@@ -227,7 +349,7 @@ TOTAL: €${order.totalAmount.toFixed(2)}
 ${deliverySection}
 ${measurementsSection}
 ${shippingSection}
-Thank you for your order! We will process it as soon as possible.
+${statusInfo.thankYouMessage}
 
 If you have any questions, please contact us at ${process.env.EMAIL_USER}.
 
@@ -235,8 +357,13 @@ VARONA Team
 `;
 };
 
-// Update the sendOrderConfirmationEmail function
-export const sendOrderConfirmationEmail = async (orderId) => {
+/**
+ * Send order status email based on the current status
+ * @param {string} orderId - PayPal order ID
+ * @param {string} previousStatus - Previous order status (optional)
+ * @returns {Promise<boolean>} - Success status
+ */
+export const sendOrderStatusEmail = async (orderId, previousStatus = null) => {
   try {
     // Find the order in the database
     const order = await Order.findOne({ paypalOrderId: orderId });
@@ -246,6 +373,12 @@ export const sendOrderConfirmationEmail = async (orderId) => {
       return false;
     }
 
+    // Skip if the status hasn't changed and an email was already sent
+    if (previousStatus && previousStatus === order.status && order.emailSent) {
+      console.log(`Status unchanged and email already sent for order: ${orderId}`);
+      return true;
+    }
+
     // Get emails from both PayPal and delivery details
     const paypalEmail = order.customer?.email;
     const deliveryEmail = order.deliveryDetails?.email;
@@ -253,12 +386,6 @@ export const sendOrderConfirmationEmail = async (orderId) => {
     if (!paypalEmail && !deliveryEmail) {
       console.error(`No email available for order: ${orderId}`);
       return false;
-    }
-
-    // If email was already sent, don't send again
-    if (order.emailSent) {
-      console.log(`Email already sent for order: ${orderId}`);
-      return true;
     }
 
     // Create an array of recipient emails (removing duplicates)
@@ -271,11 +398,15 @@ export const sendOrderConfirmationEmail = async (orderId) => {
     const htmlContent = formatOrderEmail(order);
     const textContent = formatPlainTextEmail(order);
 
+    // Create appropriate subject based on order status
+    const statusInfo = getStatusInfo(order.status);
+    const emailSubject = `VARONA - ${statusInfo.title} #${orderId}`;
+
     // Send email to customer(s)
     const customerMailOptions = {
       from: `VARONA <${process.env.EMAIL_USER}>`,
       to: recipientEmails.join(', '), // Join emails with commas for multiple recipients
-      subject: `VARONA - Order Confirmation #${orderId}`,
+      subject: emailSubject,
       text: textContent,
       html: htmlContent
     };
@@ -286,8 +417,8 @@ export const sendOrderConfirmationEmail = async (orderId) => {
     const adminMailOptions = {
       from: `VARONA Order System <${process.env.EMAIL_USER}>`,
       to: process.env.EMAIL_USER, // Send to admin email
-      subject: `New Order Received #${orderId}`,
-      text: `A new order has been received:\n\n${textContent}`,
+      subject: `Order Status Update: ${order.status} #${orderId}`,
+      text: `An order status has been updated:\n\n${textContent}`,
       html: htmlContent
     };
 
@@ -302,12 +433,17 @@ export const sendOrderConfirmationEmail = async (orderId) => {
       }
     );
 
-    console.log(`Order confirmation email sent for order: ${orderId}`);
+    console.log(`Order status email sent for order: ${orderId} (Status: ${order.status})`);
     return true;
   } catch (error) {
-    console.error('Error sending order confirmation email:', error);
+    console.error('Error sending order status email:', error);
     return false;
   }
 };
 
-export default { sendOrderConfirmationEmail };
+// Original function (maintained for backwards compatibility)
+export const sendOrderConfirmationEmail = async (orderId) => {
+  return sendOrderStatusEmail(orderId);
+};
+
+export default { sendOrderStatusEmail, sendOrderConfirmationEmail };

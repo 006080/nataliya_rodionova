@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useCart } from '../../components/CartContext'
 import MeasureForm from '../../components/MeasureForm'
-import DeliveryForm from "../../components/DeliveryForm"
+import DeliveryForm from '../../components/DeliveryForm'
 import styles from './Checkout.module.css'
 import PayPalPayment from '../../components/PayPalPayment'
 
@@ -9,16 +9,16 @@ const Checkout = () => {
   const { cartItems, removeFromCart } = useCart()
   const [orderComplete, setOrderComplete] = useState(false)
   const [orderData, setOrderData] = useState(null)
-  
+  const [paymentCancelled, setPaymentCancelled] = useState(false)
+
   // Form state
   const [measurements, setMeasurements] = useState(null)
   const [deliveryDetails, setDeliveryDetails] = useState(null)
   const [formStep, setFormStep] = useState(1)
 
-  const totalPrice = cartItems?.reduce(
-    (total, item) => total + item.price * item.quantity, 
+  const totalPrice =
+    cartItems?.reduce((total, item) => total + item.price * item.quantity, 0) ||
     0
-  ) || 0
 
   const handleMeasureFormSubmit = (measureData) => {
     setMeasurements(measureData)
@@ -37,7 +37,11 @@ const Checkout = () => {
   }
 
   const handlePaymentCancel = () => {
-    console.log('Payment was cancelled')
+    setPaymentCancelled(true)
+
+    setTimeout(() => {
+      setPaymentCancelled(false)
+    }, 10000)
   }
 
   const formattedCartItems = cartItems.map((item) => ({
@@ -55,7 +59,7 @@ const Checkout = () => {
       <div className={styles.cartContainer}>
         <h1>Order Confirmed!</h1>
         <p>Thank you for your purchase.</p>
-        <div className="order-details">
+        <div className={styles.orderDetails}>
           <h2>Order Details</h2>
           <p>Order ID: {orderData.id}</p>
           <p>Status: {orderData.status}</p>
@@ -68,7 +72,7 @@ const Checkout = () => {
               </li>
             ))}
           </ul>
-          <p className="total">
+          <p className={styles.total}>
             <strong>Total: €{totalPrice.toFixed(2)}</strong>
           </p>
         </div>
@@ -105,8 +109,16 @@ const Checkout = () => {
               className={styles.productImage}
             />
             <div style={{ width: '150px' }}>
-              <p><strong>{item.name}</strong></p>
-              <div style={{ lineHeight: '1', fontSize: 'medium', fontStyle: 'italic' }}>
+              <p>
+                <strong>{item.name}</strong>
+              </p>
+              <div
+                style={{
+                  lineHeight: '1',
+                  fontSize: 'medium',
+                  fontStyle: 'italic',
+                }}
+              >
                 <p>Quantity: {item.quantity}</p>
                 <p>Price: €{item.price.toFixed(2)}</p>
               </div>
@@ -117,9 +129,7 @@ const Checkout = () => {
       </div>
 
       {/* Step 1: Measurements Form */}
-      {formStep === 1 && (
-        <MeasureForm onSubmit={handleMeasureFormSubmit} />
-      )}
+      {formStep === 1 && <MeasureForm onSubmit={handleMeasureFormSubmit} />}
 
       {/* Step 2: Delivery Form */}
       {formStep === 2 && (
@@ -146,10 +156,10 @@ const Checkout = () => {
               <span className={styles.stepStatus}>In Progress</span>
             </div>
           </div>
-          
+
           <h3>Complete Your Purchase</h3>
           <p>Please review your information before proceeding with payment.</p>
-          
+
           <div className={styles.reviewSection}>
             <div className={styles.reviewBlock}>
               <h4>Measurements</h4>
@@ -157,22 +167,24 @@ const Checkout = () => {
               <p>Chest: {measurements.chest} cm</p>
               <p>Waist: {measurements.waist} cm</p>
               <p>Hips: {measurements.hips} cm</p>
-              <button 
+              <button
                 className={styles.editButton}
                 onClick={() => setFormStep(1)}
               >
                 Edit
               </button>
             </div>
-            
+
             <div className={styles.reviewBlock}>
               <h4>Delivery Information</h4>
               <p>{deliveryDetails.fullName}</p>
               <p>{deliveryDetails.address}</p>
-              <p>{deliveryDetails.city}, {deliveryDetails.postalCode}</p>
+              <p>
+                {deliveryDetails.city}, {deliveryDetails.postalCode}
+              </p>
               <p>Email: {deliveryDetails.email}</p>
               <p>Phone: {deliveryDetails.phone}</p>
-              <button 
+              <button
                 className={styles.editButton}
                 onClick={() => setFormStep(2)}
               >
@@ -180,7 +192,28 @@ const Checkout = () => {
               </button>
             </div>
           </div>
-          
+
+            {/* Payment Cancelled Message */}
+            {paymentCancelled && (
+              <div className={styles.cancelMessage}>
+                <span
+                  className={styles.closeIcon}
+                  onClick={() => setPaymentCancelled(false)}
+                >
+                  ✕
+                </span>
+                <h3>Payment Cancelled</h3>
+                <p>
+                  Your payment was cancelled. No worries, your items are still
+                  in your cart, and you can try again whenever you&apos;re
+                  ready.
+                </p>
+                <button onClick={() => setPaymentCancelled(false)}>
+                  Try Again
+                </button>
+              </div>
+            )}
+
           <PayPalPayment
             cart={formattedCartItems}
             measurements={measurements}

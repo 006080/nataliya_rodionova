@@ -17,7 +17,6 @@ import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import bodyParser from "body-parser";
 import paypalRoutes from './routes/paypal.js';
 import productRoutes from './routes/product.js';
-import { logTransaction } from './middleware/transactionLogger.js';
 
 
 
@@ -322,10 +321,8 @@ app.get('/api/reviews', async (req, res) => {
 });
 
 
-
 app.use(productRoutes);
 app.use(paypalRoutes);
-app.use(logTransaction);
 
 
 

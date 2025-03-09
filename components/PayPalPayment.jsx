@@ -170,8 +170,8 @@ function PayPalPayment({ cart = [], measurements, deliveryDetails, onSuccess, on
       }}
     >
       <div className={styles.payPalContainer}>
-        {error && <div className="error-message">{error}</div>}
-        {paymentStatus && <div className="status-message">{paymentStatus}</div>}
+        {error && <div className={styles.errorMessage}>{error}</div>}
+        {/* {paymentStatus && <div className={styles.statusMessage}>{paymentStatus}</div>} */}
 
         <div className={styles.paypalButtonContainer}>
           <PayPalButtons

@@ -4,3 +4,25 @@
 .payPalContainer h2 {
   color: black;
 }
+
+.errorMessage {
+  padding: 12px;
+  margin-bottom: 16px;
+  border-radius: 4px;
+  background-color: #ffebee;
+  color: #d32f2f;
+  border-left: 4px solid #d32f2f;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.statusMessage {
+  padding: 12px;
+  margin-bottom: 16px;
+  border-radius: 4px;
+  background-color: #e8f4fd;
+  color: #0277bd;
+  border-left: 4px solid #0277bd;
+  font-size: 14px;
+  font-weight: 500;
+}

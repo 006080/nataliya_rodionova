@@ -1,7 +1,12 @@
 import express from 'express';
-import { createPayPalOrder, capturePayPalOrder } from '../services/paypal.js';
+import { 
+  createPayPalOrder, 
+  capturePayPalOrder,
+  updateOrderStatus,
+  getPayPalOrderDetails 
+} from '../services/paypal.js';
 import Order from '../Models/Order.js';
-import { sendOrderConfirmationEmail } from '../services/emailNotification.js';
+import { sendOrderStatusEmail } from '../services/emailNotification.js';
 
 const router = express.Router();
 
@@ -92,14 +97,8 @@ router.post("/api/payments/:orderID/capture", async (req, res) => {
       return res.status(400).json({ error: "Order ID is required" });
     }
     
-    // Capture the payment
+    // Capture the payment - email will be sent automatically if status changes
     const captureData = await capturePayPalOrder(orderID);
-    
-    if (captureData.status === 'COMPLETED') {
-      // Send order confirmation email
-      await sendOrderConfirmationEmail(orderID);
-      console.log(`Order ${orderID} completed successfully and email sent`);
-    }
     
     res.json(captureData);
   } catch (error) {
@@ -157,16 +156,107 @@ router.post("/api/payments/:orderID/send-email", async (req, res) => {
       return res.status(400).json({ error: "Order ID is required" });
     }
     
-    const success = await sendOrderConfirmationEmail(orderID);
+    const success = await sendOrderStatusEmail(orderID);
     
     if (success) {
-      res.json({ message: "Order confirmation email sent successfully" });
+      res.json({ message: "Order status email sent successfully" });
     } else {
-      res.status(400).json({ error: "Failed to send order confirmation email" });
+      res.status(400).json({ error: "Failed to send order status email" });
     }
   } catch (error) {
     console.error("Error sending email:", error);
     res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+/**
+ * Update order status manually
+ */
+router.patch("/api/payments/:orderID/status", async (req, res) => {
+  try {
+    const { orderID } = req.params;
+    const { status } = req.body;
+    
+    if (!orderID) {
+      return res.status(400).json({ error: "Order ID is required" });
+    }
+    
+    if (!status) {
+      return res.status(400).json({ error: "Status is required" });
+    }
+    
+    // Validate status
+    const validStatuses = ['CREATED', 'SAVED', 'APPROVED', 'VOIDED', 'COMPLETED', 'PAYER_ACTION_REQUIRED'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ 
+        error: `Invalid status. Must be one of: ${validStatuses.join(', ')}`
+      });
+    }
+    
+    // Update status and send notification email
+    const updatedOrder = await updateOrderStatus(orderID, status);
+    
+    res.json({
+      id: updatedOrder.paypalOrderId,
+      status: updatedOrder.status,
+      message: `Order status updated to ${status}`
+    });
+  } catch (error) {
+    console.error("Error updating order status:", error);
+    res.status(500).json({ 
+      error: "Failed to update order status",
+      message: error.message
+    });
+  }
+});
+
+/**
+ * Sync order with PayPal (useful for ensuring order status is up to date)
+ */
+router.post("/api/payments/:orderID/sync", async (req, res) => {
+  try {
+    const { orderID } = req.params;
+    
+    if (!orderID) {
+      return res.status(400).json({ error: "Order ID is required" });
+    }
+    
+    // Get order details from PayPal
+    const paypalOrder = await getPayPalOrderDetails(orderID);
+    
+    // Get current order from database
+    const dbOrder = await Order.findOne({ paypalOrderId: orderID });
+    
+    if (!dbOrder) {
+      return res.status(404).json({ error: "Order not found in database" });
+    }
+    
+    // Update order in database if status is different
+    if (dbOrder.status !== paypalOrder.status) {
+      const updatedOrder = await updateOrderStatus(orderID, paypalOrder.status);
+      
+      return res.json({
+        id: updatedOrder.paypalOrderId,
+        status: updatedOrder.status,
+        synced: true,
+        previousStatus: dbOrder.status,
+        message: `Order status synced from PayPal (${dbOrder.status} → ${paypalOrder.status})`
+      });
+    }
+    
+    // If status is the same, just return the current order
+    res.json({
+      id: dbOrder.paypalOrderId,
+      status: dbOrder.status,
+      synced: false,
+      message: "Order status already in sync with PayPal"
+    });
+  } catch (error) {
+    console.error("Error syncing order with PayPal:", error);
+    res.status(500).json({ 
+      error: "Failed to sync order with PayPal",
+      message: error.message
+    });
   }
 });
 
