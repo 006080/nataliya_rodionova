@@ -39,9 +39,9 @@ app.use((req, res, next) => {
   });
   
   // Raw body parser only for webhook paths
-app.use('/api/webhooks', bodyParser.raw({ type: 'application/json' }));
+// app.use('/api/webhooks', bodyParser.raw({ type: 'application/json' }));
 
-app.use(cors());
+// app.use(cors());
 // app.use(express.json());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
