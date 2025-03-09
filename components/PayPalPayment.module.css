@@ -5,6 +5,13 @@
   color: black;
 }
 
+.paypalButtonContainer {
+  background-color: white;
+}
+
+.payPalContainer {
+  background-color: white !important;
+}
 .errorMessage {
   padding: 12px;
   margin-bottom: 16px;
