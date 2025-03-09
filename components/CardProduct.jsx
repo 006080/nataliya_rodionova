@@ -22,7 +22,7 @@ const NextArrow = ({ onClick }) => (
   </div>
 );
 
-const CardProduct = ({ name, images, price, description }) => {
+const CardProduct = ({ id, name, images, price, description }) => {
   const [count, setCount] = useState(0);
   const { addToCart } = useCart();
   const [selectedStars, setSelectedStars] = useState(0);
@@ -32,7 +32,7 @@ const CardProduct = ({ name, images, price, description }) => {
 
   const itemAdd = () => {
     if (count > 0) {
-      const product = { name, image: images[0], price, quantity: count }; // Store first image as default
+      const product = { id, name, image: images[0], price, quantity: count }; // Store first image as default
       addToCart(product);
       setCount(0); // Reset the count after adding to cart
     }

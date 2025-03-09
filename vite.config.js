@@ -13,6 +13,7 @@ export default defineConfig({
     host: true, // Enable to expose the server on your local network
     port: 5173, // Change the port if needed
     open: true, // Automatically open the browser on server start
+    cache: false,
 
     // Setup a proxy for API requests to avoid CORS issues
     proxy: {

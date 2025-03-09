@@ -8,6 +8,7 @@ import Shop from "./Pages/Shop";
 import Footer from "../components/Footer";
 import Terms from "./Pages/Terms"; 
 import { CartProvider } from '../components/CartContext';
+// import { position } from "@cloudinary/url-gen/qualifiers/timeline";
 import ReturnPolicy from "./Pages/ReturnPolicy";
 import Checkout from "./Pages/Checkout";
 

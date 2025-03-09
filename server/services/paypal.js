@@ -1,0 +1,323 @@
+import Order from '../Models/Order.js';
+import { Buffer } from "node:buffer";
+import { sendOrderStatusEmail } from '../services/emailNotification.js';
+
+/**
+ * Get PayPal access token for API authentication
+ * @returns {Promise<string>} PayPal access token
+ */
+const getPayPalAccessToken = async () => {
+  const clientId = process.env.PAYPAL_CLIENT_ID;
+  const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
+
+  if (!clientId || !clientSecret) {
+    throw new Error("PayPal Client ID or Secret is missing!");
+  }
+
+  const auth = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
+
+  try {
+    const response = await fetch("https://api-m.sandbox.paypal.com/v1/oauth2/token", {
+      method: "POST",
+      headers: {
+        "Authorization": `Basic ${auth}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: "grant_type=client_credentials",
+    });
+
+    if (!response.ok) {
+      throw new Error(`PayPal token request failed: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    if (!data.access_token) {
+      throw new Error("Failed to get PayPal access token");
+    }
+
+    return data.access_token;
+  } catch (error) {
+    console.error("PayPal token error:", error);
+    throw new Error("Failed to authenticate with PayPal");
+  }
+};
+
+/**
+ * Format price to always have 2 decimal places
+ * @param {number} price - The price to format
+ * @returns {string} Formatted price with 2 decimal places
+ */
+const formatPrice = (price) => {
+  return Number(price).toFixed(2);
+};
+
+/**
+ * Create a PayPal order and save it in MongoDB
+ * @param {Array} cartItems - Array of cart items
+ * @param {Object} measurements - Measurements data
+ * @param {Object} deliveryDetails - Delivery details
+ * @returns {Object} Created PayPal order data
+ */
+const createPayPalOrder = async (cartItems, measurements, deliveryDetails) => {
+  const accessToken = await getPayPalAccessToken();
+
+  let totalAmount = 0;
+  
+  const items = cartItems.map(item => {
+    const itemTotal = item.price * item.quantity;
+    totalAmount += itemTotal;
+    
+    return {
+      name: item.name,
+      description: item.description || '',
+      quantity: item.quantity.toString(),
+      unit_amount: {
+        currency_code: 'EUR',
+        value: formatPrice(item.price)
+      }
+    };
+  });
+
+  const orderData = {
+    intent: "CAPTURE",
+    purchase_units: [
+      {
+        items: items,
+        amount: {
+          currency_code: 'EUR',
+          value: formatPrice(totalAmount),
+          breakdown: {
+            item_total: {
+              currency_code: 'EUR',
+              value: formatPrice(totalAmount)
+            }
+          }
+        }
+      }
+    ],
+    payment_source: {
+      paypal: {
+        experience_context: {
+          brand_name: 'VARONA',
+          shipping_preference: 'GET_FROM_FILE',
+          // user_action: 'PAY_NOW',
+          // return_url: process.env.FRONTEND_URL_PROD + '/checkout',
+          // cancel_url: process.env.FRONTEND_URL_PROD + '/cart'
+        },
+      },
+    },
+  };
+
+  try {
+    const response = await fetch("https://api-m.sandbox.paypal.com/v2/checkout/orders", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${accessToken}`,
+        "PayPal-Request-Id": `order-${Date.now()}-${Math.floor(Math.random() * 1000)}`
+      },
+      body: JSON.stringify(orderData),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("PayPal order creation failed:", errorText);
+      throw new Error(`Failed to create PayPal order: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("PayPal Order Created:", data.id);
+    
+    // Store order in MongoDB
+    const orderItems = cartItems.map(item => ({
+      productId: item.id,
+      name: item.name,
+      description: item.description || '',
+      quantity: item.quantity,
+      price: Number(item.price)
+    }));
+    
+    const newOrder = new Order({
+      paypalOrderId: data.id,
+      status: data.status,
+      items: orderItems,
+      totalAmount: totalAmount,
+      currency: 'EUR',
+      createdAt: new Date(),
+      measurements,
+      deliveryDetails
+    });
+    
+    await newOrder.save();
+    console.log("Order saved to database:", newOrder._id);
+
+    // Send email notification for order creation
+    await sendOrderStatusEmail(data.id);
+    
+    return data;
+  } catch (error) {
+    console.error("Error creating PayPal order:", error);
+    throw error;
+  }
+};
+
+/**
+ * Capture a PayPal payment and update the order in MongoDB
+ * @param {string} orderId - PayPal order ID
+ * @returns {Object} Captured payment data
+ */
+const capturePayPalOrder = async (orderId) => {
+  try {
+    // Get the current order status before updating
+    const currentOrder = await Order.findOne({ paypalOrderId: orderId });
+    const previousStatus = currentOrder ? currentOrder.status : null;
+    
+    const accessToken = await getPayPalAccessToken();
+    
+    const response = await fetch(`https://api-m.sandbox.paypal.com/v2/checkout/orders/${orderId}/capture`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${accessToken}`,
+        "PayPal-Request-Id": `capture-${orderId}-${Date.now()}`
+      }
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("PayPal capture failed:", errorText);
+      throw new Error(`Failed to capture payment: ${response.status}`);
+    }
+
+    const data = await response.json();
+    
+    // Extract customer and shipping information
+    const customerInfo = data.payer ? {
+      'customer.name': `${data.payer.name.given_name} ${data.payer.name.surname}`,
+      'customer.email': data.payer.email_address,
+      'customer.paypalPayerId': data.payer.payer_id
+    } : {};
+    
+    const shippingInfo = data.purchase_units[0]?.shipping?.address ? {
+      shippingAddress: {
+        addressLine1: data.purchase_units[0].shipping.address.address_line_1,
+        addressLine2: data.purchase_units[0].shipping.address.address_line_2 || '',
+        adminArea1: data.purchase_units[0].shipping.address.admin_area_1 || '',
+        adminArea2: data.purchase_units[0].shipping.address.admin_area_2 || '',
+        postalCode: data.purchase_units[0].shipping.address.postal_code || '',
+        countryCode: data.purchase_units[0].shipping.address.country_code || ''
+      }
+    } : {};
+    
+    // Update order in MongoDB
+    const updatedOrder = await Order.findOneAndUpdate(
+      { paypalOrderId: orderId },
+      { 
+        status: data.status,
+        paymentDetails: data,
+        updatedAt: new Date(),
+        ...customerInfo,
+        ...shippingInfo
+      },
+      { new: true }
+    );
+    
+    if (!updatedOrder) {
+      console.error("Order not found in database:", orderId);
+    } else {
+      console.log("Order updated after capture:", updatedOrder._id);
+      
+      // Send email notification if status has changed
+      if (previousStatus !== data.status) {
+        await sendOrderStatusEmail(orderId, previousStatus);
+      }
+    }
+    
+    return data;
+  } catch (error) {
+    console.error("Error capturing PayPal order:", error);
+    throw error;
+  }
+};
+
+/**
+ * Update an order's status and send notification email
+ * @param {string} orderId - PayPal order ID
+ * @param {string} newStatus - New status to set
+ * @returns {Object} Updated order
+ */
+const updateOrderStatus = async (orderId, newStatus) => {
+  try {
+    // Get current order status before update
+    const currentOrder = await Order.findOne({ paypalOrderId: orderId });
+    
+    if (!currentOrder) {
+      throw new Error(`Order not found: ${orderId}`);
+    }
+    
+    const previousStatus = currentOrder.status;
+    
+    // Skip update if status is the same
+    if (previousStatus === newStatus) {
+      return currentOrder;
+    }
+    
+    // Update the order status
+    const updatedOrder = await Order.findOneAndUpdate(
+      { paypalOrderId: orderId },
+      { 
+        status: newStatus,
+        updatedAt: new Date(),
+        // Reset email sent flag when status changes to ensure a new email is sent
+        emailSent: false
+      },
+      { new: true }
+    );
+    
+    // Send email notification for the status change
+    await sendOrderStatusEmail(orderId, previousStatus);
+    
+    return updatedOrder;
+  } catch (error) {
+    console.error(`Error updating order status: ${error}`);
+    throw error;
+  }
+};
+
+/**
+ * Get PayPal order details by ID
+ * @param {string} orderId - PayPal order ID
+ * @returns {Object} PayPal order details
+ */
+const getPayPalOrderDetails = async (orderId) => {
+  try {
+    const accessToken = await getPayPalAccessToken();
+    
+    const response = await fetch(`https://api-m.sandbox.paypal.com/v2/checkout/orders/${orderId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${accessToken}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to get order details: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error getting PayPal order details:", error);
+    throw error;
+  }
+};
+
+export { 
+  getPayPalAccessToken, 
+  createPayPalOrder, 
+  capturePayPalOrder,
+  updateOrderStatus,
+  getPayPalOrderDetails
+};

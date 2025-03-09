@@ -7,7 +7,6 @@ import rateLimit from 'express-rate-limit';
 import Review from './Models/Review.js';
 import Feedback from './Models/Feedback.js';
 // import User from '../Models/User.js'; // Uncomment if needed
-// import { Server } from 'socket.io'; // Uncomment if needed
 import http from 'http';
 import sanitizeHtml from 'sanitize-html';
 import helmet from 'helmet';
@@ -15,13 +14,41 @@ import nodemailer from 'nodemailer';
 import Joi from 'joi';
 import { v2 as cloudinary } from 'cloudinary';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
+import bodyParser from "body-parser";
+import paypalRoutes from './routes/paypal.js';
+import productRoutes from './routes/product.js';
 
 
+
+dotenv.config({ path: './.env.local' });
 const app = express();
+
+app.use((req, res, next) => {
+    if (req.originalUrl.startsWith('/api/webhooks/stripe')) {
+      let rawBody = '';
+      req.on('data', (chunk) => {
+        rawBody += chunk.toString();
+      });
+      req.on('end', () => {
+        req.rawBody = rawBody;
+        next();
+      });
+    } else {
+      next();
+    }
+  });
+  
+  // Raw body parser only for webhook paths
+app.use('/api/webhooks', bodyParser.raw({ type: 'application/json' }));
+
+app.use(cors());
+// app.use(express.json());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+
 const server = http.createServer(app);
 
-// Load environment variables
-dotenv.config({ path: './.env.local' });
 
 if (process.env.NODE_ENV === 'production') {
     app.set('trust proxy', true); 
@@ -94,7 +121,7 @@ app.use(helmet());
 app.use(express.json({ limit: '10mb' })); // Limit payload size
 app.use(cors({
     origin: (origin, callback) => {
-        const allowedOrigins = [FRONTEND_URL_LOCAL, FRONTEND_URL_PROD, ];
+        const allowedOrigins = [FRONTEND_URL_LOCAL, FRONTEND_URL_PROD, 'http://localhost:5173/cart' ];
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
@@ -134,7 +161,7 @@ const transporter = nodemailer.createTransport({
 
 
 // MongoDB Connection
-mongoose.connect(MONGO_URI)
+mongoose.connect(MONGO_URI) 
     .then(() => {
         console.log('Connected to MongoDB');
         // setupChangeStream();
@@ -293,6 +320,12 @@ app.get('/api/reviews', async (req, res) => {
     }
 });
 
+
+app.use(productRoutes);
+app.use(paypalRoutes);
+
+
+
 app.use((req, res) => {
     res.status(404).json({ error: 'Endpoint not found' });
 });
@@ -305,7 +338,6 @@ app.use((err, req, res, next) => {
 app.get('/api/health', (req, res) => {
     res.status(200).json({ status: 'OK' });
 });
-
 
 
 server.listen(PORT, () => {

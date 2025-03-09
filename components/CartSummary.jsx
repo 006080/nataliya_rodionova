@@ -5,6 +5,7 @@ import { Link } from "react-router-dom"; // ✅ Use Link instead of useNavigate
 import styles from "./CartSummary.module.css";
 import { useCart } from "./CartContext";
 import useOutsideClick from "../src/hooks/useOutsideClick";
+import { useNavigate } from "react-router-dom";
 
 const CartSummary = ({ onClose }) => {
   const { cartItems, removeFromCart } = useCart();
