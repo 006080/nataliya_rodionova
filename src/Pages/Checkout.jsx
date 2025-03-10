@@ -4,6 +4,8 @@ import MeasureForm from '../../components/MeasureForm'
 import DeliveryForm from '../../components/DeliveryForm'
 import styles from './Checkout.module.css'
 import PayPalPayment from '../../components/PayPalPayment'
+import { getCountryName } from '../utils/countries'
+
 
 const Checkout = () => {
   const { cartItems, removeFromCart } = useCart()
@@ -182,6 +184,7 @@ const Checkout = () => {
               <p>
                 {deliveryDetails.city}, {deliveryDetails.postalCode}
               </p>
+              <p>{getCountryName[deliveryDetails.country] || deliveryDetails.country}</p>
               <p>Email: {deliveryDetails.email}</p>
               <p>Phone: {deliveryDetails.phone}</p>
               <button
