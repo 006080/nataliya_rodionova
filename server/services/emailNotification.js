@@ -53,7 +53,7 @@ const formatOrderEmail = (order) => {
       </td>
     </tr>`;
   }
-  
+
   // Format delivery details
   let deliverySection = '';
   if (order.deliveryDetails) {
@@ -64,7 +64,8 @@ const formatOrderEmail = (order) => {
         <h3 style="margin: 0 0 10px 0; color: #333; font-size: 16px;">DELIVERY DETAILS</h3>
         <p style="margin: 5px 0;">${delivery.fullName}</p>
         <p style="margin: 5px 0;">${delivery.address}</p>
-        <p style="margin: 5px 0;">${delivery.city}, ${delivery.postalCode}</p>
+        <p style="margin: 5px 0;">${delivery.postalCode}, ${delivery.city}</p>
+        <p style="margin: 5px 0;">${delivery.country}</p>
         <p style="margin: 5px 0;">Email: ${delivery.email}</p>
         <p style="margin: 5px 0;">Phone: ${delivery.phone}</p>
       </td>
@@ -305,8 +306,9 @@ Hips: ${order.measurements.hips} cm
 DELIVERY DETAILS:
 Full Name: ${delivery.fullName}
 Address: ${delivery.address}
-City: ${delivery.city}
 Postal Code: ${delivery.postalCode}
+City: ${delivery.city}
+Country: ${delivery.country}
 Email: ${delivery.email}
 Phone: ${delivery.phone}
 `;
@@ -375,7 +377,6 @@ export const sendOrderStatusEmail = async (orderId, previousStatus = null) => {
 
     // Skip if the status hasn't changed and an email was already sent
     if (previousStatus && previousStatus === order.status && order.emailSent) {
-      console.log(`Status unchanged and email already sent for order: ${orderId}`);
       return true;
     }
 
@@ -433,7 +434,6 @@ export const sendOrderStatusEmail = async (orderId, previousStatus = null) => {
       }
     );
 
-    console.log(`Order status email sent for order: ${orderId} (Status: ${order.status})`);
     return true;
   } catch (error) {
     console.error('Error sending order status email:', error);

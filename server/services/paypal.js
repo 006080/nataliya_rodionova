@@ -127,7 +127,6 @@ const createPayPalOrder = async (cartItems, measurements, deliveryDetails) => {
     }
 
     const data = await response.json();
-    console.log("PayPal Order Created:", data.id);
     
     // Store order in MongoDB
     const orderItems = cartItems.map(item => ({
@@ -150,7 +149,6 @@ const createPayPalOrder = async (cartItems, measurements, deliveryDetails) => {
     });
     
     await newOrder.save();
-    console.log("Order saved to database:", newOrder._id);
 
     // Send email notification for order creation
     await sendOrderStatusEmail(data.id);
@@ -226,7 +224,6 @@ const capturePayPalOrder = async (orderId) => {
     if (!updatedOrder) {
       console.error("Order not found in database:", orderId);
     } else {
-      console.log("Order updated after capture:", updatedOrder._id);
       
       // Send email notification if status has changed
       if (previousStatus !== data.status) {

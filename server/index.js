@@ -23,20 +23,20 @@ import productRoutes from './routes/product.js';
 dotenv.config({ path: './.env.local' });
 const app = express();
 
-app.use((req, res, next) => {
-    if (req.originalUrl.startsWith('/api/webhooks/stripe')) {
-      let rawBody = '';
-      req.on('data', (chunk) => {
-        rawBody += chunk.toString();
-      });
-      req.on('end', () => {
-        req.rawBody = rawBody;
-        next();
-      });
-    } else {
-      next();
-    }
-  });
+// app.use((req, res, next) => {
+//     if (req.originalUrl.startsWith('/api/webhooks/stripe')) {
+//       let rawBody = '';
+//       req.on('data', (chunk) => {
+//         rawBody += chunk.toString();
+//       });
+//       req.on('end', () => {
+//         req.rawBody = rawBody;
+//         next();
+//       });
+//     } else {
+//       next();
+//     }
+//   });
   
   // Raw body parser only for webhook paths
 // app.use('/api/webhooks', bodyParser.raw({ type: 'application/json' }));

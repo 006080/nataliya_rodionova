@@ -41,11 +41,15 @@ const DeliveryDetailsSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  postalCode: {
+    type: String,
+    required: true
+  },
   city: {
     type: String,
     required: true
   },
-  postalCode: {
+  country: {
     type: String,
     required: true
   },
