@@ -58,7 +58,7 @@
   max-width: 800px;
   margin: 40px auto;
   padding: 30px;
-  background: linear-gradient(145deg, #ffffff, #f5f7fa);
+  background: linear-gradient(145deg, #ffffff);
   border-radius: 20px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
