@@ -359,6 +359,82 @@ VARONA Team
 `;
 };
 
+
+export const sendPayerActionRequiredEmail = async (orderId) => {
+  try {
+    // Find the order in the database
+    const order = await Order.findOne({ paypalOrderId: orderId });
+    
+    if (!order) {
+      console.error(`Order not found with ID: ${orderId}`);
+      return false;
+    }
+    
+    // Continue even if the status hasn't changed - this is important for PAYER_ACTION_REQUIRED
+    // as we always want to send this particular notification
+    
+    // Get emails from both PayPal and delivery details
+    const paypalEmail = order.customer?.email;
+    const deliveryEmail = order.deliveryDetails?.email;
+
+    if (!paypalEmail && !deliveryEmail) {
+      console.error(`No email available for order: ${orderId}`);
+      return false;
+    }
+
+    // Create an array of recipient emails (removing duplicates)
+    const recipientEmails = [...new Set([
+      paypalEmail, 
+      deliveryEmail
+    ].filter(email => email))]; // filter out undefined/null values
+
+    // Generate both HTML and plain text versions of the email
+    const htmlContent = formatOrderEmail(order);
+    const textContent = formatPlainTextEmail(order);
+
+    // Create appropriate subject based on order status
+    const statusInfo = getStatusInfo(order.status);
+    const emailSubject = `VARONA - ${statusInfo.title} #${orderId} - Action Required`;
+
+    // Send email to customer(s) with more urgent subject line
+    const customerMailOptions = {
+      from: `VARONA <${process.env.EMAIL_USER}>`,
+      to: recipientEmails.join(', '), // Join emails with commas for multiple recipients
+      subject: emailSubject,
+      text: textContent,
+      html: htmlContent
+    };
+
+    await transporter.sendMail(customerMailOptions);
+
+    // Send notification email to admin
+    const adminMailOptions = {
+      from: `VARONA Order System <${process.env.EMAIL_USER}>`,
+      to: process.env.EMAIL_USER, // Send to admin email
+      subject: `Order Requires Customer Action: ${order.status} #${orderId}`,
+      text: `An order requires customer action to complete payment:\n\n${textContent}`,
+      html: htmlContent
+    };
+
+    await transporter.sendMail(adminMailOptions);
+
+    // Update order to mark email as sent
+    await Order.findOneAndUpdate(
+      { paypalOrderId: orderId },
+      { 
+        emailSent: true,
+        emailSentAt: new Date()
+      }
+    );
+
+    return true;
+  } catch (error) {
+    console.error('Error sending payer action required email:', error);
+    return false;
+  }
+};
+
+
 /**
  * Send order status email based on the current status
  * @param {string} orderId - PayPal order ID
@@ -373,6 +449,10 @@ export const sendOrderStatusEmail = async (orderId, previousStatus = null) => {
     if (!order) {
       console.error(`Order not found with ID: ${orderId}`);
       return false;
+    }
+
+    if (order.status === 'PAYER_ACTION_REQUIRED') {
+      return sendPayerActionRequiredEmail(orderId);
     }
 
     // Skip if the status hasn't changed and an email was already sent
@@ -447,3 +527,7 @@ export const sendOrderConfirmationEmail = async (orderId) => {
 };
 
 export default { sendOrderStatusEmail, sendOrderConfirmationEmail };
+
+
+
+
