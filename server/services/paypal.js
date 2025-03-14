@@ -343,10 +343,61 @@ const getPayPalOrderDetails = async (orderId) => {
   }
 };
 
+
+/**
+ * Cancel an order manually and send notification emails
+ * @param {string} orderId - PayPal order ID
+ * @param {string} reason - Reason for cancellation (optional)
+ * @returns {Object} Updated order
+ */
+const cancelOrder = async (orderId, reason = 'Payment action not completed within required time') => {
+  try {
+    // Get current order status before update
+    const currentOrder = await Order.findOne({ paypalOrderId: orderId });
+    
+    if (!currentOrder) {
+      throw new Error(`Order not found: ${orderId}`);
+    }
+    
+    const previousStatus = currentOrder.status;
+    
+    // Skip update if already canceled or completed
+    if (previousStatus === 'VOIDED' || previousStatus === 'CANCELED' || previousStatus === 'COMPLETED') {
+      return currentOrder;
+    }
+    
+    // Update the order status to CANCELED (custom status)
+    const updatedOrder = await Order.findOneAndUpdate(
+      { paypalOrderId: orderId },
+      { 
+        status: 'CANCELED', // Custom status for manual cancellation
+        updatedAt: new Date(),
+        cancelReason: reason,
+        cancelledAt: new Date(),
+        // Reset email sent flag to ensure cancellation email is sent
+        emailSent: false
+      },
+      { new: true }
+    );
+    
+    // Cancel any scheduled reminders
+    await cancelExistingReminders(orderId);
+    
+    // Send cancellation email notification
+    await sendOrderStatusEmail(orderId, previousStatus);
+    
+    return updatedOrder;
+  } catch (error) {
+    console.error(`Error cancelling order: ${error}`);
+    throw error;
+  }
+};
+
 export { 
   getPayPalAccessToken, 
   createPayPalOrder, 
   capturePayPalOrder,
   updateOrderStatus,
-  getPayPalOrderDetails
+  getPayPalOrderDetails,
+  cancelOrder
 };

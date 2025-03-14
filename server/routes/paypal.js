@@ -3,10 +3,12 @@ import {
   createPayPalOrder, 
   capturePayPalOrder,
   updateOrderStatus,
-  getPayPalOrderDetails 
+  getPayPalOrderDetails, 
+  cancelOrder
 } from '../services/paypal.js';
 import Order from '../Models/Order.js';
 import { sendOrderStatusEmail } from '../services/emailNotification.js';
+import { findAbandonedOrders, syncOrderStatus } from '../services/adminService.js';
 
 const router = express.Router();
 
@@ -293,5 +295,162 @@ router.get("/api/payments", async (req, res) => {
   }
 });
 
+
+/**
+ * Cancel order manually
+ */
+router.post("/api/payments/:orderID/cancel", async (req, res) => {
+  try {
+    const { orderID } = req.params;
+    const { reason } = req.body;
+    
+    if (!orderID) {
+      return res.status(400).json({ error: "Order ID is required" });
+    }
+    
+    // Cancel the order
+    const cancelledOrder = await cancelOrder(orderID, reason);
+    
+    res.json({
+      id: cancelledOrder.paypalOrderId,
+      status: cancelledOrder.status,
+      message: `Order cancelled successfully: ${reason || 'Payment action not completed within required time'}`
+    });
+  } catch (error) {
+    console.error("Error cancelling order:", error);
+    res.status(500).json({ 
+      error: "Failed to cancel order",
+      message: error.message
+    });
+  }
+});
+
+
+router.post("/api/admin/orders/:orderID/sync", async (req, res) => {
+  try {
+    const { orderID } = req.params;
+    
+    if (!orderID) {
+      return res.status(400).json({ error: "Order ID is required" });
+    }
+    
+    // Sync the order status (send notifications, cancel reminders, etc.)
+    const order = await syncOrderStatus(orderID);
+    
+    res.json({
+      id: order.paypalOrderId,
+      status: order.status,
+      message: `Order synced successfully: ${order.status}`
+    });
+  } catch (error) {
+    console.error("Error syncing order:", error);
+    res.status(500).json({ 
+      error: "Failed to sync order",
+      message: error.message
+    });
+  }
+});
+
+/**
+ * Find abandoned orders (for admin interface)
+ */
+router.get("/api/admin/orders/abandoned", async (req, res) => {
+  try {
+    const abandonedOrders = await findAbandonedOrders();
+    
+    res.json({
+      count: abandonedOrders.length,
+      orders: abandonedOrders.map(order => ({
+        id: order.paypalOrderId,
+        status: order.status,
+        createdAt: order.createdAt,
+        followupReminderSentAt: order.followupReminderSentAt,
+        totalAmount: order.totalAmount,
+        customerEmail: order.customer?.email || order.deliveryDetails?.email
+      }))
+    });
+  } catch (error) {
+    console.error("Error finding abandoned orders:", error);
+    res.status(500).json({ 
+      error: "Failed to find abandoned orders",
+      message: error.message
+    });
+  }
+});
+
+
+router.get("/api/payments/:orderID/continue", async (req, res) => {
+  try {
+    const { orderID } = req.params;
+    
+    if (!orderID) {
+      return res.status(400).json({ error: "Order ID is required" });
+    }
+    
+    // Check if order exists and is in a state that allows continuing payment
+    const order = await Order.findOne({ paypalOrderId: orderID });
+    
+    if (!order) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+    
+    if (order.status !== 'PAYER_ACTION_REQUIRED' && 
+        order.status !== 'CREATED' && 
+        order.status !== 'SAVED') {
+      return res.status(400).json({ 
+        error: "Cannot continue payment for this order",
+        message: `Order status is ${order.status} which does not allow continuing payment`
+      });
+    }
+    
+    // Get PayPal order details to ensure it's still valid
+    try {
+      const paypalOrder = await getPayPalOrderDetails(orderID);
+      
+      if (paypalOrder.status === 'COMPLETED' || 
+          paypalOrder.status === 'VOIDED' ||
+          paypalOrder.status === 'CANCELLED') {
+        
+        // Update our database if PayPal has a different status
+        if (paypalOrder.status !== order.status) {
+          await Order.findOneAndUpdate(
+            { paypalOrderId: orderID },
+            { status: paypalOrder.status }
+          );
+        }
+        
+        return res.status(400).json({ 
+          error: "Cannot continue payment for this order",
+          message: `Order status in PayPal is ${paypalOrder.status} which does not allow continuing payment`
+        });
+      }
+      
+      // Return the order ID to use for payment
+      res.json({ 
+        id: orderID,
+        status: paypalOrder.status,
+        message: "Order is available for payment continuation"
+      });
+      
+    } catch (error) {
+      console.error("Error getting PayPal order details:", error);
+      
+      // If we can't get details from PayPal but our DB has it as PAYER_ACTION_REQUIRED,
+      // assume it's still valid to continue
+      res.json({ 
+        id: orderID,
+        status: order.status,
+        message: "Order is available for payment continuation (based on local status)"
+      });
+    }
+    
+  } catch (error) {
+    console.error("Error continuing payment:", error);
+    res.status(500).json({ 
+      error: "Failed to continue payment",
+      message: error.message
+    });
+  }
+});
 
 export default router;
