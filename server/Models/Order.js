@@ -112,6 +112,17 @@ const OrderSchema = new mongoose.Schema({
     default: false
   },
   emailSentAt: Date,
+  // Add new fields to track reminder emails
+  initialReminderSent: {
+    type: Boolean,
+    default: false
+  },
+  initialReminderSentAt: Date,
+  followupReminderSent: {
+    type: Boolean,
+    default: false
+  },
+  followupReminderSentAt: Date,
   createdAt: {
     type: Date,
     default: Date.now
@@ -128,15 +139,6 @@ OrderSchema.index({ createdAt: 1 });
 const Order = mongoose.model('Order', OrderSchema);
 
 export default Order;
-
-
-
-
-
-
-
-
-
 
 
 

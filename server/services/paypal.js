@@ -1,6 +1,7 @@
 import Order from '../Models/Order.js';
 import { Buffer } from "node:buffer";
 import { sendOrderStatusEmail } from '../services/emailNotification.js';
+import { schedulePaymentReminders, cancelExistingReminders } from '../services/paymentReminderService.js';
 
 /**
  * Get PayPal access token for API authentication
@@ -150,8 +151,14 @@ const createPayPalOrder = async (cartItems, measurements, deliveryDetails) => {
     
     await newOrder.save();
 
-    // Send email notification for order creation
-    await sendOrderStatusEmail(data.id);
+    // Send email notification for order creation EXCEPT for PAYER_ACTION_REQUIRED
+    // For PAYER_ACTION_REQUIRED, schedule reminders instead
+    if (data.status === 'PAYER_ACTION_REQUIRED') {
+      await schedulePaymentReminders(data.id);
+    } else {
+      // Send regular order status email for other statuses
+      await sendOrderStatusEmail(data.id);
+    }
     
     return data;
   } catch (error) {
@@ -224,10 +231,23 @@ const capturePayPalOrder = async (orderId) => {
     if (!updatedOrder) {
       console.error("Order not found in database:", orderId);
     } else {
-      
-      // Send email notification if status has changed
+      // Check if the status has changed
       if (previousStatus !== data.status) {
-        await sendOrderStatusEmail(orderId, previousStatus);
+        // If status changed to PAYER_ACTION_REQUIRED, schedule reminder emails
+        if (data.status === 'PAYER_ACTION_REQUIRED') {
+          await schedulePaymentReminders(orderId);
+          // Note: No immediate email is sent now, only reminders are scheduled
+        } 
+        // If status changed to COMPLETED, cancel any scheduled reminders
+        else if (data.status === 'COMPLETED' || data.status === 'APPROVED') {
+          await cancelExistingReminders(orderId);
+          
+          // Send regular order status email for non-PAYER_ACTION_REQUIRED statuses
+          await sendOrderStatusEmail(orderId, previousStatus);
+        } else {
+          // For all other status changes (not to PAYER_ACTION_REQUIRED)
+          await sendOrderStatusEmail(orderId, previousStatus);
+        }
       }
     }
     
@@ -272,8 +292,20 @@ const updateOrderStatus = async (orderId, newStatus) => {
       { new: true }
     );
     
-    // Send email notification for the status change
-    await sendOrderStatusEmail(orderId, previousStatus);
+    // Handle status-specific actions
+    if (newStatus === 'PAYER_ACTION_REQUIRED') {
+      // Schedule reminder emails but don't send immediate email
+      await schedulePaymentReminders(orderId);
+    } else if (newStatus === 'COMPLETED' || newStatus === 'APPROVED' || newStatus === 'VOIDED') {
+      // Cancel any scheduled reminders
+      await cancelExistingReminders(orderId);
+      
+      // Send email notification for the status change
+      await sendOrderStatusEmail(orderId, previousStatus);
+    } else {
+      // For all other status changes (not to PAYER_ACTION_REQUIRED)
+      await sendOrderStatusEmail(orderId, previousStatus);
+    }
     
     return updatedOrder;
   } catch (error) {
@@ -318,11 +350,3 @@ export {
   updateOrderStatus,
   getPayPalOrderDetails
 };
-
-
-
-
-
-
-
-

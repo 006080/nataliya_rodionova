@@ -17,6 +17,7 @@ import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import bodyParser from "body-parser";
 import paypalRoutes from './routes/paypal.js';
 import productRoutes from './routes/product.js';
+import { initializeReminderSystem } from './services/paymentReminderService.js';
 
 
 
@@ -145,7 +146,9 @@ const transporter = nodemailer.createTransport({
 mongoose.connect(MONGO_URI) 
     .then(() => {
         console.log('Connected to MongoDB');
-        // setupChangeStream();
+        // Initialize the payment reminder system
+        initializeReminderSystem();
+        console.log('Payment reminder system initialized');
     })
     .catch((err) => {
         console.error('MongoDB connection error:', err);
