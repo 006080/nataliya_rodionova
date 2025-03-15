@@ -13,12 +13,6 @@
     padding: 10px 0;
   }
   
-  .productImage {
-    width: 200px;
-    height: auto;
-    border-radius: 5px;
-  }
-  
   .submitButton {
     display: block;
     width: 100%;
@@ -550,6 +544,7 @@
   background: white;
   border-radius: 12px;
   padding: 20px;
+  margin-top: 80px;
   margin-bottom: 30px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }

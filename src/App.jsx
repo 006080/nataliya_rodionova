@@ -11,6 +11,7 @@ import { CartProvider } from '../components/CartContext';
 // import { position } from "@cloudinary/url-gen/qualifiers/timeline";
 import ReturnPolicy from "./Pages/ReturnPolicy";
 import Checkout from "./Pages/Checkout";
+import Collaboration from "./Pages/Collaboration";
 
 const AppContent = () => {
   const location = useLocation();  // Get current route
@@ -25,6 +26,7 @@ const AppContent = () => {
         <Route style={{ position: 'relative' }} path="/terms" element={<Terms />} />
         <Route style={{ position: 'relative' }} path="/return" element={<ReturnPolicy />} />
         <Route style={{ position: 'relative' }} path="/checkout" element={<Checkout />} />
+        <Route style={{ position: 'relative' }} path="/collaboration" element={<Collaboration />} />
         <Route path="/contacts" element={<Contacts />} />
         <Route path="/shop" element={<Shop />} />
         <Route path="/" element={<Shop />} />

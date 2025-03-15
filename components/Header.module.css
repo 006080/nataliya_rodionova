@@ -142,6 +142,13 @@
   transition: color 0.2s ease;
 }
 
+.dropdownLinks li p a {
+  cursor: pointer;
+  font-size: 14px;
+  color: #555; /* Default color */
+  transition: color 0.2s ease;
+}
+
 .dropdownLinks li p:hover {
   color: #000; /* Hover color */
 }
