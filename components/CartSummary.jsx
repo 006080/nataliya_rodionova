@@ -1,11 +1,10 @@
 import PropTypes from "prop-types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
-import { Link } from "react-router-dom"; // ✅ Use Link instead of useNavigate
+import { Link } from "react-router-dom"; 
 import styles from "./CartSummary.module.css";
 import { useCart } from "./CartContext";
 import useOutsideClick from "../src/hooks/useOutsideClick";
-import { useNavigate } from "react-router-dom";
 
 const CartSummary = ({ onClose }) => {
   const { cartItems, removeFromCart } = useCart();
@@ -97,8 +96,7 @@ const CartSummary = ({ onClose }) => {
             Shipping & taxes calculated at checkout
           </p>
 
-          {/* ✅ Link instead of useNavigate */}
-          <Link to="/checkout" className={styles.checkoutButton}>
+          <Link to="/checkout" onClick={onClose} className={styles.checkoutButton}>
             Checkout
           </Link>
         </>

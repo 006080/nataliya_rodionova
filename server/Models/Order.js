@@ -41,11 +41,15 @@ const DeliveryDetailsSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  postalCode: {
+    type: String,
+    required: true
+  },
   city: {
     type: String,
     required: true
   },
-  postalCode: {
+  country: {
     type: String,
     required: true
   },
@@ -124,3 +128,16 @@ OrderSchema.index({ createdAt: 1 });
 const Order = mongoose.model('Order', OrderSchema);
 
 export default Order;
+
+
+
+
+
+
+
+
+
+
+
+
+

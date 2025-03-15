@@ -15,7 +15,6 @@ const router = express.Router();
  */
 router.post("/api/payments", async (req, res) => {
   try {
-    console.log("Received request to create order:", req.body);
 
     const { cart, measurements, deliveryDetails } = req.body;
     
@@ -60,7 +59,7 @@ router.post("/api/payments", async (req, res) => {
       return res.status(400).json({ error: "Delivery details are required and must be an object" });
     }
     
-    const requiredDeliveryFields = ['fullName', 'address', 'city', 'postalCode', 'email', 'phone'];
+    const requiredDeliveryFields = ['fullName', 'address', 'postalCode', 'city', 'country', 'email', 'phone'];
     const missingDeliveryFields = requiredDeliveryFields.filter(field => !deliveryDetails[field]);
     
     if (missingDeliveryFields.length > 0) {
@@ -293,5 +292,6 @@ router.get("/api/payments", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch orders" });
   }
 });
+
 
 export default router;

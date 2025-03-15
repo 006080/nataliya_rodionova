@@ -1,6 +1,40 @@
-import { useState } from 'react'
-import { PayPalButtons, PayPalScriptProvider } from '@paypal/react-paypal-js'
+import { useState, useEffect } from 'react'
+import { PayPalButtons, PayPalScriptProvider, usePayPalScriptReducer } from '@paypal/react-paypal-js'
 import styles from './PayPalPayment.module.css'
+
+// Loading spinner component
+const LoadingSpinner = () => (
+  <div className={styles.spinnerContainer}>
+    <div className={styles.spinner}></div>
+    <p>Loading payment options...</p>
+  </div>
+)
+
+// PayPal buttons wrapper component to handle loading state
+const PayPalButtonsWrapper = ({ createOrder, onApprove, onCancel, onError, disabled }) => {
+  const [{ isPending }] = usePayPalScriptReducer();
+  
+  return (
+    <>
+      {isPending ? (
+        <LoadingSpinner />
+      ) : (
+        <PayPalButtons
+          createOrder={createOrder}
+          onApprove={onApprove}
+          onCancel={onCancel}
+          onError={onError}
+          disabled={disabled}
+          style={{
+            layout: 'vertical',
+            color: 'gold',
+            shape: 'rect',
+          }}
+        />
+      )}
+    </>
+  );
+};
 
 const getApiUrl = () => {
   const baseUrl =
@@ -14,6 +48,16 @@ function PayPalPayment({ cart = [], measurements, deliveryDetails, onSuccess, on
   const [paymentStatus, setPaymentStatus] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState(null)
+  const [isClientLoaded, setIsClientLoaded] = useState(false)
+
+  // Set isClientLoaded to true after component mounts
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsClientLoaded(true)
+    }, 1000) // Add a small delay to ensure visibility of the spinner
+
+    return () => clearTimeout(timer)
+  }, [])
 
   const formatCartItems = (cartItems) => {
     return cartItems.map(item => ({
@@ -38,9 +82,6 @@ function PayPalPayment({ cart = [], measurements, deliveryDetails, onSuccess, on
       }
 
       const formattedCart = formatCartItems(cart);
-      console.log('Sending cart to API:', formattedCart);
-      console.log('Sending measurements:', measurements);
-      console.log('Sending delivery details:', deliveryDetails);
 
       const res = await fetch(`${getApiUrl()}/api/payments`, {
         method: 'POST',
@@ -58,7 +99,6 @@ function PayPalPayment({ cart = [], measurements, deliveryDetails, onSuccess, on
       }
 
       const data = await res.json()
-      console.log('API Response:', data)
 
       if (!data.id) {
         throw new Error('No order ID returned from backend')
@@ -82,7 +122,6 @@ function PayPalPayment({ cart = [], measurements, deliveryDetails, onSuccess, on
     setPaymentStatus('Processing payment...')
 
     try {
-      console.log('Payment approved:', data.orderID)
       const response = await fetch(
         `${getApiUrl()}/api/payments/${data.orderID}/capture`,
         {
@@ -97,7 +136,6 @@ function PayPalPayment({ cart = [], measurements, deliveryDetails, onSuccess, on
       }
 
       const orderData = await response.json()
-      console.log('Order Captured:', orderData)
 
       const paymentStatus = orderData.status
 
@@ -123,7 +161,6 @@ function PayPalPayment({ cart = [], measurements, deliveryDetails, onSuccess, on
   }
 
   const handleCancel = (data) => {
-    console.log("Payment cancelled:", data);
     setPaymentStatus("Payment cancelled");
     
     if (onCancel && typeof onCancel === 'function') {
@@ -142,8 +179,9 @@ function PayPalPayment({ cart = [], measurements, deliveryDetails, onSuccess, on
                      deliveryDetails && 
                      deliveryDetails.fullName &&
                      deliveryDetails.address &&
-                     deliveryDetails.city &&
                      deliveryDetails.postalCode &&
+                     deliveryDetails.city &&
+                     deliveryDetails.country &&
                      deliveryDetails.email &&
                      deliveryDetails.phone;
 
@@ -155,9 +193,18 @@ function PayPalPayment({ cart = [], measurements, deliveryDetails, onSuccess, on
     
     return (
       <div className={styles.payPalContainer}>
-        <div className="error-message">
+        <div className={styles.errorMessage}>
           Cannot proceed with payment. Missing: {missingItems.join(", ")}
         </div>
+      </div>
+    );
+  }
+
+  // Show spinner if client is not loaded yet
+  if (!isClientLoaded) {
+    return (
+      <div className={styles.payPalContainer}>
+        <LoadingSpinner />
       </div>
     );
   }
@@ -170,21 +217,16 @@ function PayPalPayment({ cart = [], measurements, deliveryDetails, onSuccess, on
       }}
     >
       <div className={styles.payPalContainer}>
-        {error && <div className={styles.errorMessage}>{error}</div>}
-        {/* {paymentStatus && <div className={styles.statusMessage}>{paymentStatus}</div>} */}
+      {error && <div className={styles.errorMessage}>{error}</div>}
+      {/* {paymentStatus && <div className={styles.statusMessage}>{paymentStatus}</div>} */}
 
         <div className={styles.paypalButtonContainer}>
-          <PayPalButtons
+          <PayPalButtonsWrapper
             createOrder={createOrder}
             onApprove={onApprove}
             onCancel={handleCancel}
             onError={onError}
             disabled={isProcessing}
-            style={{
-              layout: 'vertical',
-              color: 'gold',
-              shape: 'rect',
-            }}
           />
         </div>
       </div>
