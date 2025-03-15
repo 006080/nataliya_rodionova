@@ -1,246 +1,12 @@
-// import { createContext, useContext, useState } from 'react';
-
-// const CartContext = createContext();
-
-// export const useCart = () => useContext(CartContext);
-
-// export const CartProvider = ({ children }) => {
-//   const [cartItems, setCartItems] = useState([]);
-
-//   const addToCart = (product) => {
-//     setCartItems((prevItems) => {
-//       const existingItem = prevItems.find((item) => item.name === product.name);
-//       if (existingItem) {
-//         return prevItems.map((item) =>
-//           item.name === product.name
-//             ? { ...item, quantity: item.quantity + product.quantity }
-//             : item
-//         );
-//       }
-//       return [...prevItems, product];
-//     });
-//   };
-
-//   const removeFromCart = (productName) => {
-//     setCartItems((prevItems) =>
-//       prevItems.filter((item) => item.name !== productName)
-//     );
-//   };
-
-//   return (
-//     <CartContext.Provider value={{ cartItems, addToCart, removeFromCart }}>
-//       {children}
-//     </CartContext.Provider>
-//   );
-// };
-
-
-// import { createContext, useContext, useState, useEffect } from 'react';
-
-// const CartContext = createContext();
-
-// export const useCart = () => useContext(CartContext);
-
-// export const CartProvider = ({ children }) => {
-//   // Load cart items from localStorage on initial render
-//   const [cartItems, setCartItems] = useState(() => {
-//     try {
-//       const savedCartItems = localStorage.getItem('cartItems');
-//       return savedCartItems ? JSON.parse(savedCartItems) : [];
-//     } catch (error) {
-//       console.error('Error loading cart from localStorage:', error);
-//       return [];
-//     }
-//   });
-
-//   // Initialize pendingOrderId from localStorage
-//   const [pendingOrderId, setPendingOrderId] = useState(() => {
-//     return localStorage.getItem('pendingOrderId') || null;
-//   });
-
-//   // Save cart items to localStorage whenever they change
-//   useEffect(() => {
-//     try {
-//       localStorage.setItem('cartItems', JSON.stringify(cartItems));
-//     } catch (error) {
-//       console.error('Error saving cart to localStorage:', error);
-//     }
-//   }, [cartItems]);
-
-//   // Save pendingOrderId to localStorage whenever it changes
-//   useEffect(() => {
-//     if (pendingOrderId) {
-//       localStorage.setItem('pendingOrderId', pendingOrderId);
-//     } else {
-//       localStorage.removeItem('pendingOrderId');
-//     }
-//   }, [pendingOrderId]);
-
-//   const addToCart = (product) => {
-//     setCartItems((prevItems) => {
-//       const existingItem = prevItems.find((item) => item.name === product.name);
-//       if (existingItem) {
-//         return prevItems.map((item) =>
-//           item.name === product.name
-//             ? { ...item, quantity: item.quantity + product.quantity }
-//             : item
-//         );
-//       }
-//       return [...prevItems, product];
-//     });
-//   };
-
-//   const removeFromCart = (productName) => {
-//     // If productName is provided, remove that specific item
-//     if (productName) {
-//       setCartItems((prevItems) =>
-//         prevItems.filter((item) => item.name !== productName)
-//       );
-//     } 
-//     // If no productName is provided, clear the entire cart
-//     else {
-//       setCartItems([]);
-//     }
-//   };
-
-//   // Set the pending order ID
-//   const setPendingOrder = (orderId) => {
-//     setPendingOrderId(orderId);
-//   };
-
-//   // Clear the pending order ID
-//   const clearPendingOrder = () => {
-//     setPendingOrderId(null);
-//   };
-
-//   return (
-//     <CartContext.Provider 
-//       value={{ 
-//         cartItems, 
-//         addToCart, 
-//         removeFromCart,
-//         pendingOrderId,
-//         setPendingOrder,
-//         clearPendingOrder
-//       }}
-//     >
-//       {children}
-//     </CartContext.Provider>
-//   );
-// };
-
-
-
-
-// import { createContext, useContext, useState, useEffect } from 'react';
-
-// const CartContext = createContext();
-
-// export const useCart = () => useContext(CartContext);
-
-// export const CartProvider = ({ children }) => {
-//   // Load cart items from localStorage on initial render
-//   const [cartItems, setCartItems] = useState(() => {
-//     try {
-//       const savedCartItems = localStorage.getItem('cartItems');
-//       return savedCartItems ? JSON.parse(savedCartItems) : [];
-//     } catch (error) {
-//       console.error('Error loading cart from localStorage:', error);
-//       return [];
-//     }
-//   });
-
-//   // Initialize pendingOrderId from localStorage
-//   const [pendingOrderId, setPendingOrderId] = useState(() => {
-//     return localStorage.getItem('pendingOrderId') || null;
-//   });
-
-//   // Save cart items to localStorage whenever they change
-//   useEffect(() => {
-//     try {
-//       localStorage.setItem('cartItems', JSON.stringify(cartItems));
-//     } catch (error) {
-//       console.error('Error saving cart to localStorage:', error);
-//     }
-//   }, [cartItems]);
-
-//   // Save pendingOrderId to localStorage whenever it changes
-//   useEffect(() => {
-//     if (pendingOrderId) {
-//       localStorage.setItem('pendingOrderId', pendingOrderId);
-//     } else {
-//       localStorage.removeItem('pendingOrderId');
-//     }
-//   }, [pendingOrderId]);
-
-//   const addToCart = (product) => {
-//     setCartItems((prevItems) => {
-//       const existingItem = prevItems.find((item) => item.name === product.name);
-//       if (existingItem) {
-//         return prevItems.map((item) =>
-//           item.name === product.name
-//             ? { ...item, quantity: item.quantity + product.quantity }
-//             : item
-//         );
-//       }
-//       return [...prevItems, product];
-//     });
-//   };
-
-//   const removeFromCart = (productName) => {
-//     // If productName is provided, remove that specific item
-//     if (productName) {
-//       setCartItems((prevItems) =>
-//         prevItems.filter((item) => item.name !== productName)
-//       );
-//     } 
-//     // If no productName is provided, clear the entire cart
-//     else {
-//       setCartItems([]);
-//     }
-//   };
-
-//   // Set the pending order ID
-//   const setPendingOrder = (orderId) => {
-//     setPendingOrderId(orderId);
-//   };
-
-//   // Clear the pending order ID and optionally clear the cart
-//   const clearPendingOrder = (clearCart = false) => {
-//     setPendingOrderId(null);
-    
-//     // Also clear the cart if the clearCart parameter is true
-//     if (clearCart) {
-//       setCartItems([]);
-//       localStorage.removeItem('cartItems');
-//     }
-//   };
-
-//   return (
-//     <CartContext.Provider 
-//       value={{ 
-//         cartItems, 
-//         addToCart, 
-//         removeFromCart,
-//         pendingOrderId,
-//         setPendingOrder,
-//         clearPendingOrder
-//       }}
-//     >
-//       {children}
-//     </CartContext.Provider>
-//   );
-// };
-
-
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useState, useContext, useEffect } from 'react';
+import { getPendingOrderId, setPendingOrderId, clearPendingOrderId } from '../src/utils/cookieUtils';
 
 const CartContext = createContext();
 
 export const useCart = () => useContext(CartContext);
 
 export const CartProvider = ({ children }) => {
-  // Load cart items from localStorage on initial render
+  // Initialize cart items from localStorage
   const [cartItems, setCartItems] = useState(() => {
     try {
       const savedCartItems = localStorage.getItem('cartItems');
@@ -251,111 +17,111 @@ export const CartProvider = ({ children }) => {
     }
   });
 
-  // Initialize pendingOrderId from localStorage
-  const [pendingOrderId, setPendingOrderId] = useState(() => {
-    return localStorage.getItem('pendingOrderId') || null;
+  // Use cookies for pendingOrderId instead of localStorage
+  const [pendingOrderId, setPendingOrderState] = useState(() => {
+    return getPendingOrderId();
   });
 
   // Save cart items to localStorage whenever they change
   useEffect(() => {
-    if (cartItems.length > 0) {
-      try {
-        localStorage.setItem('cartItems', JSON.stringify(cartItems));
-      } catch (error) {
-        console.error('Error saving cart to localStorage:', error);
-      }
-    } else {
-      // If cart is empty, remove the item from localStorage
-      localStorage.removeItem('cartItems');
-    }
+    localStorage.setItem('cartItems', JSON.stringify(cartItems));
   }, [cartItems]);
 
-  // Save pendingOrderId to localStorage whenever it changes
-  useEffect(() => {
-    if (pendingOrderId) {
-      localStorage.setItem('pendingOrderId', pendingOrderId);
-    } else {
-      localStorage.removeItem('pendingOrderId');
-    }
-  }, [pendingOrderId]);
-
-  const addToCart = (product) => {
+  // Add item to cart
+  const addToCart = (item) => {
     setCartItems((prevItems) => {
-      const existingItem = prevItems.find((item) => item.name === product.name);
+      const existingItem = prevItems.find((i) => i.id === item.id);
+      
       if (existingItem) {
-        return prevItems.map((item) =>
-          item.name === product.name
-            ? { ...item, quantity: item.quantity + product.quantity }
-            : item
+        return prevItems.map((i) =>
+          i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
         );
+      } else {
+        return [...prevItems, { ...item, quantity: 1 }];
       }
-      return [...prevItems, product];
     });
   };
 
-  const removeFromCart = (productName) => {
-    // If productName is provided, remove that specific item
-    if (productName) {
-      setCartItems((prevItems) =>
-        prevItems.filter((item) => item.name !== productName)
-      );
-    } 
-    // If no productName is provided, clear the entire cart
-    else {
+  // Update quantity for an item
+  const updateQuantity = (itemId, quantity) => {
+    setCartItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === itemId ? { ...item, quantity } : item
+      )
+    );
+  };
+
+  // Remove item from cart - enhanced to handle different identification methods
+  const removeFromCart = (itemIdentifier) => {
+    // If no identifier is provided, clear the entire cart
+    if (!itemIdentifier) {
       setCartItems([]);
-      localStorage.removeItem('cartItems');
+      return;
+    }
+    
+    // Check if we're removing by ID or name
+    if (typeof itemIdentifier === 'string') {
+      // Try to determine if this is an ID or a name
+      const matchById = cartItems.some(item => item.id === itemIdentifier);
+      
+      if (matchById) {
+        // This is an ID, filter by ID
+        setCartItems(prevItems => prevItems.filter(item => item.id !== itemIdentifier));
+      } else {
+        // Assume it's a name if not found as an ID
+        setCartItems(prevItems => prevItems.filter(item => item.name !== itemIdentifier));
+      }
+    } else if (typeof itemIdentifier === 'object' && itemIdentifier !== null) {
+      // If an object is passed, check for id or name property
+      const { id, name } = itemIdentifier;
+      
+      if (id) {
+        setCartItems(prevItems => prevItems.filter(item => item.id !== id));
+      } else if (name) {
+        setCartItems(prevItems => prevItems.filter(item => item.name !== name));
+      }
     }
   };
 
-  // Set the pending order ID
+  // Set pending order - Uses cookie
   const setPendingOrder = (orderId) => {
-    // Always reset the previous pendingOrderId regardless of value
-    if (pendingOrderId) {
-      console.log(`Replacing existing pendingOrderId: ${pendingOrderId} with new ID: ${orderId}`);
-    }
+    setPendingOrderState(orderId);
     
-    // Set the new order ID
-    setPendingOrderId(orderId);
-    localStorage.setItem('pendingOrderId', orderId);
+    // Store in cookie
+    if (orderId) {
+      setPendingOrderId(orderId);
+    }
   };
 
-  // Clear the pending order ID and optionally clear the cart
+  // Clear pending order - Clears cookie
   const clearPendingOrder = (clearCart = false) => {
-    console.log(`Clearing pendingOrderId: ${pendingOrderId}`);
+    setPendingOrderState(null);
     
-    // Clear pendingOrderId
-    setPendingOrderId(null);
-    localStorage.removeItem('pendingOrderId');
+    // Clear from cookie
+    clearPendingOrderId();
     
-    // Also clear the cart if the clearCart parameter is true
+    // Optionally clear cart
     if (clearCart) {
       setCartItems([]);
       localStorage.removeItem('cartItems');
-      
-      // Clear other checkout-related localStorage items
-      localStorage.removeItem('measurements');
-      localStorage.removeItem('deliveryDetails');
     }
   };
 
-  // Check if an order is the same as the pending order
-  const isCurrentPendingOrder = (orderId) => {
-    return pendingOrderId === orderId;
-  };
-
   return (
-    <CartContext.Provider 
-      value={{ 
-        cartItems, 
-        addToCart, 
+    <CartContext.Provider
+      value={{
+        cartItems,
+        addToCart,
         removeFromCart,
+        updateQuantity,
         pendingOrderId,
         setPendingOrder,
-        clearPendingOrder,
-        isCurrentPendingOrder
+        clearPendingOrder
       }}
     >
       {children}
     </CartContext.Provider>
   );
 };
+
+export default CartContext;

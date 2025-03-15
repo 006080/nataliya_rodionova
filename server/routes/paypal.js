@@ -379,6 +379,10 @@ router.get("/api/admin/orders/abandoned", async (req, res) => {
 });
 
 
+/**
+ * Continue payment for an existing order
+ * This endpoint checks if an order is available for continuation
+ */
 router.get("/api/payments/:orderID/continue", async (req, res) => {
   try {
     const { orderID } = req.params;
