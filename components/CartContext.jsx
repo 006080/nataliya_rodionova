@@ -125,3 +125,5 @@ export const CartProvider = ({ children }) => {
 };
 
 export default CartContext;
+
+

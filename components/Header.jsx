@@ -4,18 +4,22 @@ import Nav from "./Nav";
 import logo from "../src/assets/Logo.webp";
 import styles from "./Header.module.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBars, faUser, faCartShopping } from "@fortawesome/free-solid-svg-icons";
+import { faBars, faUser, faCartShopping, faSignInAlt } from "@fortawesome/free-solid-svg-icons";
 import CartSummary from "./CartSummary";
 import { useCart } from "./CartContext";
+import { useAuth } from "../src/contexts/AuthContext";
 import useOutsideClick from '../src/hooks/useOutsideClick';
 
 const Header = () => {
   const navigate = useNavigate();
   const [cartIsOpen, setCartIsOpen] = useState(false);
   const [menu, openMenu] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const { cartItems } = useCart();
+  const { user, isAuthenticated, logout } = useAuth();
 
   const navRef = useOutsideClick(() => openMenu(false))
+  const userMenuRef = useOutsideClick(() => setUserMenuOpen(false));
 
   // Check if we're on the Contacts page
   // const isContactPage = window.location.pathname === "/contacts";
@@ -30,6 +34,16 @@ const Header = () => {
     } else {
       openMenu(!menu); // Open regular menu on other pages
     }
+  };
+
+  const handleUserIconClick = () => {
+    setUserMenuOpen(!userMenuOpen);
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    setUserMenuOpen(false);
+    navigate('/login');
   };
 
   return (
@@ -77,6 +91,40 @@ const Header = () => {
             )}
             {cartIsOpen && <CartSummary cartItems={cartItems} onClose={() => setCartIsOpen(false)} />}
           </div>
+
+            {/* User Icon - Conditionally render based on authentication */}
+          <div className={styles.userIconContainer}>
+            <FontAwesomeIcon 
+              icon={isAuthenticated ? faUser : faSignInAlt} 
+              className={`${styles.userIcon} ${menu ? styles.whiteIcon : ''}`}
+              onClick={handleUserIconClick}
+            />
+            
+            {/* User dropdown menu */}
+            {userMenuOpen && (
+              <div className={styles.userMenu} ref={userMenuRef}>
+                {isAuthenticated ? (
+                  <>
+                    <div className={styles.userInfo}>
+                      <p>Hello, {user.name}</p>
+                      <span>{user.email}</span>
+                    </div>
+                    <ul>
+                      <li onClick={() => { navigate('/profile'); setUserMenuOpen(false); }}>My Profile</li>
+                      <li onClick={() => { navigate('/orders'); setUserMenuOpen(false); }}>My Orders</li>
+                      <li onClick={handleLogout}>Logout</li>
+                    </ul>
+                  </>
+                ) : (
+                  <ul>
+                    <li onClick={() => { navigate('/login'); setUserMenuOpen(false); }}>Login</li>
+                    <li onClick={() => { navigate('/register'); setUserMenuOpen(false); }}>Register</li>
+                  </ul>
+                )}
+              </div>
+            )}
+          </div>
+
           {/* <FontAwesomeIcon 
             icon={faUser} 
             className={`${styles.userIcon} ${isContactPage ? styles.whiteIcon : ''}`} 

@@ -18,18 +18,32 @@ import bodyParser from "body-parser";
 import paypalRoutes from './routes/paypal.js';
 import productRoutes from './routes/product.js';
 import { initializeReminderSystem } from './services/paymentReminderService.js';
-
-
+import cookieParser from 'cookie-parser';
+import authRoutes from './routes/auth.js';
 
 dotenv.config({ path: './.env.local' });
+
 const app = express();
+const server = http.createServer(app);
 
-
+app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(helmet()); 
+app.use(cors({
+    origin: (origin, callback) => {
+        const allowedOrigins = [FRONTEND_URL_LOCAL, FRONTEND_URL_PROD, 'http://localhost:5173/cart' ];
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true
+}));
+app.use(express.json({ limit: '10mb' })); // Limit payload size
 
 
-const server = http.createServer(app);
 
 
 if (process.env.NODE_ENV === 'production') {
@@ -98,20 +112,6 @@ const feedbackLimiter = rateLimit({
 // Middleware
 app.use("/api/feedback", feedbackLimiter);
 
-app.use(helmet()); 
-
-app.use(express.json({ limit: '10mb' })); // Limit payload size
-app.use(cors({
-    origin: (origin, callback) => {
-        const allowedOrigins = [FRONTEND_URL_LOCAL, FRONTEND_URL_PROD, 'http://localhost:5173/cart' ];
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
-    credentials: true
-}));
 
 const feedbackSchema = Joi.object({
     name: Joi.string().min(3).max(50).required(),
@@ -307,6 +307,7 @@ app.get('/api/reviews', async (req, res) => {
 
 app.use(productRoutes);
 app.use(paypalRoutes);
+app.use(authRoutes);
   
 
 

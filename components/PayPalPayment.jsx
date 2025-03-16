@@ -52,7 +52,7 @@ function PayPalPayment({
   onSuccess, 
   onCancel, 
   onOrderCreated, 
-  existingOrderId = null // Allow passing an existing order ID 
+  existingOrderId = null 
 }) {
   const [paymentStatus, setPaymentStatus] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
@@ -311,12 +311,12 @@ function PayPalPayment({
     >
       <div className={styles.payPalContainer}>
         {error && <div className={styles.errorMessage}>{error}</div>}
-        {paymentStatus && <div className={styles.statusMessage}>{paymentStatus}</div>}
+        {/* {paymentStatus && <div className={styles.statusMessage}>{paymentStatus}</div>}
         {orderId && (
           <div className={styles.statusMessage}>
             {existingOrderId ? 'Continuing payment for existing order' : 'Using previously started order'}
           </div>
-        )}
+        )} */}
 
         <div className={styles.paypalButtonContainer}>
           <PayPalButtonsWrapper
@@ -333,3 +333,6 @@ function PayPalPayment({
 }
 
 export default PayPalPayment
+
+
+

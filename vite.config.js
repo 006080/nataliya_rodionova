@@ -21,9 +21,16 @@ export default defineConfig({
         target: process.env.NODE_ENV === 'production' ? 'https://www.nataliyarodionova.com' : 'http://localhost:4000', // Check the environment
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/api/, ''), // Removes '/api' prefix
+        rewrite: (path) => path.replace(/^\/api/, ''), 
       },
     },
+    '/auth': {
+      target: process.env.NODE_ENV === 'production' 
+        ? 'https://www.nataliyarodionova.com' 
+        : 'http://localhost:4000',
+      changeOrigin: true,
+      rewrite: (path) => path.replace(/^\/auth/, '/api/auth'),
+    }
   },
 
   // Resolve absolute imports for easier imports
