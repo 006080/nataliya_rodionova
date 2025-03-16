@@ -38,8 +38,8 @@ const Home = () => {
       />
        
       <div className={styles.sloganBlog}>
-        <h1>Unveil Timeless Beauty</h1>
-        <h2 style={{textAlign:'left', marginTop:'-15px'}}>Masterpieces in Wool Designs</h2>
+        <h1 style={{color:'beige'}}>Unveil Timeless Beauty</h1>
+        <h2 style={{textAlign:'left', marginTop:'-15px', color:'black'}}>Masterpieces in Wool Designs</h2>
         <Button className={styles.homeButton} onClick={handleClick}>
           Shop Now
         </Button>

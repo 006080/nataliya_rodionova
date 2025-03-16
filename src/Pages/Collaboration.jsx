@@ -4,8 +4,8 @@ import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import styles from "./Collaboration.module.css";
 
-const CLOUDINARY_CLOUD_NAME = "dwenvtwyx";
-const UPLOAD_FOLDER = "YOUR_UPLOAD_FOLDER";
+const CLOUDINARY_CLOUD_NAME = "YOUR_CLOUDINARY_CLOUD_NAME";
+const CLOUDINARY_API_KEY = "YOUR_CLOUDINARY_API_KEY";
 
 const Collaboration = () => {
   const [collaborations, setCollaborations] = useState([]);
@@ -14,11 +14,16 @@ const Collaboration = () => {
     const fetchImages = async () => {
       try {
         const response = await axios.get(
-          `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/list/${UPLOAD_FOLDER}.json`
+          `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/resources/image`,
+          {
+            headers: {
+              Authorization: `Basic ${btoa(`api_key:${CLOUDINARY_API_KEY}`)}`,
+            },
+          }
         );
-        
+
         const groupedData = response.data.resources.reduce((acc, image) => {
-          const date = image.folder || "Unknown Date";
+          const date = new Date(image.created_at).toLocaleDateString();
           if (!acc[date]) acc[date] = [];
           acc[date].push(image);
           return acc;
@@ -46,7 +51,7 @@ const Collaboration = () => {
             <Carousel showThumbs={false} autoPlay infiniteLoop>
               {images.map((img) => (
                 <div key={img.public_id}>
-                  <img src={img.url} alt={img.public_id} className={styles.collabImage} />
+                  <img src={img.secure_url} alt={img.public_id} className={styles.collabImage} />
                 </div>
               ))}
             </Carousel>
