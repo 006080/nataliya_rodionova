@@ -1,11 +1,11 @@
-// src/contexts/AuthContext.jsx
 import { createContext, useContext, useState, useEffect } from 'react';
 import { 
   setTokens, 
   clearTokens, 
   isAuthenticated, 
   getCurrentUser,
-  refreshAccessToken
+  refreshAccessToken,
+  authFetch
 } from '../services/authService';
 
 const getApiUrl = () => {
@@ -45,49 +45,71 @@ function AuthProviderComponent({ children }) {
     initAuth();
   }, []);
   
-  // Login function
-  const login = async (email, password) => {
-    try {
-      setAuthError('');
-      
-      const response = await fetch(`${getApiUrl()}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-        credentials: 'include',
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Login failed');
+
+// Login function with comprehensive fix for verification issues
+const login = async (email, password) => {
+  try {
+    // Clear previous errors
+    setAuthError('');
+    
+    console.log('Login attempt for:', email);
+    console.log('Pending verification in session storage:', 
+      sessionStorage.getItem('pendingVerificationEmail'));
+    
+    const response = await fetch(`${getApiUrl()}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+      credentials: 'include',
+    });
+    
+    const data = await response.json();
+    
+    // Debug logging
+    console.log('Login response:', {
+      status: response.status,
+      data,
+      emailVerified: data.user?.emailVerified
+    });
+    
+    if (!response.ok) {
+      // Handle email verification error specifically
+      if (response.status === 403 && data.needsVerification) {
+        console.log('Email not verified - response status 403 with needsVerification flag');
+        setAuthError('Please verify your email address before logging in.');
+        // Store the email in session for convenience when resending verification
+        sessionStorage.setItem('pendingVerificationEmail', email);
+        return false;
       }
       
-      const data = await response.json();
-      console.log('Login response data:', {
-        accessToken: data.accessToken ? 'present' : 'missing',
-        refreshToken: data.refreshToken ? 'present' : 'missing',
-        user: data.user ? 'present' : 'missing'
-      });
-      
-      // Store tokens securely - checking if refreshToken exists
-      if (!data.refreshToken) {
-        console.warn('Server did not return a refresh token during login');
-      }
-      
-      setTokens(data.accessToken, data.refreshToken);
-      
-      // Update user state
-      setUser(data.user);
-      
-      return true;
-    } catch (error) {
-      console.error('Login error:', error);
-      setAuthError(error.message);
-      return false;
+      throw new Error(data.error || 'Login failed');
     }
-  };
+    
+    console.log('Login successful, user data:', data.user);
+    
+    // Store tokens securely
+    setTokens(data.accessToken, data.refreshToken);
+    
+    // Update user state
+    setUser(data.user);
+    
+    // CRITICAL FIX: Clear pending verification if login succeeds
+    if (data.user && data.user.emailVerified) {
+      console.log('User is verified, clearing pendingVerificationEmail');
+      sessionStorage.removeItem('pendingVerificationEmail');
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Login error:', error);
+    setAuthError(error.message);
+    return false;
+  }
+};
+
+
   
-  // Register function
+  // Register function - updated to handle email verification
   const register = async (name, email, password) => {
     try {
       setAuthError('');
@@ -99,12 +121,12 @@ function AuthProviderComponent({ children }) {
         credentials: 'include',
       });
       
+      const data = await response.json();
+      
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Registration failed');
+        throw new Error(data.error || 'Registration failed');
       }
       
-      const data = await response.json();
       console.log('Registration response data:', {
         accessToken: data.accessToken ? 'present' : 'missing',
         refreshToken: data.refreshToken ? 'present' : 'missing',
@@ -117,9 +139,37 @@ function AuthProviderComponent({ children }) {
       // Update user state
       setUser(data.user);
       
+      // Store email in session to use for verification resend if needed
+      sessionStorage.setItem('pendingVerificationEmail', email);
+      
       return true;
     } catch (error) {
       console.error('Registration error:', error);
+      setAuthError(error.message);
+      return false;
+    }
+  };
+
+  // Resend verification email
+  const resendVerificationEmail = async (email) => {
+    try {
+      setAuthError('');
+      
+      const response = await fetch(`${getApiUrl()}/api/auth/resend-verification`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to resend verification email');
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Resend verification error:', error);
       setAuthError(error.message);
       return false;
     }
@@ -149,7 +199,10 @@ function AuthProviderComponent({ children }) {
     login,
     register,
     logout,
+    resendVerificationEmail,
     clearAuthError: () => setAuthError(''),
+    authFetch, // Export authFetch for protected API calls
+    setUser, // Expose setUser for updates after profile changes
   };
 
   return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;

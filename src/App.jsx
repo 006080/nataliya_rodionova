@@ -19,6 +19,7 @@ import LoginForm from "../components/LoginForm";
 import RegisterForm from "../components/RegisterForm";
 import ForgotPasswordForm from "../components/ForgotPasswordForm";
 import NotFoundPage from "./NotFoundPage";
+import VerifyEmail from "../components/VerifyEmail";
 
 
 const Unauthorized = () => (
@@ -42,7 +43,8 @@ const AppContent = () => {
         <Route path="/register" element={<RegisterForm />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="/forgot-password" element={<ForgotPasswordForm />} />
-        <Route path="/forgot-password" element={<ForgotPasswordForm />} />
+        <Route path="/verify-email/:token" element={<VerifyEmail />} />
+
         <Route style={{ position: 'relative' }} path="/ourservice" element={<OurService />} />
         <Route style={{ position: 'relative' }} path="/reviews" element={<Reviews />} />
         <Route style={{ position: 'relative' }} path="/terms" element={<Terms />} />
