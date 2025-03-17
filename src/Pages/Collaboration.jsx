@@ -1,18 +1,22 @@
 import { useEffect, useState } from 'react';
 import styles from './Collaboration.module.css';
 
+function Loader() {
+    return <div className={styles.loader}></div>;
+}
+
 function Collaboration() {
     const [folders, setFolders] = useState({});
     const [selectedFolder, setSelectedFolder] = useState(null);
     const [images, setImages] = useState([]);
     const [loading, setLoading] = useState(false);
     const [fullscreenImage, setFullscreenImage] = useState(null);
-
-    const CLOUDINARY_CDN = "https://cdn.nataliyarodionova.com";
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
     useEffect(() => {
         async function fetchFolders() {
             try {
+                setLoading(true);
                 const res = await fetch('http://localhost:4000/api/cloudinary-folders');
                 const data = await res.json();
                 if (data.error) {
@@ -22,16 +26,16 @@ function Collaboration() {
                 }
             } catch (err) {
                 console.error('Error fetching folders:', err);
+            } finally {
+                setLoading(false);
             }
         }
         fetchFolders();
     }, []);
 
-    // Modify Cloudinary URL to use CDN and optimize images
-    const optimizeImage = (url, width = 600, height = 400) => {
-        return url
-            .replace('/upload/', `/upload/w_${width},h_${height},c_fill,f_auto,q_auto,dpr_auto/`)
-            .replace('res.cloudinary.com', 'cdn.nataliyarodionova.com'); // Corrected replacement
+    // Modify Cloudinary URL to optimize images without resizing or blur effect
+    const optimizeImage = (url) => {
+        return url.replace('/upload/', `/upload/f_auto,q_90/`);
     };
 
     // Handle folder selection
@@ -42,6 +46,8 @@ function Collaboration() {
         if (folders[folderName] && folders[folderName].length > 0) {
             const optimizedImages = folders[folderName].map(url => optimizeImage(url));
             setImages(optimizedImages);
+            setFullscreenImage(optimizedImages[0]); // Show the first image in fullscreen
+            setCurrentImageIndex(0);
         } else {
             setImages([]);
         }
@@ -49,16 +55,20 @@ function Collaboration() {
         setLoading(false);
     };
 
-    // Open full-screen image
-    const openFullScreen = (url) => {
-        setFullscreenImage(optimizeImage(url, 1200, 800)); // Load larger image
+    // Show next image in fullscreen mode
+    const showNextImage = () => {
+        if (images.length > 0) {
+            const nextIndex = (currentImageIndex + 1) % images.length;
+            setCurrentImageIndex(nextIndex);
+            setFullscreenImage(images[nextIndex]);
+        }
     };
 
     return (
         <div className={styles.container}>
             <h2 className={styles.heading}>Photos</h2>
             <p className={styles.text}>
-                Explore collaborations with stylists, photographers, models, and magazines.
+                Immerse yourself in enchanting collaborations with visionary stylists, talented photographers, captivating models, and renowned magazines, where artistry and passion come together to create timeless beauty.
             </p>
 
             {selectedFolder ? (
@@ -69,49 +79,37 @@ function Collaboration() {
                     <h3 className={styles.selectedFolderTitle}>{selectedFolder}</h3>
 
                     {loading ? (
-                        <p>Loading images...</p>
-                    ) : (
-                        <div className={styles.imageGrid}>
-                            {images.length > 0 ? (
-                                images.map((url, index) => (
-                                    <img
-                                        key={index}
-                                        src={url}
-                                        alt={`img-${index}`}
-                                        className={styles.thumbnail}
-                                        loading="lazy"
-                                        onClick={() => openFullScreen(url)}
-                                    />
-                                ))
-                            ) : (
-                                <p>No images found in this folder.</p>
-                            )}
+                        <Loader />
+                    ) : fullscreenImage ? (
+                        <div className={styles.fullscreenModal} onClick={showNextImage}>
+                            <div></div>
+                            <img src={fullscreenImage} alt="Fullscreen" className={styles.fullscreenImage} />
                         </div>
+                    ) : (
+                        <p>No images found in this folder.</p>
                     )}
                 </>
             ) : (
                 <div className={styles.folderGrid}>
-                    {Object.entries(folders).map(([folderName, images]) => (
-                        folderName !== 'review' && (
-                            <div key={folderName} className={styles.folderItem} onClick={() => handleFolderClick(folderName)}>
-                                {images.length > 0 && (
-                                    <img
-                                        src={optimizeImage(images[0], 200, 200)}
-                                        alt={folderName}
-                                        className={styles.folderImage}
-                                        loading="lazy"
-                                    />
-                                )}
-                                <h3 className={styles.folderTitle}>{folderName}</h3>
-                            </div>
+                    {loading ? (
+                        <Loader />
+                    ) : (
+                        Object.entries(folders).map(([folderName, images]) =>
+                            folderName !== 'reviews' && (
+                                <div key={folderName} className={styles.folderItem} onClick={() => handleFolderClick(folderName)}>
+                                    {images.length > 0 && (
+                                        <img
+                                            src={optimizeImage(images[0])} // No resizing here, just optimization
+                                            alt={folderName}
+                                            className={styles.folderImage}
+                                            loading="lazy"
+                                        />
+                                    )}
+                                    <h3 className={styles.folderTitle}>{folderName}</h3>
+                                </div>
+                            )
                         )
-                    ))}
-                </div>
-            )}
-
-            {fullscreenImage && (
-                <div className={styles.fullscreenModal} onClick={() => setFullscreenImage(null)}>
-                    <img src={fullscreenImage} alt="Fullscreen" className={styles.fullscreenImage} />
+                    )}
                 </div>
             )}
         </div>
