@@ -40,14 +40,14 @@ const OurService = () => {
         className={styles.imageContainer}
         onClick={() =>
           openImageModal(
-            '66130675_2309445942483047_864015165027254272_n_5_bmvvjh'
+            '66130675_2309445942483047_864015165027254272_n_5_cusrfy'
           )
         }
       >
         <AdvancedImage
           className={styles.fullWidthImage}
           cldImg={getImage(
-            '66130675_2309445942483047_864015165027254272_n_5_bmvvjh'
+            '66130675_2309445942483047_864015165027254272_n_5_cusrfy'
           )}
           alt="Viola"
         />
@@ -129,11 +129,11 @@ const OurService = () => {
 
       <section
         className={styles.imageContainer}
-        onClick={() => openImageModal('sommer_xjiitv')}
+        onClick={() => openImageModal('sommer_xjiitv_qnoi0v')}
       >
         <AdvancedImage
           className={styles.fullWidthImage}
-          cldImg={getImage('sommer_xjiitv')}
+          cldImg={getImage('sommer_xjiitv_qnoi0v')}
           alt="Sommer"
         />
       </section>
