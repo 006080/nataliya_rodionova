@@ -21,6 +21,7 @@ import { initializeReminderSystem } from './services/paymentReminderService.js';
 import cookieParser from 'cookie-parser';
 import authRoutes from './routes/auth.js';
 
+
 dotenv.config({ path: './.env.local' });
 
 const app = express();

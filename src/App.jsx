@@ -33,6 +33,7 @@ const Unauthorized = () => (
 const AppContent = () => {
   const location = useLocation();  // Get current route
 
+
   return (
     <>
      <AuthProvider>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styles from './VerifyEmail.module.css';
 import { clearPendingVerification, updateUserVerificationStatus } from '../src/utils/authHelpers';
@@ -6,9 +6,10 @@ import { clearPendingVerification, updateUserVerificationStatus } from '../src/u
 const VerifyEmail = () => {
   const [status, setStatus] = useState('verifying');
   const [message, setMessage] = useState('Verifying your email...');
-  const [responseData, setResponseData] = useState(null);
+  const [errorDetails, setErrorDetails] = useState(null);
   const { token } = useParams();
   const navigate = useNavigate();
+  const verificationAttempted = useRef(false);
   
   const getApiUrl = () => {
     return import.meta.env.VITE_NODE_ENV === "production"
@@ -18,6 +19,12 @@ const VerifyEmail = () => {
   
   useEffect(() => {
     const verifyEmail = async () => {
+      // Prevent double verification attempts
+      if (verificationAttempted.current) {
+        console.log('Verification already attempted, skipping duplicate request');
+        return;
+      }
+      
       if (!token) {
         setStatus('error');
         setMessage('Invalid verification link. No token provided.');
@@ -27,26 +34,35 @@ const VerifyEmail = () => {
       try {
         console.log('Verifying token:', token);
         
+        // Mark that we've attempted verification
+        verificationAttempted.current = true;
+        
         // Force clear any stale verification status from session storage
         clearPendingVerification();
         
         const response = await fetch(`${getApiUrl()}/api/auth/verify-email/${token}`);
         const data = await response.json();
         
-        // Store the full response data for debugging
-        setResponseData(data);
-        
         console.log('Verification response:', {
           status: response.status,
           data
         });
         
-        if (response.ok) {
+        // Store error details for debugging
+        if (!response.ok && !data.verified) {
+          setErrorDetails(data);
+        }
+        
+        // Check if verification was successful or already done
+        if (response.ok || data.verified === true) {
           setStatus('success');
           setMessage(data.message || 'Email verified successfully! You can now login to your account.');
           
-          // Update the user object in localStorage if it exists to show verified
+          // Update the user object in localStorage to show verified
           updateUserVerificationStatus(true);
+          
+          // Clear any pending verification
+          clearPendingVerification();
         } else {
           setStatus('error');
           setMessage(data.error || 'Failed to verify email. Please try again.');
@@ -55,6 +71,9 @@ const VerifyEmail = () => {
         console.error('Verification error:', error);
         setStatus('error');
         setMessage('An error occurred during verification. Please try again.');
+        setErrorDetails({
+          error: error.message
+        });
       }
     };
     
@@ -109,6 +128,28 @@ const VerifyEmail = () => {
     }
   };
   
+  // Debug view for development mode
+  // const DebugInfo = () => {
+  //   if (process.env.NODE_ENV === 'production') return null;
+    
+  //   return (
+  //     <div className={styles.debug}>
+  //       <h4>Debug Information</h4>
+  //       <p>Status: {status}</p>
+  //       <p>Token: {token ? `${token.substring(0, 10)}...` : 'none'}</p>
+  //       <p>Verification attempted: {verificationAttempted.current ? 'yes' : 'no'}</p>
+  //       <p>Session Storage:</p>
+  //       <ul>
+  //         <li>pendingVerificationEmail: {sessionStorage.getItem('pendingVerificationEmail') || 'none'}</li>
+  //       </ul>
+        
+  //       {errorDetails && (
+  //         <pre>{JSON.stringify(errorDetails, null, 2)}</pre>
+  //       )}
+  //     </div>
+  //   );
+  // };
+  
   return (
     <div className={styles.container}>
       <div className={`${styles.card} ${styles[status]}`}>
@@ -120,12 +161,7 @@ const VerifyEmail = () => {
         
         <p className={styles.message}>{message}</p>
         
-        {/* Show raw response data in development for debugging */}
-        {process.env.NODE_ENV !== 'production' && responseData && (
-          <div className={styles.debug}>
-            <pre>{JSON.stringify(responseData, null, 2)}</pre>
-          </div>
-        )}
+        {/* <DebugInfo /> */}
         
         <div className={styles.buttons}>
           {status === 'success' && (
