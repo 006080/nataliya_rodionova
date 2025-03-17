@@ -92,7 +92,10 @@ function Collaboration() {
             ) : (
                 <div className={styles.folderGrid}>
                     {loading ? (
+                        <div className={styles.loadingContainer}>
                         <Loader />
+                        <p className={styles.loadingText}>Please wait, images are loading...</p>
+                    </div>
                     ) : (
                         Object.entries(folders).map(([folderName, images]) =>
                             folderName !== 'reviews' && (
