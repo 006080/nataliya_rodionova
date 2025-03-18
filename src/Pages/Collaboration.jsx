@@ -17,7 +17,7 @@ function Collaboration() {
         async function fetchFolders() {
             try {
                 setLoading(true);
-                const res = await fetch('http://localhost:4000/api/cloudinary-folders');
+                const res = await fetch('http://nataliyarodionova.com/api/cloudinary-folders');
                 const data = await res.json();
                 if (data.error) {
                     console.error(data.error);
