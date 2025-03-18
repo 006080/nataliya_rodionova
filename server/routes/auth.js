@@ -151,7 +151,12 @@ router.post('/api/auth/login', loginLimiter, trackLoginAttempts, async (req, res
     console.log('Login successful for user:', email);
     
     // Generate tokens
-    const { accessToken, refreshToken } = generateTokens(user._id);
+    const { accessToken, refreshToken } = generateTokens(user._id, {
+      name: user.name,
+      email: user.email,
+      emailVerified: user.emailVerified,
+      role: user.role
+    });
     
     // Store refresh token in httpOnly cookie
     res.cookie('refreshToken', refreshToken, {
@@ -213,7 +218,12 @@ router.post('/api/auth/refresh-token', refreshTokenLimiter, async (req, res) => 
     }
     
     // Generate new tokens
-    const tokens = generateTokens(user._id);
+    const tokens = generateTokens(user._id, {
+      name: user.name,
+      email: user.email,
+      emailVerified: user.emailVerified,
+      role: user.role
+    });
     
     // Update refresh token cookie
     res.cookie('refreshToken', tokens.refreshToken, {
@@ -281,6 +291,107 @@ const registerLimiter = rateLimit({
   message: { error: 'Too many accounts created. Please try again later.' },
 });
 
+// router.post('/api/auth/register', registerLimiter, async (req, res) => {
+//   try {
+//     const { name, email, password } = req.body;
+    
+//     // Validate input
+//     if (!name || !email || !password) {
+//       return res.status(400).json({ error: 'All fields are required.' });
+//     }
+    
+//     // Check email format
+//     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+//     if (!emailRegex.test(email)) {
+//       return res.status(400).json({ error: 'Invalid email format.' });
+//     }
+    
+//     // Check password strength
+//     if (password.length < 8) {
+//       return res.status(400).json({ error: 'Password must be at least 8 characters.' });
+//     }
+    
+//     // Check if email already exists
+//     const existingUser = await User.findOne({ email });
+//     if (existingUser) {
+//       return res.status(400).json({ error: 'Email already in use.' });
+//     }
+    
+//     // Hash password
+//     const salt = await bcrypt.genSalt(10);
+//     const hashedPassword = await bcrypt.hash(password, salt);
+
+
+
+//               // Generate email verification token
+//               const { token, hashedToken } = generateVerificationToken();
+    
+//                   // Create user with verification token
+//               const newUser = new User({
+//                 name,
+//                 email,
+//                 password: hashedPassword,
+//                 role: 'customer',
+//                 registeredAt: new Date(),
+//                 registrationIp: req.ip,
+//                 emailVerificationToken: hashedToken,
+//                 emailVerificationExpires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+//               });
+
+//     // Create user
+//     // const newUser = new User({
+//     //   name,
+//     //   email,
+//     //   password: hashedPassword,
+//     //   role: 'customer', // Default role
+//     //   registeredAt: new Date(),
+//     //   registrationIp: req.ip,
+//     // });
+    
+//     await newUser.save();
+
+
+//                 // Send verification email
+//                 try {
+//                   await sendVerificationEmail(email, name, token);
+//                   console.log('Verification email sent to:', email);
+//                 } catch (emailError) {
+//                   console.error('Error sending verification email:', emailError);
+//                   // Continue with registration even if email fails
+//                 }
+    
+//     // Generate tokens
+//     const { accessToken, refreshToken } = generateTokens(newUser._id);
+    
+//     // Store refresh token in httpOnly cookie
+//     res.cookie('refreshToken', refreshToken, {
+//       httpOnly: true,
+//       secure: process.env.NODE_ENV === 'production',
+//       sameSite: 'strict',
+//       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+//     });
+    
+//     // Return access token and user info
+//     res.status(201).json({
+//       accessToken,
+//       user: {
+//         id: newUser._id,
+//         name: newUser.name,
+//         email: newUser.email,
+//         role: newUser.role,
+//         emailVerified: newUser.emailVerified,    // Add emailVerified field to response
+//       },
+//       message: 'Registration successful. Please verify your email address.',
+//     });
+//   } catch (error) {
+//     console.error('Registration error:', error);
+//     res.status(500).json({ error: 'Internal server error.' });
+//   }
+// });
+
+
+// Update your register route in server/routes/auth.js
+
 router.post('/api/auth/register', registerLimiter, async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -311,47 +422,39 @@ router.post('/api/auth/register', registerLimiter, async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-
-
-              // Generate email verification token
-              const { token, hashedToken } = generateVerificationToken();
+    // Generate email verification token
+    const { token, hashedToken } = generateVerificationToken();
     
-                  // Create user with verification token
-              const newUser = new User({
-                name,
-                email,
-                password: hashedPassword,
-                role: 'customer',
-                registeredAt: new Date(),
-                registrationIp: req.ip,
-                emailVerificationToken: hashedToken,
-                emailVerificationExpires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
-              });
+    // Create user with verification token
+    const newUser = new User({
+      name,
+      email,
+      password: hashedPassword,
+      role: 'customer',
+      registeredAt: new Date(),
+      registrationIp: req.ip,
+      emailVerificationToken: hashedToken,
+      emailVerificationExpires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+    });
 
-    // Create user
-    // const newUser = new User({
-    //   name,
-    //   email,
-    //   password: hashedPassword,
-    //   role: 'customer', // Default role
-    //   registeredAt: new Date(),
-    //   registrationIp: req.ip,
-    // });
-    
     await newUser.save();
 
-
-                // Send verification email
-                try {
-                  await sendVerificationEmail(email, name, token);
-                  console.log('Verification email sent to:', email);
-                } catch (emailError) {
-                  console.error('Error sending verification email:', emailError);
-                  // Continue with registration even if email fails
-                }
+    // Send verification email
+    try {
+      await sendVerificationEmail(email, name, token);
+      console.log('Verification email sent to:', email);
+    } catch (emailError) {
+      console.error('Error sending verification email:', emailError);
+      // Continue with registration even if email fails
+    }
     
-    // Generate tokens
-    const { accessToken, refreshToken } = generateTokens(newUser._id);
+    // Generate tokens with full user data
+    const { accessToken, refreshToken } = generateTokens(newUser._id, {
+      name: newUser.name,
+      email: newUser.email,
+      emailVerified: newUser.emailVerified,
+      role: newUser.role
+    });
     
     // Store refresh token in httpOnly cookie
     res.cookie('refreshToken', refreshToken, {
@@ -369,7 +472,7 @@ router.post('/api/auth/register', registerLimiter, async (req, res) => {
         name: newUser.name,
         email: newUser.email,
         role: newUser.role,
-        emailVerified: newUser.emailVerified,    // Add emailVerified field to response
+        emailVerified: newUser.emailVerified,
       },
       message: 'Registration successful. Please verify your email address.',
     });

@@ -12,17 +12,67 @@ const {
 } = process.env;
 
 // Generate tokens
-export const generateTokens = (userId) => {
-  const accessToken = jwt.sign({ sub: userId }, JWT_ACCESS_SECRET, {
+// export const generateTokens = (userId) => {
+//   const accessToken = jwt.sign({ sub: userId }, JWT_ACCESS_SECRET, {
+//     expiresIn: JWT_ACCESS_EXPIRES,
+//   });
+  
+//   const refreshToken = jwt.sign({ sub: userId }, JWT_REFRESH_SECRET, {
+//     expiresIn: JWT_REFRESH_EXPIRES,
+//   });
+  
+//   return { accessToken, refreshToken };
+// };
+// export const generateTokens = (userId, user) => {
+//   // Create a payload that includes ALL necessary user data
+//   const payload = {
+//     sub: userId,
+//     // Include other essential user data
+//     name: user.name || '',
+//     email: user.email || '',
+//     emailVerified: user.emailVerified || false,
+//     role: user.role || 'customer'
+//   };
+
+//   const accessToken = jwt.sign(payload, JWT_ACCESS_SECRET, {
+//     expiresIn: JWT_ACCESS_EXPIRES,
+//   });
+  
+//   const refreshToken = jwt.sign(payload, JWT_REFRESH_SECRET, {
+//     expiresIn: JWT_REFRESH_EXPIRES,
+//   });
+  
+//   return { accessToken, refreshToken };
+// };
+
+// server/middleware/auth.js - Update the generateTokens function
+
+// Generate tokens with complete user data in the payload
+export const generateTokens = (userId, user = {}) => {
+  // Create a payload with better error handling
+  // Make sure user is always at least an empty object
+  const userData = user || {};
+  
+  const payload = {
+    sub: userId,
+    // Include other essential user data with fallbacks
+    name: userData.name || '',
+    email: userData.email || '',
+    emailVerified: userData.emailVerified || false,
+    role: userData.role || 'customer'
+  };
+
+  const accessToken = jwt.sign(payload, JWT_ACCESS_SECRET, {
     expiresIn: JWT_ACCESS_EXPIRES,
   });
   
-  const refreshToken = jwt.sign({ sub: userId }, JWT_REFRESH_SECRET, {
+  const refreshToken = jwt.sign(payload, JWT_REFRESH_SECRET, {
     expiresIn: JWT_REFRESH_EXPIRES,
   });
   
   return { accessToken, refreshToken };
 };
+
 
 // Verify JWT token
 export const verifyToken = (token, secret) => {
@@ -76,7 +126,7 @@ export const loginLimiter = rateLimit({
 
 export const refreshTokenLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 10, // 10 requests per IP
+  max: 60, // 10 requests per IP
   standardHeaders: true, 
   legacyHeaders: false,
   message: { error: 'Too many token refresh attempts. Please try again later.' },

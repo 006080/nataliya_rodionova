@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Nav from "./Nav";
 import logo from "../src/assets/Logo.webp";
@@ -18,8 +18,26 @@ const Header = () => {
   const { cartItems } = useCart();
   const { user, isAuthenticated, logout } = useAuth();
 
+  const [userData, setUserData] = useState({ name: '', email: '' });
+
   const navRef = useOutsideClick(() => openMenu(false))
   const userMenuRef = useOutsideClick(() => setUserMenuOpen(false));
+
+  useEffect(() => {
+    if (user && user.name && user.email) {
+      setUserData({ name: user.name, email: user.email });
+    } else if (isAuthenticated) {
+      // Try to get user data from localStorage if not in context
+      try {
+        const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+        if (storedUser && storedUser.name && storedUser.email) {
+          setUserData({ name: storedUser.name, email: storedUser.email });
+        }
+      } catch (e) {
+        console.error('Error parsing user data from localStorage:', e);
+      }
+    }
+  }, [user, isAuthenticated]);
 
   // Check if we're on the Contacts page
   // const isContactPage = window.location.pathname === "/contacts";
@@ -106,8 +124,8 @@ const Header = () => {
                 {isAuthenticated ? (
                   <>
                     <div className={styles.userInfo}>
-                      <p>Hello, {user.name}</p>
-                      <span>{user.email}</span>
+                      <p>Hello, {userData.name}</p>
+                      <span>{userData.email}</span>
                     </div>
                     <ul>
                       <li onClick={() => { navigate('/profile'); setUserMenuOpen(false); }}>My Profile</li>
