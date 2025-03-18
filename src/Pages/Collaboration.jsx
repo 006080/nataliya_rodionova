@@ -13,11 +13,18 @@ function Collaboration() {
     const [fullscreenImage, setFullscreenImage] = useState(null);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
+    const apiUrl = process.env.REACT_APP_API_BASE_URL;
+
     useEffect(() => {
         async function fetchFolders() {
+            if (!apiUrl) {
+                console.error("API base URL is missing. Check your .env files.");
+                return;
+            }
+    
             try {
                 setLoading(true);
-                const res = await fetch('http://localhost:4000/api/cloudinary-folders');
+                const res = await fetch(`${apiUrl}/api/cloudinary-folders`);
                 const data = await res.json();
                 if (data.error) {
                     console.error(data.error);
@@ -33,29 +40,30 @@ function Collaboration() {
         fetchFolders();
     }, []);
 
-    // Modify Cloudinary URL to optimize images without resizing or blur effect
     const optimizeImage = (url) => {
         return url.replace('/upload/', `/upload/f_auto,q_90/`);
     };
 
-    // Handle folder selection
     const handleFolderClick = async (folderName) => {
         setLoading(true);
         setSelectedFolder(folderName);
 
-        if (folders[folderName] && folders[folderName].length > 0) {
-            const optimizedImages = folders[folderName].map(url => optimizeImage(url));
-            setImages(optimizedImages);
-            setFullscreenImage(optimizedImages[0]); // Show the first image in fullscreen
-            setCurrentImageIndex(0);
-        } else {
-            setImages([]);
+        try {
+            if (folders[folderName] && folders[folderName].length > 0) {
+                const optimizedImages = folders[folderName].map(url => optimizeImage(url));
+                setImages(optimizedImages);
+                setFullscreenImage(optimizedImages[0]);
+                setCurrentImageIndex(0);
+            } else {
+                setImages([]);
+            }
+        } catch (err) {
+            console.error('Error loading images:', err);
+        } finally {
+            setLoading(false);
         }
-
-        setLoading(false);
     };
 
-    // Show next image in fullscreen mode
     const showNextImage = () => {
         if (images.length > 0) {
             const nextIndex = (currentImageIndex + 1) % images.length;
@@ -93,16 +101,16 @@ function Collaboration() {
                 <div className={styles.folderGrid}>
                     {loading ? (
                         <div className={styles.loadingContainer}>
-                        <Loader />
-                        <p className={styles.loadingText}>Please wait, images are loading...</p>
-                    </div>
+                            <Loader />
+                            <p className={styles.loadingText}>Please wait, images are loading...</p>
+                        </div>
                     ) : (
                         Object.entries(folders).map(([folderName, images]) =>
                             folderName !== 'reviews' && (
                                 <div key={folderName} className={styles.folderItem} onClick={() => handleFolderClick(folderName)}>
                                     {images.length > 0 && (
                                         <img
-                                            src={optimizeImage(images[0])} // No resizing here, just optimization
+                                            src={optimizeImage(images[0])}
                                             alt={folderName}
                                             className={styles.folderImage}
                                             loading="lazy"
