@@ -211,7 +211,7 @@ app.get('/api/cloudinary-images', async (req, res) => {
     }
 });
 
-// Cloudinary Folders Route
+
 app.get('/api/cloudinary-folders', async (req, res) => {
     try {
         const { folders } = await cloudinary.api.root_folders();

@@ -90,7 +90,9 @@
   }
   
   .selectedFolderTitle {
-  font-size: 22px;
+    font-family: "Playfair Display", serif;
+    font-weight: 600;
+  font-size: 28px;
   margin-bottom: 20px;
   }
   
