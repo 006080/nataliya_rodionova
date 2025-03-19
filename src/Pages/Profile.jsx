@@ -147,7 +147,7 @@ const Profile = () => {
             </tbody>
           </table>
         ) : (
-          <p style={{ marginTop: '1rem' }}>You haven't placed any orders yet.</p>
+          <p style={{ marginTop: '1rem' }}>You haven&apos;t placed any orders yet.</p>
         )}
       </div>
     </div>

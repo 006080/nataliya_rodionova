@@ -20,6 +20,9 @@ import RegisterForm from "../components/RegisterForm";
 import ForgotPasswordForm from "../components/ForgotPasswordForm";
 import NotFoundPage from "./NotFoundPage";
 import VerifyEmail from "../components/VerifyEmail";
+import ResetPasswordForm from "../components/ResetPasswordForm";
+import MyOrders from "./Pages/MyOrders";
+import OrderDetail from "./Pages/OrderDetail";
 
 
 const Unauthorized = () => (
@@ -45,6 +48,7 @@ const AppContent = () => {
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="/forgot-password" element={<ForgotPasswordForm />} />
         <Route path="/verify-email/:token" element={<VerifyEmail />} />
+        <Route path="/reset-password/:token" element={<ResetPasswordForm />} />
 
         <Route style={{ position: 'relative' }} path="/ourservice" element={<OurService />} />
         <Route style={{ position: 'relative' }} path="/reviews" element={<Reviews />} />
@@ -64,6 +68,24 @@ const AppContent = () => {
                   </ProtectedRoute>
                 } 
               />
+
+              <Route 
+                  path="/orders" 
+                  element={
+                    <ProtectedRoute>
+                      <MyOrders />
+                    </ProtectedRoute>
+                  } 
+                />
+
+                <Route 
+                  path="/orders/:id" 
+                  element={
+                    <ProtectedRoute>
+                      <OrderDetail />
+                    </ProtectedRoute>
+                  } 
+                />
               
               {/* <Route 
                 path="/checkout"
@@ -75,14 +97,14 @@ const AppContent = () => {
                 } 
               /> */}
               
-              <Route 
+              {/* <Route 
                 path="/orders/:orderId" 
                 element={
                   <ProtectedRoute>
                     <OrderStatus />
                   </ProtectedRoute>
                 } 
-              />
+              /> */}
               
               {/* Admin routes (require admin role) */}
               {/* <Route 

@@ -10,7 +10,7 @@ import {
   trackLoginAttempts 
 } from '../middleware/auth.js';
 import rateLimit from 'express-rate-limit';
-import { generateVerificationToken, sendVerificationEmail } from '../services/emailVerification.js';
+import { generateVerificationToken, sendPasswordResetEmail, sendVerificationEmail } from '../services/emailVerification.js';
 
 const router = express.Router();
 
@@ -291,106 +291,6 @@ const registerLimiter = rateLimit({
   message: { error: 'Too many accounts created. Please try again later.' },
 });
 
-// router.post('/api/auth/register', registerLimiter, async (req, res) => {
-//   try {
-//     const { name, email, password } = req.body;
-    
-//     // Validate input
-//     if (!name || !email || !password) {
-//       return res.status(400).json({ error: 'All fields are required.' });
-//     }
-    
-//     // Check email format
-//     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-//     if (!emailRegex.test(email)) {
-//       return res.status(400).json({ error: 'Invalid email format.' });
-//     }
-    
-//     // Check password strength
-//     if (password.length < 8) {
-//       return res.status(400).json({ error: 'Password must be at least 8 characters.' });
-//     }
-    
-//     // Check if email already exists
-//     const existingUser = await User.findOne({ email });
-//     if (existingUser) {
-//       return res.status(400).json({ error: 'Email already in use.' });
-//     }
-    
-//     // Hash password
-//     const salt = await bcrypt.genSalt(10);
-//     const hashedPassword = await bcrypt.hash(password, salt);
-
-
-
-//               // Generate email verification token
-//               const { token, hashedToken } = generateVerificationToken();
-    
-//                   // Create user with verification token
-//               const newUser = new User({
-//                 name,
-//                 email,
-//                 password: hashedPassword,
-//                 role: 'customer',
-//                 registeredAt: new Date(),
-//                 registrationIp: req.ip,
-//                 emailVerificationToken: hashedToken,
-//                 emailVerificationExpires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
-//               });
-
-//     // Create user
-//     // const newUser = new User({
-//     //   name,
-//     //   email,
-//     //   password: hashedPassword,
-//     //   role: 'customer', // Default role
-//     //   registeredAt: new Date(),
-//     //   registrationIp: req.ip,
-//     // });
-    
-//     await newUser.save();
-
-
-//                 // Send verification email
-//                 try {
-//                   await sendVerificationEmail(email, name, token);
-//                   console.log('Verification email sent to:', email);
-//                 } catch (emailError) {
-//                   console.error('Error sending verification email:', emailError);
-//                   // Continue with registration even if email fails
-//                 }
-    
-//     // Generate tokens
-//     const { accessToken, refreshToken } = generateTokens(newUser._id);
-    
-//     // Store refresh token in httpOnly cookie
-//     res.cookie('refreshToken', refreshToken, {
-//       httpOnly: true,
-//       secure: process.env.NODE_ENV === 'production',
-//       sameSite: 'strict',
-//       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-//     });
-    
-//     // Return access token and user info
-//     res.status(201).json({
-//       accessToken,
-//       user: {
-//         id: newUser._id,
-//         name: newUser.name,
-//         email: newUser.email,
-//         role: newUser.role,
-//         emailVerified: newUser.emailVerified,    // Add emailVerified field to response
-//       },
-//       message: 'Registration successful. Please verify your email address.',
-//     });
-//   } catch (error) {
-//     console.error('Registration error:', error);
-//     res.status(500).json({ error: 'Internal server error.' });
-//   }
-// });
-
-
-// Update your register route in server/routes/auth.js
 
 router.post('/api/auth/register', registerLimiter, async (req, res) => {
   try {
@@ -663,7 +563,10 @@ router.post('/api/auth/forgot-password', async (req, res) => {
     
     // Always return success, even if user is not found (security best practice)
     if (!user) {
-      return res.status(200).json({ message: 'If your email exists in our system, you will receive a password reset link.' });
+      console.log('Password reset requested for non-existent email:', email);
+      return res.status(200).json({ 
+        message: 'If your email exists in our system, you will receive a password reset link.' 
+      });
     }
     
     // Generate reset token
@@ -682,12 +585,17 @@ router.post('/api/auth/forgot-password', async (req, res) => {
     await user.save();
     
     // Send email with reset link
-    // TODO: Implement email sending
-    // For now, we'll just log the token for testing
-    console.log('Password reset token:', resetToken);
-    console.log('Reset link:', `http://localhost:3000/reset-password/${resetToken}`);
+    try {
+      await sendPasswordResetEmail(user.email, user.name, resetToken);
+      console.log('Password reset email sent to:', user.email);
+    } catch (emailError) {
+      console.error('Error sending password reset email:', emailError);
+      // Still return success to prevent user enumeration, but log the error
+    }
     
-    res.status(200).json({ message: 'If your email exists in our system, you will receive a password reset link.' });
+    res.status(200).json({ 
+      message: 'If your email exists in our system, you will receive a password reset link.' 
+    });
   } catch (error) {
     console.error('Password reset request error:', error);
     res.status(500).json({ error: 'Internal server error.' });

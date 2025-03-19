@@ -103,7 +103,57 @@ export const sendVerificationEmail = async (email, name, token) => {
   }
 };
 
+
+/**
+ * Send password reset email with link
+ * @param {string} email - Recipient email
+ * @param {string} name - Recipient name
+ * @param {string} token - Reset token
+ * @returns {Promise} Email sending result
+ */
+export const sendPasswordResetEmail = async (email, name, token) => {
+  try {
+    const frontendUrl = process.env.NODE_ENV === 'production' 
+      ? process.env.FRONTEND_URL_PROD 
+      : process.env.FRONTEND_URL_LOCAL;
+      
+    const resetUrl = `${frontendUrl}/reset-password/${token}`;
+    
+    console.log('Sending password reset email with URL:', resetUrl);
+    
+    const mailOptions = {
+      from: `"VARONA" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: 'Reset Your Password',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2>Password Reset</h2>
+          <p>Hi ${name},</p>
+          <p>We received a request to reset your password. Click the button below to create a new password:</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${resetUrl}" style="background-color: #4CAF50; color: white; padding: 12px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">
+              Reset Password
+            </a>
+          </div>
+          <p>Or copy and paste this link in your browser:</p>
+          <p>${resetUrl}</p>
+          <p>This link will expire in 1 hour.</p>
+          <p>If you didn't request a password reset, you can safely ignore this email.</p>
+        </div>
+      `
+    };
+    
+    const result = await transporter.sendMail(mailOptions);
+    console.log('Password reset email sent successfully:', result.messageId);
+    return result;
+  } catch (error) {
+    console.error('Error sending password reset email:', error);
+    throw error;
+  }
+};
+
 export default {
   generateVerificationToken,
-  sendVerificationEmail
+  sendVerificationEmail,
+  sendPasswordResetEmail
 };

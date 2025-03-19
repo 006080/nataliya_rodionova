@@ -1,6 +1,6 @@
 // src/components/ResetPasswordForm.js
-import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 
 const ResetPasswordForm = () => {
   const [password, setPassword] = useState('');
@@ -8,11 +8,11 @@ const ResetPasswordForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  
-  const navigate = useNavigate();
+  const [tokenValid, setTokenValid] = useState(null);
   const { token } = useParams();
+  const navigate = useNavigate();
   
-  // Password strength checker
+  // Password strength checker (same as RegisterForm)
   const checkPasswordStrength = (password) => {
     let strength = 0;
     
@@ -30,6 +30,13 @@ const ResetPasswordForm = () => {
   };
   
   const passwordStrength = checkPasswordStrength(password);
+  
+  useEffect(() => {
+    if (!token) {
+      setError('Invalid reset link. No token provided.');
+      setTokenValid(false);
+    }
+  }, [token]);
   
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -72,23 +79,38 @@ const ResetPasswordForm = () => {
         throw new Error(data.error || 'Failed to reset password');
       }
       
-      setMessage('Your password has been reset successfully. You will be redirected to the login page.');
-      
+      setMessage('Your password has been reset successfully.');
       // Clear form
       setPassword('');
       setConfirmPassword('');
       
-      // Redirect to login page after a short delay
+      // Redirect to login after a short delay
       setTimeout(() => {
         navigate('/login');
       }, 3000);
+      
     } catch (error) {
       console.error('Password reset error:', error);
       setError(error.message);
+      setTokenValid(false);
     } finally {
       setIsSubmitting(false);
     }
   };
+  
+  if (tokenValid === false) {
+    return (
+      <div className="reset-password-container">
+        <h2>Reset Password</h2>
+        <div className="error-message">
+          {error || 'Invalid or expired reset link. Please request a new one.'}
+        </div>
+        <div className="login-link">
+          <a href="/forgot-password">Request a new password reset</a>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div className="reset-password-container">
@@ -173,9 +195,13 @@ const ResetPasswordForm = () => {
           className="reset-button"
           disabled={isSubmitting}
         >
-          {isSubmitting ? 'Resetting...' : 'Reset Password'}
+          {isSubmitting ? 'Resetting Password...' : 'Reset Password'}
         </button>
       </form>
+      
+      <div className="login-link">
+        Remember your password? <a href="/login">Login here</a>
+      </div>
     </div>
   );
 };
