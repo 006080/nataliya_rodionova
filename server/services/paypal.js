@@ -146,7 +146,9 @@ const createPayPalOrder = async (cartItems, measurements, deliveryDetails) => {
       currency: 'EUR',
       createdAt: new Date(),
       measurements,
-      deliveryDetails
+      deliveryDetails,
+      // Set initial fulfillment status based on PayPal status
+      fulfillmentStatus: 'Processing'
     });
     
     await newOrder.save();
@@ -223,9 +225,11 @@ const capturePayPalOrder = async (orderId) => {
         paymentDetails: data,
         updatedAt: new Date(),
         ...customerInfo,
-        ...shippingInfo
+        ...shippingInfo,
+        // Add fulfillment status if not already set
+        $setOnInsert: { fulfillmentStatus: 'Processing' }
       },
-      { new: true }
+      { new: true, upsert: false }
     );
     
     if (!updatedOrder) {
@@ -374,6 +378,8 @@ const cancelOrder = async (orderId, reason = 'Payment action not completed withi
         updatedAt: new Date(),
         cancelReason: reason,
         cancelledAt: new Date(),
+        // Also update fulfillment status
+        fulfillmentStatus: 'Cancelled',
         // Reset email sent flag to ensure cancellation email is sent
         emailSent: false
       },

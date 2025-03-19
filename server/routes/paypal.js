@@ -77,6 +77,16 @@ router.post("/api/payments", async (req, res) => {
       return res.status(500).json({ error: "Failed to create order" });
     }
 
+      // If user is authenticated, link order to user
+      if (req.user && req.user._id) {
+        await Order.findOneAndUpdate(
+          { paypalOrderId: order.id },
+          { user: req.user._id },
+          { new: true }
+        );
+        console.log(`Order ${order.id} linked to user ${req.user._id}`);
+      }
+
     res.json({ id: order.id });
   } catch (error) {
     console.error("Error creating order:", error);
@@ -100,6 +110,15 @@ router.post("/api/payments/:orderID/capture", async (req, res) => {
     
     // Capture the payment - email will be sent automatically if status changes
     const captureData = await capturePayPalOrder(orderID);
+
+    // If user is authenticated, ensure order is linked to their account
+    if (req.user && req.user._id) {
+      await Order.findOneAndUpdate(
+        { paypalOrderId: orderID, user: { $exists: false } },
+        { user: req.user._id },
+        { new: true }
+      );
+    }
     
     res.json(captureData);
   } catch (error) {
@@ -127,6 +146,19 @@ router.get("/api/payments/:orderID", async (req, res) => {
     if (!order) {
       return res.status(404).json({ error: "Order not found" });
     }
+
+     // If user is authenticated, ensure order is linked to their account
+    // But only if the order email matches the user's email
+    if (req.user && req.user._id && !order.user) {
+      const userEmail = req.user.email.toLowerCase();
+      const orderEmail = (order.customer?.email || order.deliveryDetails?.email || '').toLowerCase();
+      
+      if (userEmail === orderEmail) {
+        order.user = req.user._id;
+        await order.save();
+        console.log(`Order ${orderID} linked to user ${req.user._id}`);
+      }
+    }
     
     res.json({
       id: order.paypalOrderId,
@@ -138,7 +170,13 @@ router.get("/api/payments/:orderID", async (req, res) => {
       createdAt: order.createdAt,
       customer: order.customer,
       emailSent: order.emailSent,
-      emailSentAt: order.emailSentAt
+      emailSentAt: order.emailSentAt,
+      fulfillmentStatus: order.fulfillmentStatus,
+      trackingNumber: order.trackingNumber,
+      shippedAt: order.shippedAt,
+      deliveredAt: order.deliveredAt,
+      // Include user ID if order is linked to a user
+      user: order.user
     });
   } catch (error) {
     console.error("Error fetching order:", error);
@@ -196,6 +234,14 @@ router.patch("/api/payments/:orderID/status", async (req, res) => {
     
     // Update status and send notification email
     const updatedOrder = await updateOrderStatus(orderID, status);
+
+    // Handle fulfillment status based on payment status
+    if (status === 'COMPLETED' && updatedOrder.fulfillmentStatus === undefined) {
+      await Order.findByIdAndUpdate(
+        updatedOrder._id,
+        { fulfillmentStatus: 'Processing' }
+      );
+    }
     
     res.json({
       id: updatedOrder.paypalOrderId,
@@ -310,6 +356,12 @@ router.post("/api/payments/:orderID/cancel", async (req, res) => {
     
     // Cancel the order
     const cancelledOrder = await cancelOrder(orderID, reason);
+
+    // Update fulfillment status to match payment status
+    await Order.findByIdAndUpdate(
+      cancelledOrder._id,
+      { fulfillmentStatus: 'Cancelled' }
+    );
     
     res.json({
       id: cancelledOrder.paypalOrderId,

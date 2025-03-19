@@ -20,6 +20,7 @@ import productRoutes from './routes/product.js';
 import { initializeReminderSystem } from './services/paymentReminderService.js';
 import cookieParser from 'cookie-parser';
 import authRoutes from './routes/auth.js';
+import orderRoutes from './routes/order.js';
 
 
 dotenv.config({ path: './.env.local' });
@@ -309,6 +310,7 @@ app.get('/api/reviews', async (req, res) => {
 app.use(productRoutes);
 app.use(paypalRoutes);
 app.use(authRoutes);
+app.use(orderRoutes);
   
 
 
