@@ -130,19 +130,12 @@
 
   @media (max-width: 768px) {
 
-    h4 {
-      font-family: "Roboto Serif", serif;
-      font-size: 14px; 
-      font-style: italic;
-      font-weight: 400;
-    }
-  
-    h5 {
-      font-family: "Roboto Serif", serif;
-      font-size: 10px; 
-      font-style: italic;
-      font-weight: 400;
-    }
+    .folderGrid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 50px;
+      justify-content: center;
+      }
 
   }
 

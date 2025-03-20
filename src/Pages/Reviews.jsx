@@ -15,12 +15,17 @@ const Reviews = () => {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const response = await fetch('http://localhost:4000/api/reviews'); 
+        const apiUrl =
+          window.location.hostname === "localhost"
+            ? "http://localhost:4000/api/reviews"
+            : "https://nataliyarodionova.com/api/reviews";
+  
+        const response = await fetch(apiUrl);
         if (!response.ok) throw new Error("Failed to fetch reviews.");
         const data = await response.json();
         setReviews(data);
       } catch (err) {
-        setError("Failed to load reviews.");  // ✅ Set error if fetching fails
+        setError("Failed to load reviews.");
       }
     };
     fetchReviews();
