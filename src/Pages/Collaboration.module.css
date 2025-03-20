@@ -38,7 +38,7 @@
   .folderGrid {
   display: flex;
   flex-wrap: wrap;
-  gap: 200px;
+  gap: 120px;
   justify-content: center;
   }
   
@@ -68,9 +68,8 @@
   }
   
   .folderTitle {
-  
+    font-weight: 500;
   margin-top: 8px;
-  font-size: 24px;
   font-family: "Playfair Display", serif;
   }
   
@@ -81,6 +80,20 @@
   cursor: pointer;
   color: #000000;
   margin-bottom: 10px;
+  }
+
+  h4 {
+    font-family: "Roboto Serif", serif;
+    font-size: 18px; 
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  h5 {
+    font-family: "Roboto Serif", serif;
+    font-size: 14px; 
+    font-style: italic;
+    font-weight: 400;
   }
   
   .backButton:hover {
