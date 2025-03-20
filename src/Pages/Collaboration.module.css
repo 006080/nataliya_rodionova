@@ -127,3 +127,39 @@
   object-fit: contain;
   transition: opacity 0.3s ease-in-out;
   }
+
+  @media (max-width: 768px) {
+
+    h4 {
+      font-family: "Roboto Serif", serif;
+      font-size: 14px; 
+      font-style: italic;
+      font-weight: 400;
+    }
+  
+    h5 {
+      font-family: "Roboto Serif", serif;
+      font-size: 10px; 
+      font-style: italic;
+      font-weight: 400;
+    }
+
+  }
+
+  @media screen and (max-width: 1024px) {
+
+    h4 {
+      font-family: "Roboto Serif", serif;
+      font-size: 16px; 
+      font-style: italic;
+      font-weight: 400;
+    }
+  
+    h5 {
+      font-family: "Roboto Serif", serif;
+      font-size: 10px; 
+      font-style: italic;
+      font-weight: 400;
+    }
+
+  }
