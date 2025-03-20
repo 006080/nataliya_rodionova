@@ -1,6 +1,6 @@
+import { useState, useEffect } from 'react';
 import { Cloudinary } from '@cloudinary/url-gen';
 import { AdvancedVideo } from '@cloudinary/react';
-import { useState, useEffect } from 'react';
 import styles from "./Reviews.module.css";
 import Review from '../../components/Review';
 import SubmitModal from '../../components/SubmitModal';
@@ -10,49 +10,39 @@ const Reviews = () => {
   const [reviews, setReviews] = useState([]);
   const [loadingImages, setLoadingImages] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [error, setError] = useState(null);  // ✅ Added setError
 
-  // Fetch reviews from MongoDB
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const response = await fetch('http://localhost:4000/api/reviews'); // Adjust API URL if needed
+        const response = await fetch('http://localhost:4000/api/reviews'); 
         if (!response.ok) throw new Error("Failed to fetch reviews.");
-
         const data = await response.json();
         setReviews(data);
       } catch (err) {
-        console.error("Failed to load reviews.");
+        setError("Failed to load reviews.");  // ✅ Set error if fetching fails
       }
     };
-
     fetchReviews();
   }, []);
 
-  // Initialize Cloudinary instance
   const cld = new Cloudinary({
-    cloud: {
-      cloudName: 'dwenvtwyx',
-    },
+    cloud: { cloudName: 'dwenvtwyx' },
   });
 
-  // Fetch the video by its public ID
   const video = cld.video('Podium_be5hn5');
 
   const logo = cld.image('fashion-network-logo_apwgif');
   logo.format('webp').quality(80);
 
   const imagePublicIds = [
-    'green_cev8bm',
-    'capotto_iaam9k',
-    'pantaloni_loyblc',
-    'impermiabile_agbvg3',
-    'abito_h4xf2u'
+    'green_cev8bm', 'capotto_iaam9k', 'pantaloni_loyblc', 
+    'impermiabile_agbvg3', 'abito_h4xf2u'
   ];
 
-  // Function to handle image load completion
-  const handleImageLoad = () => {
-    setLoadingImages(false);
-  };
+  const handleImageLoad = () => setLoadingImages(false);
+  const handleOpenModal = () => setIsModalOpen(true);
+  const handleCloseModal = () => setIsModalOpen(false);
 
   return (
     <div>
@@ -61,17 +51,11 @@ const Reviews = () => {
       </div>
 
       <a href="https://de.fashionnetwork.com/fotogalerien/photos/Varona-by-Nataliya-Rodionova,33328.html" target="_blank" rel="noopener noreferrer">
-        <img
-          className={styles.fashionNetwork}
-          src={logo.toURL()}
-          alt="Fashion Podium"
-        />
+        <img className={styles.fashionNetwork} src={logo.toURL()} alt="Fashion Podium" />
       </a>
 
       <div className={styles.imageGallery}>
-        {loadingImages && (
-          <div className={styles.loader}>Loading images...</div>
-        )}
+        {loadingImages && <div className={styles.loader}>Loading images...</div>}
         {imagePublicIds.map((imageId, index) => {
           const image = cld.image(imageId);
           image.format('webp').quality(80);
@@ -90,6 +74,7 @@ const Reviews = () => {
 
       <section className={styles.review}>
         <h1 style={{ color: 'black' }}>Reviews:</h1>
+        {error && <div className={styles.error}>{error}</div>} {/* ✅ Display errors */}
         <div className={styles.reviewsList}>
           {reviews.map((review) => (
             <div key={review._id} className={styles.reviewItem}>
@@ -110,8 +95,9 @@ const Reviews = () => {
       </section>
 
       <div className={styles.overlay}>
-        {isModalOpen && <SubmitModal onClose={() => setIsModalOpen(false)} />}
-        <Review onSubmit={() => setIsModalOpen(true)} setReviews={setReviews} />
+        {isModalOpen && <SubmitModal onClose={handleCloseModal} />}
+        {/* ✅ Pass setError to Review */}
+        <Review onSubmit={handleOpenModal} setReviews={setReviews} setError={setError} />
       </div>
     </div>
   );

@@ -150,17 +150,24 @@
    
     h4 {
       font-family: "Roboto Serif", serif;
-      font-size: 14px; 
+      font-size: 12px; 
       font-style: italic;
       font-weight: 400;
     }
   
     h5 {
       font-family: "Roboto Serif", serif;
-      font-size: 12px; 
+      font-size: 10px; 
       font-style: italic;
       font-weight: 400;
     } 
+
+    .dataInfo {
+      font-family: "Roboto Serif", serif;
+      font-size: 10px; 
+      font-style: italic;
+      font-weight: 400; 
+    }
   }
 
   @media screen and (max-width: 1024px) {
