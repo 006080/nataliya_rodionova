@@ -81,6 +81,27 @@ button:hover {
   color: #000000;
 }
 
+.loader {
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  padding: 20px;
+}
+
+.loader::after {
+  content: " ⏳";
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { content: " ⏳"; }
+  25% { content: " ⏳."; }
+  50% { content: " ⏳.."; }
+  75% { content: " ⏳..."; }
+  100% { content: " ⏳"; }
+}
+
 @media (max-width: 768px) {
   .reviewComponent {
   margin-left: 15%;

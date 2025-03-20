@@ -7,8 +7,9 @@ import SubmitModal from '../../components/SubmitModal';
 import { FaStar } from 'react-icons/fa';
 
 const Reviews = () => {
-  const [error, setError] = useState(null);
   const [reviews, setReviews] = useState([]);
+  const [loadingImages, setLoadingImages] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Fetch reviews from MongoDB
   useEffect(() => {
@@ -17,14 +18,14 @@ const Reviews = () => {
         const response = await fetch('http://localhost:4000/api/reviews'); // Adjust API URL if needed
         if (!response.ok) throw new Error("Failed to fetch reviews.");
 
-        const data = await response.json(); // Convert response to JSON
-        setReviews(data); // Store reviews in state
+        const data = await response.json();
+        setReviews(data);
       } catch (err) {
-        setError("Failed to load reviews.");
+        console.error("Failed to load reviews.");
       }
     };
 
-    fetchReviews(); // Call function on component mount
+    fetchReviews();
   }, []);
 
   // Initialize Cloudinary instance
@@ -48,10 +49,10 @@ const Reviews = () => {
     'abito_h4xf2u'
   ];
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const handleOpenModal = () => setIsModalOpen(true);
-  const handleCloseModal = () => setIsModalOpen(false);
+  // Function to handle image load completion
+  const handleImageLoad = () => {
+    setLoadingImages(false);
+  };
 
   return (
     <div>
@@ -68,12 +69,20 @@ const Reviews = () => {
       </a>
 
       <div className={styles.imageGallery}>
+        {loadingImages && (
+          <div className={styles.loader}>Loading images...</div>
+        )}
         {imagePublicIds.map((imageId, index) => {
           const image = cld.image(imageId);
           image.format('webp').quality(80);
           return (
             <div className={styles.imageContainer} key={index}>
-              <img src={image.toURL()} alt={`Cloudinary Image ${index}`} className={styles.fullScreenImage} />
+              <img 
+                src={image.toURL()} 
+                alt={`Cloudinary Image ${index}`} 
+                className={styles.fullScreenImage} 
+                onLoad={handleImageLoad} 
+              />
             </div>
           );
         })}
@@ -82,7 +91,6 @@ const Reviews = () => {
       <section className={styles.review}>
         <h1 style={{ color: 'black' }}>Reviews:</h1>
         <div className={styles.reviewsList}>
-          {error && <div className={styles.error}>{error}</div>}
           {reviews.map((review) => (
             <div key={review._id} className={styles.reviewItem}>
               <div className={styles.reviewHeader}>
@@ -102,8 +110,8 @@ const Reviews = () => {
       </section>
 
       <div className={styles.overlay}>
-        {isModalOpen && <SubmitModal onClose={handleCloseModal} />}
-        <Review onSubmit={handleOpenModal} setError={setError} setReviews={setReviews} />
+        {isModalOpen && <SubmitModal onClose={() => setIsModalOpen(false)} />}
+        <Review onSubmit={() => setIsModalOpen(true)} setReviews={setReviews} />
       </div>
     </div>
   );
