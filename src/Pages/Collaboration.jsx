@@ -108,12 +108,12 @@ function Collaboration() {
                                     <h3 style={{fontSize:'24px'}} className={styles.folderTitle}>{folderName}</h3>
                             <AdvancedImage className={styles.folderImage} cldImg={getImage(data.images[0])} alt={folderName} />
                             <div className={styles.artistInfo}>
-                                {data.photographer && <h4><strong>Photographer: </strong>{data.photographer}</h4>}
-                                {data.model && <h4><strong>Model: </strong>{data.model}</h4>}
-                                {data.stylist && <h4><strong>Stylist: </strong>{data.stylist}</h4>}
-                                {data.makeupArtist && <h4><strong>Makeup Artist: </strong>{data.makeupArtist}</h4>}
-                                {data.designer && <h4><strong>Fashion Designer: </strong>{data.designer}</h4>}
-                                {data.data && <h5>{data.data}</h5>}
+                                {data.photographer && <h4 className={styles.info}><strong>Photographer: </strong>{data.photographer}</h4>}
+                                {data.model && <h4 className={styles.info}><strong>Model: </strong>{data.model}</h4>}
+                                {data.stylist && <h4 className={styles.info}><strong>Stylist: </strong>{data.stylist}</h4>}
+                                {data.makeupArtist && <h4 className={styles.info}><strong>Makeup Artist: </strong>{data.makeupArtist}</h4>}
+                                {data.designer && <h4 className={styles.info}><strong>Fashion Designer: </strong>{data.designer}</h4>}
+                                {data.data && <h5 className={styles.dataInfo}>{data.data}</h5>}
                             </div>
                     
                         </div>
