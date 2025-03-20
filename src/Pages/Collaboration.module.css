@@ -146,18 +146,35 @@
 
   }
 
-  @media screen and (max-width: 1024px) {
-
+  @media (min-width: 768px) and (max-width: 1024px) {
+   
     h4 {
       font-family: "Roboto Serif", serif;
-      font-size: 16px; 
+      font-size: 14px; 
       font-style: italic;
       font-weight: 400;
     }
   
     h5 {
       font-family: "Roboto Serif", serif;
-      font-size: 10px; 
+      font-size: 12px; 
+      font-style: italic;
+      font-weight: 400;
+    } 
+  }
+
+  @media screen and (max-width: 1024px) {
+
+    h4 {
+      font-family: "Roboto Serif", serif;
+      font-size: 14px; 
+      font-style: italic;
+      font-weight: 400;
+    }
+  
+    h5 {
+      font-family: "Roboto Serif", serif;
+      font-size: 12px; 
       font-style: italic;
       font-weight: 400;
     }
