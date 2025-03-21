@@ -10,23 +10,25 @@ const Reviews = () => {
   const [reviews, setReviews] = useState([]);
   const [loadingImages, setLoadingImages] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [error, setError] = useState(null);  // Error state added here
 
   useEffect(() => {
     const fetchReviews = async () => {
-      try {
-        const apiUrl =
-          window.location.hostname === "localhost"
-            ? "http://localhost:4000/api/reviews"
-            : "https://www.nataliyarodionova.com/api/reviews";
-  
-        const response = await fetch(apiUrl);
-        if (!response.ok) throw new Error("Failed to fetch reviews.");
+      const apiUrl =
+        window.location.hostname === "localhost"
+          ? "http://localhost:4000/api/reviews"
+          : "https://www.nataliyarodionova.com/api/reviews";
+
+      const response = await fetch(apiUrl);
+      
+      if (response.ok) {
         const data = await response.json();
         setReviews(data);
-      } catch (err) {
-        console.error("Error fetching reviews:", err);
+      } else {
+        setError("");  // Set error message if fetch fails
       }
     };
+
     fetchReviews();
   }, []);
 
@@ -44,7 +46,6 @@ const Reviews = () => {
     'impermiabile_agbvg3', 'abito_h4xf2u'
   ];
 
-  // Handle image load to toggle loading state
   const handleImageLoad = () => setLoadingImages(false);
   const handleOpenModal = () => setIsModalOpen(true);
   const handleCloseModal = () => setIsModalOpen(false);
@@ -64,18 +65,13 @@ const Reviews = () => {
         {imagePublicIds.map((imageId, index) => {
           const image = cld.image(imageId);
           image.format('webp').quality(80);
-          const imageURL = image.toURL();
-
-          // We use the image URL as the src for the images
           return (
             <div className={styles.imageContainer} key={index}>
               <img 
-                src={imageURL} 
+                src={image.toURL()} 
                 alt={`Cloudinary Image ${index}`} 
                 className={styles.fullScreenImage} 
                 onLoad={handleImageLoad} 
-                // Ensure images are cached by the browser
-                loading="lazy" // Use lazy loading to delay loading until the image is in the viewport
               />
             </div>
           );
@@ -84,6 +80,7 @@ const Reviews = () => {
 
       <section className={styles.review}>
         <h1 style={{ color: 'black' }}>Reviews:</h1>
+        {error && <div style={{ color: 'red' }}>{error}</div>}  {/* Display error here if there is one */}
         <div className={styles.reviewsList}>
           {reviews.map((review) => (
             <div key={review._id} className={styles.reviewItem}>
@@ -105,7 +102,7 @@ const Reviews = () => {
 
       <div className={styles.overlay}>
         {isModalOpen && <SubmitModal onClose={handleCloseModal} />}
-        <Review onSubmit={handleOpenModal} setReviews={setReviews} />
+        <Review onSubmit={handleOpenModal} setReviews={setReviews} setError={setError} />  {/* Pass setError here */}
       </div>
     </div>
   );
