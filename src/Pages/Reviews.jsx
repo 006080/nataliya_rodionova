@@ -18,7 +18,7 @@ const Reviews = () => {
         const apiUrl =
           window.location.hostname === "localhost"
             ? "http://localhost:4000/api/reviews"
-            : "https://nataliyarodionova.com/api/reviews";
+            : "https://www.nataliyarodionova.com/api/reviews";
   
         const response = await fetch(apiUrl);
         if (!response.ok) throw new Error("Failed to fetch reviews.");
