@@ -436,7 +436,7 @@ if (orderComplete) {
               <p>
                 {deliveryDetails.city}, {deliveryDetails.postalCode}
               </p>
-              <p>{getCountryName[deliveryDetails.country] || deliveryDetails.country}</p>
+              <p>{getCountryName(deliveryDetails.country)}</p>
               <p>Email: {deliveryDetails.email}</p>
               <p>Phone: {deliveryDetails.phone}</p>
               <button

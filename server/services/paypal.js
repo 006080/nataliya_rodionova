@@ -3,6 +3,7 @@ import Order from '../Models/Order.js';
 import { Buffer } from "node:buffer";
 import { sendOrderStatusEmail } from '../services/emailNotification.js';
 import { schedulePaymentReminders, cancelExistingReminders } from '../services/paymentReminderService.js';
+import { getCountryName } from '../../src/utils/countries.js';
 
 // In-memory cache for temporary orders 
 const tempOrderCache = new Map();
@@ -447,6 +448,13 @@ const persistOrderToDatabase = async (orderId) => {
     if (!customer.email && tempOrderData.deliveryDetails && tempOrderData.deliveryDetails.email) {
       customer.email = tempOrderData.deliveryDetails.email;
     }
+
+    // Convert country code to country name in delivery details
+    const deliveryDetails = { ...tempOrderData.deliveryDetails };
+    if (deliveryDetails && deliveryDetails.country) {
+      // Convert the country code to full country name
+      deliveryDetails.country = getCountryName(deliveryDetails.country);
+    }
     
     // User has interacted, create in database
     const newOrder = new Order({
@@ -457,7 +465,7 @@ const persistOrderToDatabase = async (orderId) => {
       currency: tempOrderData.currency || 'EUR',
       createdAt: new Date(),
       measurements: tempOrderData.measurements,
-      deliveryDetails: tempOrderData.deliveryDetails,
+      deliveryDetails: deliveryDetails,
       fulfillmentStatus: 'Processing',
       customer: Object.keys(customer).length > 0 ? customer : undefined
     });

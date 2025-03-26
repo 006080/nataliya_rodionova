@@ -1,4 +1,3 @@
-// server/routes/order.js
 import express from 'express';
 import Order from '../Models/Order.js';
 import { authenticate } from '../middleware/auth.js';
@@ -19,29 +18,7 @@ router.get('/api/orders', authenticate, async (req, res) => {
     }).sort({ createdAt: -1 });
 
     console.log(`Found ${orders.length} orders for user`);
-    
-    // Link any found orders by email to this user for future queries
-    // for (const order of orders) {
-    //   if (!order.user) {
-    //     order.user = req.user._id;
-    //     await order.save();
-    //     console.log(`Linked order ${order._id} to user ${req.user._id}`);
-    //   }
-    // }
-    //     //Link any unlinked orders to this user
-    //     let linkedCount = 0;
-    //     for (const order of orders) {
-    //       if (!order.user) {
-    //         order.user = req.user._id;
-    //         await order.save();
-    //         linkedCount++;
-    //         console.log(`Linked order ${order._id} to user ${req.user._id}`);
-    //       }
-    //     }
-        
-    //     if (linkedCount > 0) {
-    //       console.log(`Linked ${linkedCount} previously unlinked orders to user ${req.user._id}`);
-    //     }
+  
 
     const formattedOrders = orders.map(order => ({
       id: order._id,
