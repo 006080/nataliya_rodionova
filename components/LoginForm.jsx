@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../src/contexts/AuthContext';
-import verificationStyles from './LoginForm.module.css';
+import { useAuth } from '../src/contexts/AuthContext'; 
+import styles from './LoginForm.module.css';
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
@@ -11,6 +11,7 @@ const LoginForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [needsVerification, setNeedsVerification] = useState(false);
   const [verificationDetails, setVerificationDetails] = useState(null);
+  const [infoMessage, setInfoMessage] = useState('');
   
   const { login, authError, resendVerificationEmail } = useAuth();
   const navigate = useNavigate();
@@ -27,6 +28,25 @@ const LoginForm = () => {
       setRemember(true);
     }
   }, []);
+  
+  // Check for messages in location state
+  useEffect(() => {
+    if (location.state) {
+      // Show verification needed message
+      if (location.state.verificationNeeded) {
+        setInfoMessage(location.state.message || 'Please verify your email before logging in.');
+        setEmail(location.state.email || email); // Pre-fill email if provided
+      }
+      
+      // Show verification success message
+      if (location.state.verified) {
+        setInfoMessage(location.state.message || 'Your email has been verified! You can now log in.');
+      }
+      
+      // Clear location state after reading
+      window.history.replaceState({}, document.title);
+    }
+  }, [location, email]);
   
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -71,14 +91,17 @@ const LoginForm = () => {
         console.log('Email verification needed:', result.verificationDetails);
         setNeedsVerification(true);
         setVerificationDetails(result.verificationDetails);
+        setInfoMessage('');
       }
       // Handle other errors 
       else {
         setFormError(result.error || 'Login failed');
+        setInfoMessage('');
       }
     } catch (error) {
       console.error('Login submission error:', error);
       setFormError('An unexpected error occurred.');
+      setInfoMessage('');
     } finally {
       setIsSubmitting(false);
     }
@@ -97,7 +120,8 @@ const LoginForm = () => {
       const success = await resendVerificationEmail(email);
       
       if (success) {
-        alert('Verification email has been sent. Please check your inbox.');
+        setInfoMessage('Verification email has been sent. Please check your inbox.');
+        setNeedsVerification(false); // Hide the verification UI after sending
       }
     } catch (error) {
       console.error('Failed to resend verification:', error);
@@ -108,37 +132,43 @@ const LoginForm = () => {
   };
   
   // Debug information in development mode
-  const DebugInfo = () => {
-    if (process.env.NODE_ENV !== 'production' && verificationDetails) {
-      return (
-        <div style={{background: '#f5f5f5', padding: '5px', margin: '5px 0', fontSize: '12px'}}>
-          <h4>Verification Details</h4>
-          <pre>{JSON.stringify(verificationDetails, null, 2)}</pre>
-        </div>
-      );
-    }
-    return null;
-  };
+  // const DebugInfo = () => {
+  //   if (process.env.NODE_ENV !== 'production' && verificationDetails) {
+  //     return (
+  //       <div style={{background: '#f5f5f5', padding: '5px', margin: '5px 0', fontSize: '12px'}}>
+  //         <h4>Verification Details</h4>
+  //         <pre>{JSON.stringify(verificationDetails, null, 2)}</pre>
+  //       </div>
+  //     );
+  //   }
+  //   return null;
+  // };
   
   return (
-    <div className="login-container">
+    <div className={styles.loginContainer}>
       <h2>Login to Your Account</h2>
       
-      <DebugInfo />
+      {/* <DebugInfo /> */}
+      
+      {infoMessage && (
+        <div className={styles.infoMessage}>
+          {infoMessage}
+        </div>
+      )}
       
       {formError && (
-        <div className="error-message">
+        <div className={styles.errorMessage}>
           {formError}
         </div>
       )}
       
       {needsVerification && (
-        <div className={verificationStyles.verificationMessage}>
+        <div className={styles.verificationMessage}>
           <p>Please verify your email address before logging in.</p>
           <button 
             onClick={handleResendVerification}
             disabled={isSubmitting}
-            className={verificationStyles.resendButton}
+            className={styles.resendButton}
           >
             Resend Verification Email
           </button>
@@ -146,7 +176,7 @@ const LoginForm = () => {
       )}
       
       <form onSubmit={handleSubmit}>
-        <div className="form-group">
+        <div className={styles.formGroup}>
           <label htmlFor="email">Email</label>
           <input
             type="email"
@@ -159,7 +189,7 @@ const LoginForm = () => {
           />
         </div>
         
-        <div className="form-group">
+        <div className={styles.formGroup}>
           <label htmlFor="password">Password</label>
           <input
             type="password"
@@ -171,8 +201,8 @@ const LoginForm = () => {
           />
         </div>
         
-        <div className="form-options">
-          <div className="remember-me">
+        <div className={styles.formOptions}>
+          <div className={styles.rememberMe}>
             <input
               type="checkbox"
               id="remember"
@@ -183,21 +213,21 @@ const LoginForm = () => {
             <label htmlFor="remember">Remember me</label>
           </div>
           
-          <a href="/forgot-password" className="forgot-password">
+          <a href="/forgot-password" className={styles.forgotPassword}>
             Forgot Password?
           </a>
         </div>
         
         <button
           type="submit"
-          className="login-button"
+          className={styles.loginButton}
           disabled={isSubmitting}
         >
           {isSubmitting ? 'Logging in...' : 'Login'}
         </button>
       </form>
       
-      <div className="register-link">
+      <div className={styles.registerLink}>
         Don't have an account? <a href="/register">Register here</a>
       </div>
     </div>

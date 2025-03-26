@@ -1,13 +1,13 @@
 import PropTypes from "prop-types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTimes } from "@fortawesome/free-solid-svg-icons";
+import { faTimes, faPlus, faMinus } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom"; 
 import styles from "./CartSummary.module.css";
 import { useCart } from "./CartContext";
 import useOutsideClick from "../src/hooks/useOutsideClick";
 
 const CartSummary = ({ onClose }) => {
-  const { cartItems, removeFromCart } = useCart();
+  const { cartItems, removeFromCart, updateQuantity } = useCart();
   const cartRef = useOutsideClick(() => onClose());
 
   const totalItems = cartItems.reduce(
@@ -18,6 +18,26 @@ const CartSummary = ({ onClose }) => {
     (total, item) => total + item.price * item.quantity,
     0
   );
+
+  // Function to increase item quantity
+  const increaseQuantity = (item) => {
+    // Use ID if available, otherwise use name as identifier
+    const identifier = item.id || item.name;
+    updateQuantity(identifier, item.quantity + 1);
+  };
+
+  // Function to decrease item quantity
+  const decreaseQuantity = (item) => {
+    // Use ID if available, otherwise use name as identifier
+    const identifier = item.id || item.name;
+    
+    if (item.quantity > 1) {
+      updateQuantity(identifier, item.quantity - 1);
+    } else {
+      // Remove item if quantity would go below 1
+      removeFromCart(item);
+    }
+  };
 
   return (
     <div className={styles.cartSummary} ref={cartRef}>
@@ -36,7 +56,7 @@ const CartSummary = ({ onClose }) => {
         <>
           <div className={styles.itemList}>
             {cartItems.map((item) => (
-              <div key={item.name} className={styles.item}>
+              <div key={item.id || item.name} className={styles.item}>
                 <img
                   src={item.image}
                   alt={item.name}
@@ -52,15 +72,27 @@ const CartSummary = ({ onClose }) => {
                     {item.name}
                   </p>
                   <div style={{ lineHeight: "1" }}>
-                    <p
-                      style={{
-                        fontSize: "14px",
-                        fontStyle: "italic",
-                        fontWeight: "200",
-                      }}
-                    >
-                      Quantity: {item.quantity}
-                    </p>
+                    {/* Quantity controls */}
+                    <div className={styles.quantityControls}>
+                      <button 
+                        className={styles.quantityButton}
+                        onClick={() => decreaseQuantity(item)}
+                        aria-label="Decrease quantity"
+                      >
+                        <FontAwesomeIcon icon={faMinus} size="xs" />
+                      </button>
+                      
+                      <span className={styles.quantityValue}>{item.quantity}</span>
+                      
+                      <button 
+                        className={styles.quantityButton}
+                        onClick={() => increaseQuantity(item)}
+                        aria-label="Increase quantity"
+                      >
+                        <FontAwesomeIcon icon={faPlus} size="xs" />
+                      </button>
+                    </div>
+                    
                     <p
                       style={{
                         fontSize: "14px",
@@ -70,10 +102,11 @@ const CartSummary = ({ onClose }) => {
                     >
                       ${item.price}
                     </p>
+                    
                   </div>
                   <button
                     className={styles.removeButton}
-                    onClick={() => removeFromCart(item.name)}
+                    onClick={() => removeFromCart(item)}
                   >
                     Remove
                   </button>

@@ -11,41 +11,6 @@ const {
   JWT_REFRESH_EXPIRES = '7d',
 } = process.env;
 
-// Generate tokens
-// export const generateTokens = (userId) => {
-//   const accessToken = jwt.sign({ sub: userId }, JWT_ACCESS_SECRET, {
-//     expiresIn: JWT_ACCESS_EXPIRES,
-//   });
-  
-//   const refreshToken = jwt.sign({ sub: userId }, JWT_REFRESH_SECRET, {
-//     expiresIn: JWT_REFRESH_EXPIRES,
-//   });
-  
-//   return { accessToken, refreshToken };
-// };
-// export const generateTokens = (userId, user) => {
-//   // Create a payload that includes ALL necessary user data
-//   const payload = {
-//     sub: userId,
-//     // Include other essential user data
-//     name: user.name || '',
-//     email: user.email || '',
-//     emailVerified: user.emailVerified || false,
-//     role: user.role || 'customer'
-//   };
-
-//   const accessToken = jwt.sign(payload, JWT_ACCESS_SECRET, {
-//     expiresIn: JWT_ACCESS_EXPIRES,
-//   });
-  
-//   const refreshToken = jwt.sign(payload, JWT_REFRESH_SECRET, {
-//     expiresIn: JWT_REFRESH_EXPIRES,
-//   });
-  
-//   return { accessToken, refreshToken };
-// };
-
-// server/middleware/auth.js - Update the generateTokens function
 
 // Generate tokens with complete user data in the payload
 export const generateTokens = (userId, user = {}) => {
@@ -117,7 +82,7 @@ export const authenticate = async (req, res, next) => {
 
 // Rate limiters
 export const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: 1 * 60 * 1000, // 15 minutes
   max: 5, // 5 requests per IP
   standardHeaders: true,
   legacyHeaders: false,

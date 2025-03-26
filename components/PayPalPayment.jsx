@@ -126,6 +126,71 @@ function PayPalPayment({
     }));
   };
 
+  // 23.03.2025 
+  // Function to check if user has interacted with PayPal
+  // const checkUserInteraction = async (orderId) => {
+  //   try {
+  //     // Wait a short time to allow PayPal popup interaction
+  //     await new Promise(resolve => setTimeout(resolve, 1000));
+      
+  //     const response = await fetch(
+  //       `${getApiUrl()}/api/payments/${orderId}/check-interaction`,
+  //       {
+  //         method: 'POST',
+  //         headers: { 'Content-Type': 'application/json' },
+  //       }
+  //     );
+      
+  //     if (!response.ok) {
+  //       console.error(`Failed to check interaction: ${response.status}`);
+  //       return false;
+  //     }
+      
+  //     const data = await response.json();
+  //     return data.exists || data.created || false;
+  //   } catch (error) {
+  //     console.error('Error checking user interaction:', error);
+  //     return false;
+  //   }
+  // };
+
+  // Function to check if user has interacted with PayPal
+const checkUserInteraction = async (orderId) => {
+  try {
+    // Wait a short time to allow PayPal popup interaction
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    const response = await fetch(
+      `${getApiUrl()}/api/payments/${orderId}/check-interaction`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
+    
+    if (!response.ok) {
+      console.error(`Failed to check interaction: ${response.status}`);
+      return false;
+    }
+    
+    const data = await response.json();
+    
+    // Log detailed information about the interaction check
+    console.log("Interaction check response:", {
+      exists: data.exists,
+      created: data.created,
+      hasEmail: data.hasEmail,
+      hasInteraction: data.exists || data.created || data.hasEmail
+    });
+    
+    // Return true if any sign of interaction
+    return data.exists || data.created || data.hasEmail || false;
+  } catch (error) {
+    console.error('Error checking user interaction:', error);
+    return false;
+  }
+};
+
   const total = cart.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0).toFixed(2);
 
   const createOrder = async () => {
@@ -137,6 +202,10 @@ function PayPalPayment({
       if (orderId) {
         console.log(`Using existing order ID: ${orderId}`);
         setPaymentStatus(`Using existing order: ${orderId}`);
+        
+        // Check if order needs to be persisted to database
+        await checkUserInteraction(orderId);
+        
         return orderId;
       }
 
@@ -196,6 +265,13 @@ function PayPalPayment({
     setPaymentStatus('Processing payment...')
 
     try {
+      // Check for user interaction before capturing
+      const hasInteraction = await checkUserInteraction(data.orderID);
+      
+      if (!hasInteraction) {
+        console.log("Ensuring order exists before capture");
+      }
+      
       const response = await fetch(
         `${getApiUrl()}/api/payments/${data.orderID}/capture`,
         {
@@ -237,8 +313,129 @@ function PayPalPayment({
     }
   }
 
-  const handleCancel = (data) => {
+  // 23.03.2025 
+  // const handleCancel = async (data) => {
+  //   setPaymentStatus("Payment cancelled");
+    
+  //   try {
+  //     // Check if user interacted before cancelling
+  //     const hasInteraction = await checkUserInteraction(data.orderID);
+      
+  //     if (hasInteraction) {
+  //       console.log("User interacted with PayPal before cancelling");
+  //     } else {
+  //       console.log("User closed PayPal popup without interaction");
+  //       // No order in database, no need to do anything
+  //     }
+  //   } catch (error) {
+  //     console.error("Error checking user interaction:", error);
+  //   }
+    
+  //   // NOTE: We do NOT clear the cookie here to allow retrying with the same order
+    
+  //   if (onCancel && typeof onCancel === 'function') {
+  //     onCancel(data);
+  //   }
+  // };
+
+  // 23.03.2025 
+  // const handleCancel = async (data) => {
+  //   setPaymentStatus("Payment cancelled");
+    
+  //   try {
+  //     // Check if user interacted before cancelling
+  //     const hasInteraction = await checkUserInteraction(data.orderID);
+      
+  //     if (hasInteraction) {
+  //       console.log("User interacted with PayPal before cancelling");
+        
+  //       // Since user interacted (provided email), update order status
+  //       try {
+  //         const response = await fetch(
+  //           `${getApiUrl()}/api/payments/${data.orderID}/update-canceled`,
+  //           {
+  //             method: 'POST',
+  //             headers: { 'Content-Type': 'application/json' },
+  //             body: JSON.stringify({ status: 'PAYER_ACTION_REQUIRED' })
+  //           }
+  //         );
+          
+  //         if (response.ok) {
+  //           console.log("Order status updated to PAYER_ACTION_REQUIRED");
+  //         } else {
+  //           console.error("Failed to update order status:", await response.text());
+  //         }
+  //       } catch (updateError) {
+  //         console.error("Error updating order status:", updateError);
+  //       }
+  //     } else {
+  //       console.log("User closed PayPal popup without interaction");
+  //       // No email provided, do nothing with the order
+  //     }
+  //   } catch (error) {
+  //     console.error("Error checking user interaction:", error);
+  //   }
+    
+  //   // NOTE: We do NOT clear the cookie here to allow retrying with the same order
+    
+  //   if (onCancel && typeof onCancel === 'function') {
+  //     onCancel(data);
+  //   }
+  // };
+
+
+  const handleCancel = async (data) => {
     setPaymentStatus("Payment cancelled");
+    
+    try {
+      // Always check for user interaction when cancel is triggered
+      const checkResponse = await fetch(
+        `${getApiUrl()}/api/payments/${data.orderID}/check-interaction`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+      
+      if (checkResponse.ok) {
+        const checkData = await checkResponse.json();
+        
+        if (checkData.hasEmail || checkData.exists) {
+          console.log("User provided email before cancelling. Updating order status...");
+          
+          // Update order status to PAYER_ACTION_REQUIRED
+          try {
+            const response = await fetch(
+              `${getApiUrl()}/api/payments/${data.orderID}/update-canceled`,
+              {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: 'PAYER_ACTION_REQUIRED' })
+              }
+            );
+            
+            if (response.ok) {
+              const result = await response.json();
+              console.log("Order status updated:", result);
+              
+              if (result.hasCustomerEmail) {
+                console.log("Order has customer email:", result.hasCustomerEmail);
+              }
+            } else {
+              console.error("Failed to update order status:", await response.text());
+            }
+          } catch (updateError) {
+            console.error("Error updating order status:", updateError);
+          }
+        } else {
+          console.log("User closed PayPal popup without providing email");
+        }
+      } else {
+        console.error("Failed to check interaction:", await checkResponse.text());
+      }
+    } catch (error) {
+      console.error("Error in handleCancel:", error);
+    }
     
     // NOTE: We do NOT clear the cookie here to allow retrying with the same order
     
@@ -246,6 +443,8 @@ function PayPalPayment({
       onCancel(data);
     }
   };
+
+
 
   const onError = (error) => {
     console.error('PayPal error:', error)
@@ -333,6 +532,3 @@ function PayPalPayment({
 }
 
 export default PayPalPayment
-
-
-

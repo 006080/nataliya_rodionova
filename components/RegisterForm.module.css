@@ -39,47 +39,6 @@
   animation: fadeIn 0.3s ease-in-out;
 }
 
-.verificationMessage {
-  padding: 1rem;
-  border-radius: 8px;
-  margin-bottom: 1.5rem;
-  font-size: 0.95rem;
-  background-color: #fef9c3;
-  color: #854d0e;
-  border-left: 4px solid #eab308;
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
-  animation: fadeIn 0.3s ease-in-out;
-}
-
-.verificationMessage p {
-  margin: 0;
-}
-
-.resendButton {
-  background-color: transparent;
-  color: #854d0e;
-  border: 1px solid #eab308;
-  border-radius: 6px;
-  padding: 0.6rem 1rem;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  align-self: flex-start;
-  font-family: inherit;
-}
-
-.resendButton:hover {
-  background-color: #eab308;
-  color: white;
-}
-
-.resendButton:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
 .formGroup {
   position: relative;
   margin-bottom: 1.2rem;
@@ -219,16 +178,79 @@
   color: #666;
 }
 
-.registerLink a {
+.registerLink a, .link {
   color: #6366f1;
   text-decoration: none;
   font-weight: 500;
   transition: color 0.3s ease;
 }
 
-.registerLink a:hover {
+.registerLink a:hover, .link:hover {
   color: #4f46e5;
   text-decoration: underline;
+}
+
+/* Password strength styles */
+.passwordStrength {
+  margin-top: 0.5rem;
+  background-color: #e0e0e0;
+  height: 5px;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.strengthMeter {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.strengthText {
+  display: block;
+  font-size: 0.8rem;
+  text-align: right;
+  margin-top: 0.3rem;
+  color: #555;
+}
+
+.passwordRequirements {
+  margin: 0.8rem 0;
+  padding: 0 0 0 1.5rem;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.passwordRequirements li {
+  margin: 0.3rem 0;
+  transition: color 0.3s ease;
+  list-style-type: circle;
+}
+
+.passwordRequirements li.met {
+  color: #10b981;
+  list-style-type: disc;
+  font-weight: 500;
+}
+
+.passwordMatch {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  transition: color 0.3s ease;
+}
+
+.matched {
+  color: #10b981;
+}
+
+.notMatched {
+  color: #ef4444;
+}
+
+.termsAgreement {
+  margin: 1.5rem 0;
+  font-size: 0.85rem;
+  color: #666;
+  line-height: 1.5;
 }
 
 @keyframes fadeIn {

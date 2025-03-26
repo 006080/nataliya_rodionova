@@ -5,51 +5,49 @@ import { authenticate } from '../middleware/auth.js';
 
 const router = express.Router();
 
-/**
- * Get all orders for the logged-in user
- */
 router.get('/api/orders', authenticate, async (req, res) => {
   try {
-    // First look for orders directly linked to the user
-    let orders = await Order.find({ user: req.user._id })
-      .sort({ createdAt: -1 });
+    const userEmail = req.user.email.toLowerCase();
     
-    // If no orders found, try to find by email (for orders placed before login/registration)
-    if (orders.length === 0) {
-      // Get user email from auth context
-      const userEmail = req.user.email.toLowerCase();
-      
-      // Look for orders with matching email in either customer or deliveryDetails
-      orders = await Order.find({
-        $or: [
-          { 'customer.email': { $regex: new RegExp('^' + userEmail + '$', 'i') } },
-          { 'deliveryDetails.email': { $regex: new RegExp('^' + userEmail + '$', 'i') } }
-        ]
-      }).sort({ createdAt: -1 });
-      
-      // Link any found orders to this user for future queries
-      if (orders.length > 0) {
-        for (const order of orders) {
-          if (!order.user) {
-            order.user = req.user._id;
-            await order.save();
-            console.log(`Linked order ${order._id} to user ${req.user._id}`);
-          }
-        }
-      }
-    }
+    // Find both orders linked to user ID AND orders with matching email
+    const orders = await Order.find({
+      $or: [
+        { user: req.user._id },
+        { 'customer.email': { $regex: new RegExp(userEmail.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') } },
+        // { 'deliveryDetails.email': { $regex: new RegExp(userEmail.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') } }
+      ]
+    }).sort({ createdAt: -1 });
 
-    // Format orders for response
+    console.log(`Found ${orders.length} orders for user`);
+    
+    // Link any found orders by email to this user for future queries
+    // for (const order of orders) {
+    //   if (!order.user) {
+    //     order.user = req.user._id;
+    //     await order.save();
+    //     console.log(`Linked order ${order._id} to user ${req.user._id}`);
+    //   }
+    // }
+    //     //Link any unlinked orders to this user
+    //     let linkedCount = 0;
+    //     for (const order of orders) {
+    //       if (!order.user) {
+    //         order.user = req.user._id;
+    //         await order.save();
+    //         linkedCount++;
+    //         console.log(`Linked order ${order._id} to user ${req.user._id}`);
+    //       }
+    //     }
+        
+    //     if (linkedCount > 0) {
+    //       console.log(`Linked ${linkedCount} previously unlinked orders to user ${req.user._id}`);
+    //     }
+
     const formattedOrders = orders.map(order => ({
       id: order._id,
       paypalOrderId: order.paypalOrderId,
       date: order.createdAt.toISOString().split('T')[0],
-      status: order.fulfillmentStatus || 
-              (order.status === 'COMPLETED' ? 'Processing' : 
-              order.status === 'APPROVED' ? 'Processing' :
-              order.status === 'CANCELED' ? 'Cancelled' : 
-              order.status === 'VOIDED' ? 'Cancelled' : 
-              order.status === 'PAYER_ACTION_REQUIRED' ? 'Payment Pending' : 'Processing'),
+      status: order.getStatusText(), 
       total: order.totalAmount,
       isPaid: ['COMPLETED', 'APPROVED'].includes(order.status),
       isDelivered: order.fulfillmentStatus === 'Delivered',
@@ -150,12 +148,7 @@ router.get('/api/orders/:id', authenticate, async (req, res) => {
       paymentMethod: 'PayPal', // Default to PayPal
       totalPrice: order.totalAmount,
       currency: order.currency || 'EUR',
-      status: order.fulfillmentStatus || 
-              (order.status === 'COMPLETED' ? 'Processing' : 
-              order.status === 'APPROVED' ? 'Processing' :
-              order.status === 'CANCELED' ? 'Cancelled' : 
-              order.status === 'VOIDED' ? 'Cancelled' : 
-              order.status === 'PAYER_ACTION_REQUIRED' ? 'Payment Pending' : 'Processing'),
+      status: order.getStatusText(), 
       paymentStatus: order.status,
       isPaid: ['COMPLETED', 'APPROVED'].includes(order.status),
       paidAt: order.status === 'COMPLETED' ? order.updatedAt : null,

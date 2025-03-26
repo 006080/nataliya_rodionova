@@ -1,6 +1,6 @@
-// src/components/ResetPasswordForm.js
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import styles from './ResetPasswordForm.module.css';
 
 const ResetPasswordForm = () => {
   const [password, setPassword] = useState('');
@@ -11,6 +11,12 @@ const ResetPasswordForm = () => {
   const [tokenValid, setTokenValid] = useState(null);
   const { token } = useParams();
   const navigate = useNavigate();
+
+  const getApiUrl = () => {
+    return import.meta.env.VITE_NODE_ENV === "production"
+      ? import.meta.env.VITE_API_BASE_URL_PROD
+      : import.meta.env.VITE_API_BASE_URL_LOCAL;
+  };
   
   // Password strength checker (same as RegisterForm)
   const checkPasswordStrength = (password) => {
@@ -67,7 +73,7 @@ const ResetPasswordForm = () => {
       setError('');
       setMessage('');
       
-      const response = await fetch(`http://localhost:4000/api/auth/reset-password/${token}`, {
+      const response = await fetch(`${getApiUrl()}/api/auth/reset-password/${token}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password }),
@@ -100,36 +106,36 @@ const ResetPasswordForm = () => {
   
   if (tokenValid === false) {
     return (
-      <div className="reset-password-container">
+      <div className={styles.loginContainer}>
         <h2>Reset Password</h2>
-        <div className="error-message">
+        <div className={styles.errorMessage}>
           {error || 'Invalid or expired reset link. Please request a new one.'}
         </div>
-        <div className="login-link">
-          <a href="/forgot-password">Request a new password reset</a>
+        <div className={styles.registerLink}>
+          <a href="/forgot-password" className={styles.link}>Request a new password reset</a>
         </div>
       </div>
     );
   }
   
   return (
-    <div className="reset-password-container">
+    <div className={styles.loginContainer}>
       <h2>Reset Your Password</h2>
       
       {message && (
-        <div className="success-message">
+        <div className={styles.infoMessage}>
           {message}
         </div>
       )}
       
       {error && (
-        <div className="error-message">
+        <div className={styles.errorMessage}>
           {error}
         </div>
       )}
       
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
+      <form onSubmit={handleSubmit} className={styles.form}>
+        <div className={styles.formGroup}>
           <label htmlFor="password">New Password</label>
           <input
             type="password"
@@ -141,38 +147,38 @@ const ResetPasswordForm = () => {
           />
           
           {password && (
-            <div className="password-strength">
+            <div className={styles.passwordStrength}>
               <div 
-                className="strength-meter" 
+                className={styles.strengthMeter} 
                 style={{ 
                   width: `${(passwordStrength.score / 5) * 100}%`,
                   backgroundColor: passwordStrength.color
                 }}
               ></div>
-              <span className="strength-text">{passwordStrength.label}</span>
+              <span className={styles.strengthText}>{passwordStrength.label}</span>
             </div>
           )}
           
-          <ul className="password-requirements">
-            <li className={password.length >= 8 ? 'met' : ''}>
+          <ul className={styles.passwordRequirements}>
+            <li className={password.length >= 8 ? styles.met : ''}>
               At least 8 characters
             </li>
-            <li className={/[A-Z]/.test(password) ? 'met' : ''}>
+            <li className={/[A-Z]/.test(password) ? styles.met : ''}>
               Contains uppercase letter
             </li>
-            <li className={/[a-z]/.test(password) ? 'met' : ''}>
+            <li className={/[a-z]/.test(password) ? styles.met : ''}>
               Contains lowercase letter
             </li>
-            <li className={/[0-9]/.test(password) ? 'met' : ''}>
+            <li className={/[0-9]/.test(password) ? styles.met : ''}>
               Contains a number
             </li>
-            <li className={/[^A-Za-z0-9]/.test(password) ? 'met' : ''}>
+            <li className={/[^A-Za-z0-9]/.test(password) ? styles.met : ''}>
               Contains special character
             </li>
           </ul>
         </div>
         
-        <div className="form-group">
+        <div className={styles.formGroup}>
           <label htmlFor="confirmPassword">Confirm Password</label>
           <input
             type="password"
@@ -184,7 +190,7 @@ const ResetPasswordForm = () => {
           />
           
           {password && confirmPassword && (
-            <div className={`password-match ${password === confirmPassword ? 'matched' : 'not-matched'}`}>
+            <div className={`${styles.passwordMatch} ${password === confirmPassword ? styles.matched : styles.notMatched}`}>
               {password === confirmPassword ? 'Passwords match' : 'Passwords do not match'}
             </div>
           )}
@@ -192,15 +198,15 @@ const ResetPasswordForm = () => {
         
         <button
           type="submit"
-          className="reset-button"
+          className={styles.loginButton}
           disabled={isSubmitting}
         >
           {isSubmitting ? 'Resetting Password...' : 'Reset Password'}
         </button>
       </form>
       
-      <div className="login-link">
-        Remember your password? <a href="/login">Login here</a>
+      <div className={styles.registerLink}>
+        Remember your password? <a href="/login" className={styles.link}>Login here</a>
       </div>
     </div>
   );

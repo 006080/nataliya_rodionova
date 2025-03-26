@@ -1,11 +1,17 @@
-// src/components/ForgotPasswordForm.js
 import { useState } from 'react';
+import styles from './ForgotPasswordForm.module.css';
 
 const ForgotPasswordForm = () => {
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+
+  const getApiUrl = () => {
+    return import.meta.env.VITE_NODE_ENV === "production"
+      ? import.meta.env.VITE_API_BASE_URL_PROD
+      : import.meta.env.VITE_API_BASE_URL_LOCAL;
+  };
   
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,7 +26,7 @@ const ForgotPasswordForm = () => {
       setError('');
       setMessage('');
       
-      const response = await fetch('http://localhost:4000/api/auth/forgot-password', {
+      const response = await fetch(`${getApiUrl()}/api/auth/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
@@ -43,23 +49,23 @@ const ForgotPasswordForm = () => {
   };
   
   return (
-    <div className="forgot-password-container">
+    <div className={styles.loginContainer}>
       <h2>Forgot Password</h2>
       
       {message && (
-        <div className="success-message">
+        <div className={styles.infoMessage}>
           {message}
         </div>
       )}
       
       {error && (
-        <div className="error-message">
+        <div className={styles.errorMessage}>
           {error}
         </div>
       )}
       
       <form onSubmit={handleSubmit}>
-        <div className="form-group">
+        <div className={styles.formGroup}>
           <label htmlFor="email">Email</label>
           <input
             type="email"
@@ -74,15 +80,15 @@ const ForgotPasswordForm = () => {
         
         <button
           type="submit"
-          className="submit-button"
+          className={styles.loginButton}
           disabled={isSubmitting}
         >
           {isSubmitting ? 'Sending...' : 'Reset Password'}
         </button>
       </form>
       
-      <div className="login-link">
-        Remember your password? <a href="/login">Login here</a>
+      <div className={styles.registerLink}>
+        Remember your password? <a href="/login" className={styles.link}>Login here</a>
       </div>
     </div>
   );

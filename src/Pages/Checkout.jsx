@@ -6,11 +6,14 @@ import styles from './Checkout.module.css'
 import PayPalPayment from '../../components/PayPalPayment'
 import { getCountryName } from '../utils/countries'
 import { getPendingOrderId, setPendingOrderId, clearPendingOrderId } from '../utils/cookieUtils'
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { faPlus, faMinus } from "@fortawesome/free-solid-svg-icons"
 
 const Checkout = () => {
   const { 
     cartItems, 
     removeFromCart, 
+    updateQuantity,  
     setPendingOrder, 
     clearPendingOrder 
   } = useCart()
@@ -50,6 +53,26 @@ const Checkout = () => {
     if (measurements) return 2; // Delivery form
     return 1; // Measurement form
   });
+
+  // Function to increase item quantity
+  const increaseQuantity = (item) => {
+    // Use ID if available, otherwise use name as identifier
+    const identifier = item.id || item.name;
+    updateQuantity(identifier, item.quantity + 1);
+  };
+
+  // Function to decrease item quantity
+  const decreaseQuantity = (item) => {
+    // Use ID if available, otherwise use name as identifier
+    const identifier = item.id || item.name;
+    
+    if (item.quantity > 1) {
+      updateQuantity(identifier, item.quantity - 1);
+    } else {
+      // Remove item if quantity would go below 1
+      removeFromCart(item);
+    }
+  };
 
   // Check for pending order on component mount
   useEffect(() => {
@@ -142,18 +165,40 @@ const Checkout = () => {
   };
   
   // Handle successful payment completion
-  const handlePaymentSuccess = (data) => {
-    console.log("Payment successful. Order data:", data);
+  // const handlePaymentSuccess = (data) => {
+  //   console.log("Payment successful. Order data:", data);
     
-    // Set order complete first (important for state tracking)
-    setOrderComplete(true);
-    setOrderData(data);
+  //   // Set order complete first (important for state tracking)
+  //   setOrderComplete(true);
+  //   setOrderData(data);
     
-    // Then clear pending order and cart
-    // This will clear cookie, context, and localStorage data
-    clearPendingOrder(true);
-    setPendingOrderState(null);
-  };
+  //   // Then clear pending order and cart
+  //   // This will clear cookie, context, and localStorage data
+  //   clearPendingOrder(true);
+  //   setPendingOrderState(null);
+  // };
+  // Handle successful payment completion
+const handlePaymentSuccess = (data) => {
+  console.log("Payment successful. Order data:", data);
+  
+  // Save the cart items and total price BEFORE clearing them
+  const completedOrderItems = [...cartItems]; // Create a copy of current cart items
+  const completedOrderTotal = totalPrice;
+  
+  // Then set the saved data alongside the order data
+  setOrderData({
+    ...data,
+    items: completedOrderItems,
+    total: completedOrderTotal
+  });
+  
+  // Set order complete first (important for state tracking)
+  setOrderComplete(true);
+  
+  // Clear pending order and cart AFTER saving the data
+  clearPendingOrder(true);
+  setPendingOrderState(null);
+};
   
   // Handle payment cancellation
   const handlePaymentCancel = () => {
@@ -196,34 +241,63 @@ const Checkout = () => {
   }))
   
   // Order confirmation screen
-  if (orderComplete) {
-    return (
-      <div className={styles.cartContainer}>
-        <h1>Order Confirmed!</h1>
-        <p>Thank you for your purchase.</p>
-        <div className={styles.orderDetails}>
-          <h2>Order Details</h2>
-          <p>Order ID: {orderData.id}</p>
-          <p>Status: {orderData.status}</p>
-          <h3>Items:</h3>
-          <ul>
-            {cartItems.map((item) => (
-              <li key={item.id}>
-                {item.name} x {item.quantity} - €
-                {(item.price * item.quantity).toFixed(2)}
-              </li>
-            ))}
-          </ul>
-          <p className={styles.total}>
-            <strong>Total: €{totalPrice.toFixed(2)}</strong>
-          </p>
-        </div>
-        <button onClick={() => (window.location.href = '/shop')}>
-          Continue Shopping
-        </button>
+  // if (orderComplete) {
+  //   return (
+  //     <div className={styles.cartContainer}>
+  //       <h1>Order Confirmed!</h1>
+  //       <p>Thank you for your purchase.</p>
+  //       <div className={styles.orderDetails}>
+  //         <h2>Order Details</h2>
+  //         <p>Order ID: {orderData.id}</p>
+  //         <p>Status: {orderData.status}</p>
+  //         <h3>Items:</h3>
+  //         <ul>
+  //           {cartItems.map((item) => (
+  //             <li key={item.id}>
+  //               {item.name} x {item.quantity} - €
+  //               {(item.price * item.quantity).toFixed(2)}
+  //             </li>
+  //           ))}
+  //         </ul>
+  //         <p className={styles.total}>
+  //           <strong>Total: €{totalPrice.toFixed(2)}</strong>
+  //         </p>
+  //       </div>
+  //       <button onClick={() => (window.location.href = '/shop')}>
+  //         Continue Shopping
+  //       </button>
+  //     </div>
+  //   )
+  // }
+  // Order confirmation screen
+if (orderComplete) {
+  return (
+    <div className={styles.cartContainer}>
+      <h1>Order Confirmed!</h1>
+      <p>Thank you for your purchase.</p>
+      <div className={styles.orderDetails}>
+        <h2>Order Details</h2>
+        <p>Order ID: {orderData.id}</p>
+        <p>Status: {orderData.status}</p>
+        <h3>Items:</h3>
+        <ul>
+          {orderData.items.map((item) => (
+            <li key={item.id || item.name}>
+              {item.name} x {item.quantity} - €
+              {(item.price * item.quantity).toFixed(2)}
+            </li>
+          ))}
+        </ul>
+        <p className={styles.total}>
+          <strong>Total: €{orderData.total.toFixed(2)}</strong>
+        </p>
       </div>
-    )
-  }
+      <button onClick={() => (window.location.href = '/shop')}>
+        Continue Shopping
+      </button>
+    </div>
+  )
+}
 
   // Cart is empty
   if (!cartItems?.length) {
@@ -261,8 +335,29 @@ const Checkout = () => {
                   fontStyle: 'italic',
                 }}
               >
-                <p>Quantity: {item.quantity}</p>
+                 {/* Quantity controls */}
+                 <div className={styles.quantityControls}>
+                  <button 
+                    className={styles.quantityButton}
+                    onClick={() => decreaseQuantity(item)}
+                    aria-label="Decrease quantity"
+                  >
+                    <FontAwesomeIcon icon={faMinus} size="xs" />
+                  </button>
+                  
+                  <span className={styles.quantityValue}>{item.quantity}</span>
+                  
+                  <button 
+                    className={styles.quantityButton}
+                    onClick={() => increaseQuantity(item)}
+                    aria-label="Increase quantity"
+                  >
+                    <FontAwesomeIcon icon={faPlus} size="xs" />
+                  </button>
+                </div>
+
                 <p>Price: €{item.price.toFixed(2)}</p>
+                <p>Total: €{(item.price * item.quantity).toFixed(2)}</p>
               </div>
             </div>
           </div>

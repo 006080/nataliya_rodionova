@@ -1,7 +1,11 @@
+// 22.03.2025 - 12:25 PM With issue when closing PayPal popup
 import Order from '../Models/Order.js';
 import { Buffer } from "node:buffer";
 import { sendOrderStatusEmail } from '../services/emailNotification.js';
 import { schedulePaymentReminders, cancelExistingReminders } from '../services/paymentReminderService.js';
+
+// In-memory cache for temporary orders 
+const tempOrderCache = new Map();
 
 /**
  * Get PayPal access token for API authentication
@@ -54,7 +58,7 @@ const formatPrice = (price) => {
 };
 
 /**
- * Create a PayPal order and save it in MongoDB
+ * Create a PayPal order but don't save it to MongoDB yet
  * @param {Array} cartItems - Array of cart items
  * @param {Object} measurements - Measurements data
  * @param {Object} deliveryDetails - Delivery details
@@ -129,38 +133,28 @@ const createPayPalOrder = async (cartItems, measurements, deliveryDetails) => {
 
     const data = await response.json();
     
-    // Store order in MongoDB
-    const orderItems = cartItems.map(item => ({
-      productId: item.id,
-      name: item.name,
-      description: item.description || '',
-      quantity: item.quantity,
-      price: Number(item.price)
-    }));
-    
-    const newOrder = new Order({
+    // Store order info in temporary cache instead of database
+    const orderInfo = {
       paypalOrderId: data.id,
       status: data.status,
-      items: orderItems,
-      totalAmount: totalAmount,
+      items: cartItems.map(item => ({
+        productId: item.id,
+        name: item.name,
+        description: item.description || '',
+        quantity: item.quantity,
+        price: Number(item.price)
+      })),
+      totalAmount,
       currency: 'EUR',
-      createdAt: new Date(),
       measurements,
       deliveryDetails,
-      // Set initial fulfillment status based on PayPal status
-      fulfillmentStatus: 'Processing'
-    });
+      createdAt: new Date(),
+      timestamp: Date.now()
+    };
     
-    await newOrder.save();
-
-    // Send email notification for order creation EXCEPT for PAYER_ACTION_REQUIRED
-    // For PAYER_ACTION_REQUIRED, schedule reminders instead
-    if (data.status === 'PAYER_ACTION_REQUIRED') {
-      await schedulePaymentReminders(data.id);
-    } else {
-      // Send regular order status email for other statuses
-      await sendOrderStatusEmail(data.id);
-    }
+    // Store in temporary cache
+    tempOrderCache.set(data.id, orderInfo);
+    console.log(`Temporary order created: ${data.id}`);
     
     return data;
   } catch (error) {
@@ -169,6 +163,322 @@ const createPayPalOrder = async (cartItems, measurements, deliveryDetails) => {
   }
 };
 
+// 23.03.2025 
+/**
+ * Check if PayPal order has user interaction
+ * @returns {boolean} true if user has interacted, false otherwise
+ */
+// const checkPayPalUserInteraction = async (orderId) => {
+//   try {
+//     const paypalOrder = await getPayPalOrderDetails(orderId);
+    
+//     // Look for signs of user interaction
+//     return Boolean(
+//       paypalOrder.payer || 
+//       (paypalOrder.payment_source && 
+//        paypalOrder.payment_source.paypal && 
+//        (paypalOrder.payment_source.paypal.email_address || 
+//         paypalOrder.payment_source.paypal.account_id))
+//     );
+//   } catch (error) {
+//     console.error(`Error checking PayPal user interaction: ${error}`);
+//     // In case of error, assume no interaction
+//     return false;
+//   }
+// };
+
+//23.03.2025
+/**
+ * Check if PayPal order has user interaction, with detailed response
+ * @returns {Object} Object with interaction details
+ */
+// const checkPayPalUserInteraction = async (orderId) => {
+//   try {
+//     const paypalOrder = await getPayPalOrderDetails(orderId);
+    
+//     // Check specifically for email presence
+//     const hasEmail = Boolean(
+//       (paypalOrder.payer && paypalOrder.payer.email_address) ||
+//       (paypalOrder.payment_source && 
+//        paypalOrder.payment_source.paypal && 
+//        paypalOrder.payment_source.paypal.email_address)
+//     );
+    
+//     // General interaction check
+//     const hasInteraction = Boolean(
+//       paypalOrder.payer || 
+//       (paypalOrder.payment_source && 
+//        paypalOrder.payment_source.paypal && 
+//        (paypalOrder.payment_source.paypal.email_address || 
+//         paypalOrder.payment_source.paypal.account_id))
+//     );
+    
+//     // Return detailed interaction information
+//     return {
+//       hasInteraction,
+//       hasEmail,
+//       // Extract the email if available
+//       email: hasEmail ? 
+//         (paypalOrder.payer?.email_address || 
+//          paypalOrder.payment_source?.paypal?.email_address) : 
+//         null
+//     };
+//   } catch (error) {
+//     console.error(`Error checking PayPal user interaction: ${error}`);
+//     // In case of error, return detailed error info
+//     return {
+//       hasInteraction: false,
+//       hasEmail: false,
+//       email: null,
+//       error: error.message
+//     };
+//   }
+// };
+
+
+
+/**
+ * Check if PayPal order has user interaction, with detailed response
+ * @returns {Object} Object with interaction details
+ */
+const checkPayPalUserInteraction = async (orderId) => {
+  try {
+    const paypalOrder = await getPayPalOrderDetails(orderId);
+    
+    // Check specifically for email presence
+    const hasEmail = Boolean(
+      (paypalOrder.payer && paypalOrder.payer.email_address) ||
+      (paypalOrder.payment_source && 
+       paypalOrder.payment_source.paypal && 
+       paypalOrder.payment_source.paypal.email_address)
+    );
+    
+    // Extract customer data
+    let customerEmail = null;
+    let customerName = null;
+    let payerId = null;
+    
+    if (paypalOrder.payer) {
+      if (paypalOrder.payer.email_address) {
+        customerEmail = paypalOrder.payer.email_address;
+      }
+      
+      if (paypalOrder.payer.name) {
+        customerName = `${paypalOrder.payer.name.given_name || ''} ${paypalOrder.payer.name.surname || ''}`.trim();
+      }
+      
+      if (paypalOrder.payer.payer_id) {
+        payerId = paypalOrder.payer.payer_id;
+      }
+    } else if (paypalOrder.payment_source && paypalOrder.payment_source.paypal) {
+      if (paypalOrder.payment_source.paypal.email_address) {
+        customerEmail = paypalOrder.payment_source.paypal.email_address;
+      }
+      
+      if (paypalOrder.payment_source.paypal.name) {
+        customerName = `${paypalOrder.payment_source.paypal.name.given_name || ''} ${paypalOrder.payment_source.paypal.name.surname || ''}`.trim();
+      }
+      
+      if (paypalOrder.payment_source.paypal.account_id) {
+        payerId = paypalOrder.payment_source.paypal.account_id;
+      }
+    }
+    
+    // General interaction check
+    const hasInteraction = Boolean(
+      paypalOrder.payer || 
+      (paypalOrder.payment_source && 
+       paypalOrder.payment_source.paypal && 
+       (paypalOrder.payment_source.paypal.email_address || 
+        paypalOrder.payment_source.paypal.account_id))
+    );
+    
+    // Return detailed interaction information
+    return {
+      hasInteraction,
+      hasEmail,
+      customerData: {
+        email: customerEmail,
+        name: customerName,
+        payerId: payerId
+      }
+    };
+  } catch (error) {
+    console.error(`Error checking PayPal user interaction: ${error}`);
+    // In case of error, return detailed error info
+    return {
+      hasInteraction: false,
+      hasEmail: false,
+      customerData: null,
+      error: error.message
+    };
+  }
+};
+
+
+
+//23.03.2025
+/**
+ * Persist order to MongoDB if it's not already there
+ */
+// const persistOrderToDatabase = async (orderId) => {
+//   try {
+//     // First check if order already exists in database
+//     const existingOrder = await Order.findOne({ paypalOrderId: orderId });
+    
+//     if (existingOrder) {
+//       console.log(`Order already exists in database: ${orderId}`);
+//       return existingOrder;
+//     }
+    
+//     // Check if we have temp data for this order
+//     const tempOrderData = tempOrderCache.get(orderId);
+    
+//     if (!tempOrderData) {
+//       console.error(`No temp data found for order: ${orderId}`);
+//       throw new Error('Order data not found');
+//     }
+    
+//     // Check with PayPal if user has interacted
+//     const hasInteracted = await checkPayPalUserInteraction(orderId);
+    
+//     if (!hasInteracted) {
+//       console.log(`No user interaction detected for order: ${orderId}`);
+//       return null;
+//     }
+    
+//     // User has interacted, create in database
+//     const newOrder = new Order({
+//       paypalOrderId: orderId,
+//       status: 'PAYER_ACTION_REQUIRED',
+//       items: tempOrderData.items,
+//       totalAmount: tempOrderData.totalAmount,
+//       currency: tempOrderData.currency || 'EUR',
+//       createdAt: new Date(),
+//       measurements: tempOrderData.measurements,
+//       deliveryDetails: tempOrderData.deliveryDetails,
+//       fulfillmentStatus: 'Processing'
+//     });
+    
+//     await newOrder.save();
+//     console.log(`Order persisted to database: ${orderId}`);
+    
+//     // Schedule reminders since user has interacted
+//     await schedulePaymentReminders(orderId);
+    
+//     // Clean up temp data
+//     tempOrderCache.delete(orderId);
+    
+//     return newOrder;
+//   } catch (error) {
+//     console.error(`Error persisting order to database: ${error}`);
+//     throw error;
+//   }
+// };
+
+
+/**
+ * Persist order to MongoDB if it's not already there
+ */
+const persistOrderToDatabase = async (orderId) => {
+  try {
+    // First check if order already exists in database
+    const existingOrder = await Order.findOne({ paypalOrderId: orderId });
+    
+    if (existingOrder) {
+      console.log(`Order already exists in database: ${orderId}`);
+      return existingOrder;
+    }
+    
+    // Check if we have temp data for this order
+    const tempOrderData = tempOrderCache.get(orderId);
+    
+    if (!tempOrderData) {
+      console.error(`No temp data found for order: ${orderId}`);
+      throw new Error('Order data not found');
+    }
+    
+    // Check with PayPal if user has interacted and get their info
+    const interactionData = await checkPayPalUserInteraction(orderId);
+    
+    if (!interactionData.hasInteraction) {
+      console.log(`No user interaction detected for order: ${orderId}`);
+      return null;
+    }
+    
+    // Get customer info from PayPal
+    const paypalOrder = await getPayPalOrderDetails(orderId);
+    
+    // Extract email from PayPal response
+    let customerEmail = null;
+    let customerName = null;
+    
+    if (paypalOrder.payer && paypalOrder.payer.email_address) {
+      customerEmail = paypalOrder.payer.email_address;
+      if (paypalOrder.payer.name) {
+        customerName = `${paypalOrder.payer.name.given_name || ''} ${paypalOrder.payer.name.surname || ''}`.trim();
+      }
+    } else if (paypalOrder.payment_source && 
+               paypalOrder.payment_source.paypal && 
+               paypalOrder.payment_source.paypal.email_address) {
+      customerEmail = paypalOrder.payment_source.paypal.email_address;
+      // Try to get name from payment_source if available
+      if (paypalOrder.payment_source.paypal.name) {
+        customerName = `${paypalOrder.payment_source.paypal.name.given_name || ''} ${paypalOrder.payment_source.paypal.name.surname || ''}`.trim();
+      }
+    }
+    
+    // Prepare customer object
+    const customer = {};
+    
+    // Add email if found from PayPal
+    if (customerEmail) {
+      customer.email = customerEmail;
+    }
+    
+    // Add name if found from PayPal, otherwise use delivery details
+    if (customerName) {
+      customer.name = customerName;
+    } else if (tempOrderData.deliveryDetails && tempOrderData.deliveryDetails.fullName) {
+      customer.name = tempOrderData.deliveryDetails.fullName;
+    }
+    
+    // If we still don't have email in customer, use the one from delivery details
+    if (!customer.email && tempOrderData.deliveryDetails && tempOrderData.deliveryDetails.email) {
+      customer.email = tempOrderData.deliveryDetails.email;
+    }
+    
+    // User has interacted, create in database
+    const newOrder = new Order({
+      paypalOrderId: orderId,
+      status: 'PAYER_ACTION_REQUIRED',
+      items: tempOrderData.items,
+      totalAmount: tempOrderData.totalAmount,
+      currency: tempOrderData.currency || 'EUR',
+      createdAt: new Date(),
+      measurements: tempOrderData.measurements,
+      deliveryDetails: tempOrderData.deliveryDetails,
+      fulfillmentStatus: 'Processing',
+      customer: Object.keys(customer).length > 0 ? customer : undefined
+    });
+    
+    await newOrder.save();
+    console.log(`Order persisted to database: ${orderId} with customer email: ${customer.email || 'none'}`);
+    
+    // Schedule reminders since user has interacted
+    await schedulePaymentReminders(orderId);
+    
+    // Clean up temp data
+    tempOrderCache.delete(orderId);
+    
+    return newOrder;
+  } catch (error) {
+    console.error(`Error persisting order to database: ${error}`);
+    throw error;
+  }
+};
+
+
 /**
  * Capture a PayPal payment and update the order in MongoDB
  * @param {string} orderId - PayPal order ID
@@ -176,6 +486,9 @@ const createPayPalOrder = async (cartItems, measurements, deliveryDetails) => {
  */
 const capturePayPalOrder = async (orderId) => {
   try {
+    // Ensure order exists in database before capture
+    await persistOrderToDatabase(orderId);
+    
     // Get the current order status before updating
     const currentOrder = await Order.findOne({ paypalOrderId: orderId });
     const previousStatus = currentOrder ? currentOrder.status : null;
@@ -399,11 +712,35 @@ const cancelOrder = async (orderId, reason = 'Payment action not completed withi
   }
 };
 
+// Run cleanup job every 30 minutes
+setInterval(() => {
+  try {
+    const now = Date.now();
+    const expireTime = 30 * 60 * 1000; // 30 minutes
+    
+    let count = 0;
+    for (const [orderId, orderData] of tempOrderCache.entries()) {
+      if (now - orderData.timestamp > expireTime) {
+        tempOrderCache.delete(orderId);
+        count++;
+      }
+    }
+    
+    if (count > 0) {
+      console.log(`Cleaned up ${count} temporary orders`);
+    }
+  } catch (error) {
+    console.error("Error in temp order cleanup:", error);
+  }
+}, 30 * 60 * 1000);
+
 export { 
   getPayPalAccessToken, 
   createPayPalOrder, 
   capturePayPalOrder,
   updateOrderStatus,
   getPayPalOrderDetails,
-  cancelOrder
+  cancelOrder,
+  persistOrderToDatabase,
+  checkPayPalUserInteraction
 };

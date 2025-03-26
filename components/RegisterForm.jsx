@@ -1,7 +1,7 @@
-// src/components/RegisterForm.js
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../src/contexts/AuthContext';
+import styles from './RegisterForm.module.css';
 
 const RegisterForm = () => {
   const [name, setName] = useState('');
@@ -33,10 +33,11 @@ const RegisterForm = () => {
   
   const passwordStrength = checkPasswordStrength(password);
   
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Form validation
+    // Form validation (keep existing validation code)
     if (!name.trim()) {
       setFormError('Name is required');
       return;
@@ -72,11 +73,19 @@ const RegisterForm = () => {
       setFormError('');
       
       // Attempt registration
-      const success = await register(name, email, password);
+      const result = await register(name, email, password);
       
-      if (success) {
-        // Redirect to homepage after registration
-        navigate('/');
+      if (result && result.success) {
+        // Redirect to login page with verification message
+        navigate('/login', { 
+          state: { 
+            verificationNeeded: true,
+            email: email,
+            message: 'Registration successful! Please check your email to verify your account before logging in.'
+          } 
+        });
+      } else {
+        setFormError(result.error || 'Registration failed');
       }
     } catch (error) {
       console.error('Registration error:', error);
@@ -85,19 +94,21 @@ const RegisterForm = () => {
       setIsSubmitting(false);
     }
   };
+
+
   
   return (
-    <div className="register-container">
+    <div className={styles.loginContainer}>
       <h2>Create Account</h2>
       
       {(formError || authError) && (
-        <div className="error-message">
+        <div className={styles.errorMessage}>
           {formError || authError}
         </div>
       )}
       
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
+      <form onSubmit={handleSubmit} className={styles.form}>
+        <div className={styles.formGroup}>
           <label htmlFor="name">Full Name</label>
           <input
             type="text"
@@ -110,7 +121,7 @@ const RegisterForm = () => {
           />
         </div>
         
-        <div className="form-group">
+        <div className={styles.formGroup}>
           <label htmlFor="email">Email</label>
           <input
             type="email"
@@ -123,7 +134,7 @@ const RegisterForm = () => {
           />
         </div>
         
-        <div className="form-group">
+        <div className={styles.formGroup}>
           <label htmlFor="password">Password</label>
           <input
             type="password"
@@ -135,38 +146,38 @@ const RegisterForm = () => {
           />
           
           {password && (
-            <div className="password-strength">
+            <div className={styles.passwordStrength}>
               <div 
-                className="strength-meter" 
+                className={styles.strengthMeter} 
                 style={{ 
                   width: `${(passwordStrength.score / 5) * 100}%`,
                   backgroundColor: passwordStrength.color
                 }}
               ></div>
-              <span className="strength-text">{passwordStrength.label}</span>
+              <span className={styles.strengthText}>{passwordStrength.label}</span>
             </div>
           )}
           
-          <ul className="password-requirements">
-            <li className={password.length >= 8 ? 'met' : ''}>
+          <ul className={styles.passwordRequirements}>
+            <li className={password.length >= 8 ? styles.met : ''}>
               At least 8 characters
             </li>
-            <li className={/[A-Z]/.test(password) ? 'met' : ''}>
+            <li className={/[A-Z]/.test(password) ? styles.met : ''}>
               Contains uppercase letter
             </li>
-            <li className={/[a-z]/.test(password) ? 'met' : ''}>
+            <li className={/[a-z]/.test(password) ? styles.met : ''}>
               Contains lowercase letter
             </li>
-            <li className={/[0-9]/.test(password) ? 'met' : ''}>
+            <li className={/[0-9]/.test(password) ? styles.met : ''}>
               Contains a number
             </li>
-            <li className={/[^A-Za-z0-9]/.test(password) ? 'met' : ''}>
+            <li className={/[^A-Za-z0-9]/.test(password) ? styles.met : ''}>
               Contains special character
             </li>
           </ul>
         </div>
         
-        <div className="form-group">
+        <div className={styles.formGroup}>
           <label htmlFor="confirmPassword">Confirm Password</label>
           <input
             type="password"
@@ -178,20 +189,20 @@ const RegisterForm = () => {
           />
           
           {password && confirmPassword && (
-            <div className={`password-match ${password === confirmPassword ? 'matched' : 'not-matched'}`}>
+            <div className={`${styles.passwordMatch} ${password === confirmPassword ? styles.matched : styles.notMatched}`}>
               {password === confirmPassword ? 'Passwords match' : 'Passwords do not match'}
             </div>
           )}
         </div>
         
-        <div className="terms-agreement">
+        <div className={styles.termsAgreement}>
           <p>
             By creating an account, you agree to our{' '}
-            <a href="/terms" target="_blank" rel="noopener noreferrer">
+            <a href="/terms" target="_blank" rel="noopener noreferrer" className={styles.link}>
               Terms of Service
             </a>{' '}
             and{' '}
-            <a href="/privacy" target="_blank" rel="noopener noreferrer">
+            <a href="/privacy" target="_blank" rel="noopener noreferrer" className={styles.link}>
               Privacy Policy
             </a>
           </p>
@@ -199,15 +210,15 @@ const RegisterForm = () => {
         
         <button
           type="submit"
-          className="register-button"
+          className={styles.loginButton}
           disabled={isSubmitting}
         >
           {isSubmitting ? 'Creating Account...' : 'Create Account'}
         </button>
       </form>
       
-      <div className="login-link">
-        Already have an account? <a href="/login">Login here</a>
+      <div className={styles.registerLink}>
+        Already have an account? <a href="/login" className={styles.link}>Login here</a>
       </div>
     </div>
   );

@@ -269,7 +269,7 @@ router.post('/api/auth/store-refresh-token', (req, res) => {
 // Logout route
 router.post('/api/auth/logout', (req, res) => {
   try {
-    // Clear refresh token cookie
+    //Clear refresh token cookie
     res.clearCookie('refreshToken', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

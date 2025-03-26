@@ -34,7 +34,7 @@ const Unauthorized = () => (
 );
 
 const AppContent = () => {
-  const location = useLocation();  // Get current route
+  const location = useLocation();  
 
 
   return (
@@ -120,6 +120,7 @@ const AppContent = () => {
       </Routes>
 
       {location.pathname !== "/contacts" && <Footer />}
+      
      </AuthProvider>  
     </>
   );

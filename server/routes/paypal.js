@@ -4,11 +4,14 @@ import {
   capturePayPalOrder,
   updateOrderStatus,
   getPayPalOrderDetails, 
-  cancelOrder
+  cancelOrder,
+  persistOrderToDatabase,
+  checkPayPalUserInteraction
 } from '../services/paypal.js';
 import Order from '../Models/Order.js';
 import { sendOrderStatusEmail } from '../services/emailNotification.js';
 import { findAbandonedOrders, syncOrderStatus } from '../services/adminService.js';
+import { schedulePaymentReminders } from '../services/paymentReminderService.js';
 
 const router = express.Router();
 
@@ -17,7 +20,6 @@ const router = express.Router();
  */
 router.post("/api/payments", async (req, res) => {
   try {
-
     const { cart, measurements, deliveryDetails } = req.body;
     
     // Validate cart
@@ -70,23 +72,14 @@ router.post("/api/payments", async (req, res) => {
       });
     }
 
-    // Create PayPal order with all required data
+    // Create PayPal order but don't save to database yet
     const order = await createPayPalOrder(cart, measurements, deliveryDetails);
 
     if (!order || !order.id) {
       return res.status(500).json({ error: "Failed to create order" });
     }
 
-      // If user is authenticated, link order to user
-      if (req.user && req.user._id) {
-        await Order.findOneAndUpdate(
-          { paypalOrderId: order.id },
-          { user: req.user._id },
-          { new: true }
-        );
-        console.log(`Order ${order.id} linked to user ${req.user._id}`);
-      }
-
+    // Return the PayPal order ID to the client
     res.json({ id: order.id });
   } catch (error) {
     console.error("Error creating order:", error);
@@ -96,6 +89,87 @@ router.post("/api/payments", async (req, res) => {
     });
   }
 });
+
+
+router.post("/api/payments/:orderID/check-interaction", async (req, res) => {
+  try {
+    const { orderID } = req.params;
+    
+    if (!orderID) {
+      return res.status(400).json({ error: "Order ID is required" });
+    }
+    
+    // First check if order exists in database
+    let order = await Order.findOne({ paypalOrderId: orderID });
+    
+    // If order already exists, just return it with hasEmail flag
+    if (order) {
+      const hasEmail = Boolean(
+        (order.customer && order.customer.email) || 
+        (order.deliveryDetails && order.deliveryDetails.email)
+      );
+      
+      return res.json({
+        id: order.paypalOrderId,
+        status: order.status,
+        exists: true,
+        hasEmail: hasEmail
+      });
+    }
+    
+    // Check PayPal for user interaction
+    const paypalOrder = await getPayPalOrderDetails(orderID);
+    
+    // Check specifically for email presence in PayPal response
+    const hasEmail = Boolean(
+      (paypalOrder.payer && paypalOrder.payer.email_address) ||
+      (paypalOrder.payment_source && 
+       paypalOrder.payment_source.paypal && 
+       paypalOrder.payment_source.paypal.email_address)
+    );
+    
+    // Full interaction check (includes email and other signals)
+    const hasInteraction = Boolean(
+      paypalOrder.payer || 
+      (paypalOrder.payment_source && 
+       paypalOrder.payment_source.paypal && 
+       (paypalOrder.payment_source.paypal.email_address || 
+        paypalOrder.payment_source.paypal.account_id))
+    );
+    
+    // If there's interaction, persist the order
+    if (hasInteraction) {
+      order = await persistOrderToDatabase(orderID);
+      
+      if (order) {
+        // Order was persisted
+        return res.json({
+          id: order.paypalOrderId,
+          status: order.status,
+          exists: true,
+          created: true,
+          hasEmail: hasEmail
+        });
+      }
+    }
+    
+    // No interaction detected or failed to persist
+    return res.json({
+      id: orderID,
+      exists: false,
+      hasEmail: hasEmail,
+      hasInteraction: hasInteraction,
+      message: hasInteraction ? 
+        "Interaction detected but failed to persist order" : 
+        "No user interaction detected"
+    });
+  } catch (error) {
+    console.error("Error checking user interaction:", error);
+    res.status(500).json({ error: "Failed to check user interaction" });
+  }
+});
+
+
 
 /**
  * Capture a PayPal payment
@@ -108,7 +182,7 @@ router.post("/api/payments/:orderID/capture", async (req, res) => {
       return res.status(400).json({ error: "Order ID is required" });
     }
     
-    // Capture the payment - email will be sent automatically if status changes
+    // Capture the payment - this now ensures the order exists in DB first
     const captureData = await capturePayPalOrder(orderID);
 
     // If user is authenticated, ensure order is linked to their account
@@ -504,6 +578,114 @@ router.get("/api/payments/:orderID/continue", async (req, res) => {
     console.error("Error continuing payment:", error);
     res.status(500).json({ 
       error: "Failed to continue payment",
+      message: error.message
+    });
+  }
+});
+
+
+
+/**
+ * Update order status when user cancels after providing email
+ */
+router.post("/api/payments/:orderID/update-canceled", async (req, res) => {
+  try {
+    const { orderID } = req.params;
+    const { status } = req.body;
+    
+    if (!orderID) {
+      return res.status(400).json({ error: "Order ID is required" });
+    }
+    
+    // First check if order exists in database (which means user interaction happened)
+    const order = await Order.findOne({ paypalOrderId: orderID });
+    
+    if (!order) {
+      // If no order in database, check if we need to persist it now
+      // This will extract customer email and persist the order
+      const persistedOrder = await persistOrderToDatabase(orderID);
+      
+      if (!persistedOrder) {
+        return res.json({
+          message: "No user interaction found, no action taken",
+          updated: false
+        });
+      }
+      
+      // Order was just persisted, it already has PAYER_ACTION_REQUIRED status
+      return res.json({
+        id: persistedOrder.paypalOrderId,
+        status: persistedOrder.status,
+        message: "Order persisted with PAYER_ACTION_REQUIRED status",
+        updated: true,
+        hasCustomerEmail: !!persistedOrder.customer?.email
+      });
+    }
+    
+    // If order exists but already has terminal status, don't change it
+    if (['COMPLETED', 'APPROVED', 'VOIDED', 'CANCELED'].includes(order.status)) {
+      return res.json({
+        id: order.paypalOrderId,
+        status: order.status,
+        message: `Order already has terminal status: ${order.status}`,
+        updated: false
+      });
+    }
+    
+    // Check if we need to update the customer email in the existing order
+    if (!order.customer || !order.customer.email) {
+      // Try to get customer data from PayPal
+      const interactionData = await checkPayPalUserInteraction(orderID);
+      
+      if (interactionData.hasEmail && interactionData.customerData?.email) {
+        // Found email in PayPal, update the order
+        let customerUpdate = order.customer || {};
+        customerUpdate.email = interactionData.customerData.email;
+        
+        if (interactionData.customerData.name && !customerUpdate.name) {
+          customerUpdate.name = interactionData.customerData.name;
+        }
+        
+        if (interactionData.customerData.payerId && !customerUpdate.paypalPayerId) {
+          customerUpdate.paypalPayerId = interactionData.customerData.payerId;
+        }
+        
+        // Update the order with customer info
+        await Order.findOneAndUpdate(
+          { paypalOrderId: orderID },
+          { customer: customerUpdate }
+        );
+        
+        console.log(`Updated customer email for order ${orderID}: ${interactionData.customerData.email}`);
+      }
+    }
+    
+    // Update the order status
+    const updatedOrder = await Order.findOneAndUpdate(
+      { paypalOrderId: orderID },
+      { 
+        status: status,
+        updatedAt: new Date()
+      },
+      { new: true }
+    );
+    
+    // Schedule payment reminders for PAYER_ACTION_REQUIRED status
+    if (status === 'PAYER_ACTION_REQUIRED') {
+      await schedulePaymentReminders(orderID);
+    }
+    
+    res.json({
+      id: updatedOrder.paypalOrderId,
+      status: updatedOrder.status,
+      message: `Order status updated to ${status}`,
+      updated: true,
+      hasCustomerEmail: !!updatedOrder.customer?.email
+    });
+  } catch (error) {
+    console.error("Error updating canceled order:", error);
+    res.status(500).json({ 
+      error: "Failed to update order status",
       message: error.message
     });
   }

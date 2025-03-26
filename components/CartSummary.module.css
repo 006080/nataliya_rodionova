@@ -92,10 +92,40 @@
   font-size: 16px;
 }
 
-@media (max-width: 768px) {
-
+.quantityControls {
+  display: flex;
+  align-items: center;
+  margin: 8px 0;
 }
 
-@media (min-width: 768px) and (max-width: 1024px) {
-  
+.quantityButton {
+  background-color: #000;
+  border: 1px solid #ddd;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0;
+  transition: background-color 0.2s;
+}
+
+.quantityButton:hover {
+  background-color: #474747;
+}
+
+.quantityButton:active {
+  background-color: #d0d0d0;
+}
+
+.quantityValue {
+  margin: 0 8px;
+  min-width: 20px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 200;
+  font-style: italic;
 }
