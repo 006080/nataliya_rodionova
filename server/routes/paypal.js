@@ -225,7 +225,8 @@ router.get("/api/payments/:orderID", async (req, res) => {
     // But only if the order email matches the user's email
     if (req.user && req.user._id && !order.user) {
       const userEmail = req.user.email.toLowerCase();
-      const orderEmail = (order.customer?.email || order.deliveryDetails?.email || '').toLowerCase();
+      // const orderEmail = (order.customer?.email || order.deliveryDetails?.email || '').toLowerCase();
+      const orderEmail = (order.customer?.email || '').toLowerCase();
       
       if (userEmail === orderEmail) {
         order.user = req.user._id;
@@ -241,6 +242,7 @@ router.get("/api/payments/:orderID", async (req, res) => {
       totalAmount: order.totalAmount,
       currency: order.currency,
       measurements: order.measurements,
+      deliveryDetails: order.deliveryDetails,
       createdAt: order.createdAt,
       customer: order.customer,
       emailSent: order.emailSent,

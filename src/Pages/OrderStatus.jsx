@@ -200,7 +200,7 @@ console.log(debug);
       hips: order.measurements?.hips || 0
     };
     
-    // Create complete deliveryDetails object with all required fields
+    //Create complete deliveryDetails object with all required fields
     const deliveryDetails = {
       fullName: order.deliveryDetails?.fullName || '',
       address: order.deliveryDetails?.address || '',
