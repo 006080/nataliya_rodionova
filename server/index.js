@@ -6,7 +6,6 @@ import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
 import Review from './Models/Review.js';
 import Feedback from './Models/Feedback.js';
-// import User from '../Models/User.js'; // Uncomment if needed
 import http from 'http';
 import sanitizeHtml from 'sanitize-html';
 import helmet from 'helmet';
@@ -19,18 +18,14 @@ import paypalRoutes from './routes/paypal.js';
 import productRoutes from './routes/product.js';
 import { initializeReminderSystem } from './services/paymentReminderService.js';
 
-
-
 dotenv.config({ path: './.env.local' });
+
 const app = express();
-
-
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-
-
 const server = http.createServer(app);
 
+// Middleware setup
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 if (process.env.NODE_ENV === 'production') {
     app.set('trust proxy', true); 
@@ -38,6 +33,7 @@ if (process.env.NODE_ENV === 'production') {
     app.set('trust proxy', false); 
 }
 
+// Cloudinary configuration
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
@@ -47,10 +43,9 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
     cloudinary,
     params: {
-        folder: 'reviews', 
-        allowed_formats: ['jpg', 'jpeg', 'png'],
-        // transformation: [{ width: 1000, height: 1000, crop: 'limit' }], 
-    }, 
+        folder: "Ellements",
+        allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+    },
 });
 
 const upload = multer({
@@ -66,7 +61,6 @@ const upload = multer({
     }
 });
 
-
 const { 
     MONGO_URI, 
     PORT, 
@@ -77,33 +71,33 @@ const {
     RECAPTCHA_SECRET_KEY
 } = process.env;
 
-
+// Ensure required environment variables are present
 if (!MONGO_URI || !PORT || !FRONTEND_URL_LOCAL || !FRONTEND_URL_PROD || !EMAIL_USER || !EMAIL_PASS || !RECAPTCHA_SECRET_KEY) {
     console.error('Missing required environment variables');
     process.exit(1);
 }
 
+// Rate limiters for review and feedback routes
 const reviewLimiter = rateLimit({
-    windowMs: 60 * 60 * 1000, // 1 hour
-    max: 30, // 3 reviews per IP
+    windowMs: 60 * 60 * 1000, 
+    max: 30, 
     message: 'Too many reviews submitted. Please try again later.'
 });
 
 const feedbackLimiter = rateLimit({
-    windowMs: 30 * 60 * 1000, // 1 hour
-    max: 100, // 3 reviews per IP
+    windowMs: 30 * 60 * 1000,
+    max: 100, 
     message: 'Too many feedbacks submitted. Please try again later.'
 });
 
 // Middleware
 app.use("/api/feedback", feedbackLimiter);
-
 app.use(helmet()); 
 
-app.use(express.json({ limit: '10mb' })); // Limit payload size
+app.use(express.json({ limit: '10mb' })); 
 app.use(cors({
     origin: (origin, callback) => {
-        const allowedOrigins = [FRONTEND_URL_LOCAL, FRONTEND_URL_PROD, 'http://localhost:5173/cart' ];
+        const allowedOrigins = [FRONTEND_URL_LOCAL, FRONTEND_URL_PROD, 'http://localhost:5173/cart'];
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
@@ -113,6 +107,7 @@ app.use(cors({
     credentials: true
 }));
 
+// Feedback schema validation
 const feedbackSchema = Joi.object({
     name: Joi.string().min(3).max(50).required(),
     surname: Joi.string().min(2).max(50).required(),
@@ -121,8 +116,7 @@ const feedbackSchema = Joi.object({
     message: Joi.string().min(2).max(1000).required(),
     captchaToken: Joi.string().required(),
     terms: Joi.string().valid("yes").required() 
-  });
-
+});
 
 async function verifyCaptcha(token) {
     const response = await fetch(
@@ -131,7 +125,7 @@ async function verifyCaptcha(token) {
     );
     const data = await response.json();
     return data.success;
-  }
+}
 
 const transporter = nodemailer.createTransport({
     service: "gmail",
@@ -139,8 +133,7 @@ const transporter = nodemailer.createTransport({
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS, 
     },
-  });
-
+});
 
 // MongoDB Connection
 mongoose.connect(MONGO_URI) 
@@ -155,54 +148,104 @@ mongoose.connect(MONGO_URI)
         process.exit(1);
     });
 
-
+// Feedback POST route
 app.post("/api/feedback", async (req, res) => {
     const { name, surname, email, phone, message, captchaToken, terms } = req.body;
-  
     const { error } = feedbackSchema.validate(req.body);
     if (error) return res.status(400).json({ message: error.details[0].message });
   
     if (terms !== "yes") {
         return res.status(400).json({ message: "You must agree to the terms." });
-      }
+    }
 
     const captchaValid = await verifyCaptcha(captchaToken);
-    if (!captchaValid)
-      return res.status(400).json({ message: "reCAPTCHA error. Please try again." });
-  
+    if (!captchaValid) return res.status(400).json({ message: "reCAPTCHA error. Please try again." });
+
     const sanitizedMessage = sanitizeHtml(message, {
-      allowedTags: [],
-      allowedAttributes: {},
+        allowedTags: [],
+        allowedAttributes: {},
     });
-  
+
     try {
-      const feedback = new Feedback({ name, surname, email, phone, message });
-      await feedback.save();
+        const feedback = new Feedback({ name, surname, email, phone, message });
+        await feedback.save();
 
-      const mailOptions = {
-        from: email,
-        to: process.env.EMAIL_USER,
-        subject: `New message from ${name} ${surname}`,
-        text: `
-          Name: ${name}
-          Surname: ${surname}
-          Email: ${email}
-          Phone: ${phone || "not provided"}
-          Message:
-          ${sanitizedMessage}
-        `,
-      };
-      await transporter.sendMail(mailOptions);
-  
-      res.status(200).json({ message: "Message sent successfully." });
+        const mailOptions = {
+            from: email,
+            to: process.env.EMAIL_USER,
+            subject: `New message from ${name} ${surname}`,
+            text: `
+                Name: ${name}
+                Surname: ${surname}
+                Email: ${email}
+                Phone: ${phone || "not provided"}
+                Message:
+                ${sanitizedMessage}
+            `,
+        };
+        await transporter.sendMail(mailOptions);
+
+        res.status(200).json({ message: "Message sent successfully." });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Server error." });
+        console.error(error);
+        res.status(500).json({ message: "Server error." });
     }
-  });
+});
+
+// Cloudinary Images Route
+app.get('/api/cloudinary-images', async (req, res) => {
+    try {
+        const { folder } = req.query;
+
+        if (!folder) {
+            return res.status(400).json({ error: 'Folder parameter is required' });
+        }
+
+        const { resources } = await cloudinary.api.resources({
+            type: 'upload',
+            prefix: `${folder}`,
+            max_results: 20,
+        });
+
+        res.json(resources.map(file => file.secure_url));
+
+    } catch (error) {
+        console.error('Error fetching images:', error);
+        res.status(500).json({ error: 'Failed to fetch images' });
+    }
+});
 
 
-app.post('/api/reviews', reviewLimiter, upload.single('image'), async (req, res) => { 
+app.get('/api/cloudinary-folders', async (req, res) => {
+    try {
+        const { folders } = await cloudinary.api.root_folders();
+        const folderImages = {};
+
+        for (const folder of folders) {
+            try {
+                const { resources } = await cloudinary.search
+                    .expression(`folder:${folder.name}/*`) // Fetch images inside the folder
+                    .sort_by("created_at", "desc")
+                    .max_results(15) // Limit results to avoid rate limits
+                    .execute();
+
+                folderImages[folder.name] = resources.map(file => file.secure_url);
+            } catch (imageError) {
+                console.error(`Error fetching images for folder ${folder.name}:`, imageError);
+                folderImages[folder.name] = []; // Ensure the folder exists in response
+            }
+        }
+
+        res.json(folderImages);
+    } catch (error) {
+        console.error('Error fetching folders:', error);
+        res.status(500).json({ error: 'Failed to fetch folders' });
+    }
+});
+
+
+// Reviews Route
+app.post('/api/reviews', reviewLimiter, upload.single('image'), async (req, res) => {
     try {
         const { name, rating, message } = req.body;
 
@@ -219,7 +262,6 @@ app.post('/api/reviews', reviewLimiter, upload.single('image'), async (req, res)
             });
         }
 
-        // Sanitize inputs
         const sanitizedMessage = sanitizeHtml(message, {
             allowedTags: [],
             allowedAttributes: {}
@@ -234,12 +276,10 @@ app.post('/api/reviews', reviewLimiter, upload.single('image'), async (req, res)
             image: imageUrl,
             approved: false,
             ipAddress: req.ip,
-            // userAgent: req.get('user-agent')
         });
 
         const savedReview = await newReview.save();
 
-        // Remove sensitive data from response
         const responseReview = {
             id: savedReview._id,
             name: savedReview.name,
@@ -254,48 +294,19 @@ app.post('/api/reviews', reviewLimiter, upload.single('image'), async (req, res)
             message: 'Review submitted successfully and pending approval',
             data: responseReview
         });
-
     } catch (error) {
         console.error('Error submitting review:', error);
-        
-        if (error instanceof multer.MulterError) {
-            return res.status(400).json({ 
-                error: `File upload error: ${error.message}` 
-            });
-        }
-
-        if (error.message && error.message.includes('file size')) {
-            return res.status(400).json({ 
-                error: 'File size too large. Please upload an image less than 5MB.' 
-            });
-        }
-
-        if (error.message && error.message.includes('cloudinary')) {
-            return res.status(400).json({ 
-                error: 'Image upload failed. Please try again with a different image.' 
-            });
-        }
-
         res.status(500).json({ 
             error: 'Failed to submit review. Please try again later.' 
         });
     }
 });
 
-app.use((error, req, res, next) => {
-    if (error instanceof multer.MulterError) {
-        return res.status(400).json({
-            error: `Upload error: ${error.message}`
-        });
-    }
-    next(error);
-});
-
-
+// Reviews GET route
 app.get('/api/reviews', async (req, res) => {
     try {
         const reviews = await Review.find({ approved: true })
-            .select('-ipAddress -userAgent')
+            .select('-ipAddress')
             .sort({ createdAt: -1 });
         res.status(200).json(reviews);
     } catch (error) {
@@ -304,42 +315,26 @@ app.get('/api/reviews', async (req, res) => {
     }
 });
 
-
+// Product and PayPal routes
 app.use(productRoutes);
 app.use(paypalRoutes);
-  
 
-
-
+// Handle 404 errors
 app.use((req, res) => {
     res.status(404).json({ error: 'Endpoint not found' });
 });
 
+// General error handler
 app.use((err, req, res, next) => {
     console.error('Server error:', err);
     res.status(500).json({ error: 'Internal server error' });
 });
 
+// Health Check route
 app.get('/api/health', (req, res) => {
     res.status(200).json({ status: 'OK' });
 });
 
-
 server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
-
-
-// Graceful shutdown
-process.on('SIGTERM', shutdown);
-process.on('SIGINT', shutdown);
-
-function shutdown() {
-    console.log('Shutting down gracefully...');
-    server.close(() => {
-        mongoose.connection.close(false, () => {
-            console.log('Server and MongoDB connection closed');
-            process.exit(0);
-        });
-    });
-}

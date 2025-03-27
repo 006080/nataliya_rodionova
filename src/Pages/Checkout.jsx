@@ -100,17 +100,17 @@ const Checkout = () => {
 
   return (
     <div className={styles.checkoutContainer}>
-      <h2>Checkout</h2>
 
       <div className={styles.orderSummary}>
         {cartItems.map((item) => (
           <div key={item.id || item.name} className={styles.cartItem}>
             <img
+            style={{width:'160px', height:'120px'}}
               src={item.image}
               alt={item.name}
               className={styles.productImage}
             />
-            <div style={{ width: '150px' }}>
+            <div style={{ width: '250px' }}>
               <p>
                 <strong>{item.name}</strong>
               </p>

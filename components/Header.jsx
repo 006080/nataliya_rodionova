@@ -17,25 +17,17 @@ const Header = () => {
 
   const navRef = useOutsideClick(() => openMenu(false))
 
-  // Check if we're on the Contacts page
-  // const isContactPage = window.location.pathname === "/contacts";
-
   const handleCartClick = () => {
     setCartIsOpen(!cartIsOpen);
   };
 
   const toggleMenu = () => {
-    if (menu) {
-      openMenu(!menu); // Open modal-style menu on Contacts page
-    } else {
-      openMenu(!menu); // Open regular menu on other pages
-    }
+    openMenu(!menu);
   };
 
   return (
     <Nav>
       <div className={`${styles.navigation} ${menu ? styles.blackBackground : ''}`}>
-        {/* Logo on the left */}
         <div onClick={() => navigate("/")} className={styles.logo}>
           <img 
             className={`${styles.logotype} ${menu ? styles.whiteLogo : ''}`} 
@@ -46,23 +38,26 @@ const Header = () => {
         
         <div className={styles.navbar}>
           <ul className={styles.navLinks}>
-            {["/ourservice", "/reviews", "/shop", "/contacts"].map((path, index) => {
+            {["/ourservice", "/reviews", "/press", "/collaboration", "/shop", "/contacts"].map((path, index) => {
               const label = path.slice(1).toUpperCase().replace(/_/g, ' ');
               return (
                 <li key={index}>
-                  <p 
-                    className={menu ? styles.whiteNavLinkP : styles.navLinkP} 
-                    onClick={() => navigate(path)}
-                  >
-                    {label}
-                  </p>
+                  {path === "/press" ? (
+                    <p><a href="https://thefashionvox.wordpress.com/2018/07/27/varona/" target="_blank" style={{textDecoration:'none', color: '#555'}}>{label}</a></p>
+                  ) : (
+                    <p 
+                  
+                      onClick={() => navigate(path)}
+                    >
+                      {label}
+                    </p>
+                  )}
                 </li>
               );
             })}
           </ul>
         </div>
         
-        {/* Icons on the right */}
         <div className={styles.icons}>
           <div className={styles.cartIconContainer}>
             <FontAwesomeIcon 
@@ -77,10 +72,6 @@ const Header = () => {
             )}
             {cartIsOpen && <CartSummary cartItems={cartItems} onClose={() => setCartIsOpen(false)} />}
           </div>
-          {/* <FontAwesomeIcon 
-            icon={faUser} 
-            className={`${styles.userIcon} ${isContactPage ? styles.whiteIcon : ''}`} 
-          /> */}
           <FontAwesomeIcon 
             className={`${styles.burgerIcon} ${menu ? styles.whiteIcon : ''}`} 
             onClick={toggleMenu} 
@@ -88,15 +79,18 @@ const Header = () => {
           />
         </div>
 
-        {/* Dropdown menu for mobile on non-Contacts pages */}
         {menu && (
           <div className={styles.dropdownMenu}>
             <ul className={styles.dropdownLinks}>
-              {["/ourservice", "/reviews", "/shop", "/contacts"].map((path, index) => {
+              {["/ourservice", "/reviews", "/press", "/collaboration", "/shop", "/contacts"].map((path, index) => {
                 const label = path.slice(1).toUpperCase().replace(/_/g, ' ');
                 return (
                   <li key={index}>
-                    <p onClick={() => navigate(path)}>{label}</p>
+                    {path === "/press" ? (
+                      <p><a href="https://thefashionvox.wordpress.com/2018/07/27/varona/" target="_blank" style={{textDecoration:'none', color:'white',}}>{label}</a></p>
+                    ) : (
+                      <p onClick={() => navigate(path)}>{label}</p>
+                    )}
                   </li>
                 );
               })}
@@ -105,16 +99,19 @@ const Header = () => {
         )}
       </div>
 
-      {/* Modal Overlay for Contacts page */}
       {menu && (
         <div className={styles.modalOverlay} onClick={() => openMenu(false)}>
           <div className={styles.modalContent} ref={navRef}>
             <ul>
-              {["/ourservice", "/reviews", "/shop", "/contacts"].map((path, index) => {
+              {["/ourservice", "/reviews", "/press", "/collaboration", "/shop", "/contacts"].map((path, index) => {
                 const label = path.slice(1).toUpperCase().replace(/_/g, ' ');
                 return (
                   <li key={index}>
-                    <p onClick={() => { navigate(path); openMenu(false); }}>{label}</p>
+                    {path === "/press" ? (
+                      <p><a href="https://thefashionvox.wordpress.com/2018/07/27/varona/" target="_blank" style={{textDecoration:'none', color:'white',}}>{label}</a></p>
+                    ) : (
+                      <p onClick={() => { navigate(path); openMenu(false); }}>{label}</p>
+                    )}
                   </li>
                 );
               })}

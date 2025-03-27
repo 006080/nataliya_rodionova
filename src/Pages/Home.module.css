@@ -14,6 +14,7 @@
 }
 
 .sloganBlog {
+
     display: flex;
     flex-direction: column;
     align-content: flex-start;
@@ -21,6 +22,14 @@
     padding: 20px;
     position: fixed;
     top: 35vh; 
+}
+
+.sloganBlog h1{
+    font-size: 70px;
+}
+
+.sloganBlog h2 {
+    font-size: 30px;
 }
 
 /* Button Styling */
@@ -43,9 +52,7 @@
     background-color: rgb(11, 4, 4); /* Darker color on hover */
 }
 
-/* Typography */
 h1 {
-    font-size: 54px;
     font-family: "Playfair Display", serif;
     color: rgb(254, 249, 224);
     font-style: italic;
@@ -53,7 +60,6 @@ h1 {
 
 h2 {
     color: rgb(254, 249, 224);
-    font-size: 26px;
     font-weight: 300;
     font-style: italic;
     font-family: "Roboto Serif", serif;
@@ -74,11 +80,12 @@ h2 {
     text-align: center;
     }
 
-    h1 {
+    
+    .sloganBlog h1{
         font-size: 30px;
     }
-  
-    h2 {
+    
+    .sloganBlog h2 {
         font-size: 20px;
     }
 }
@@ -119,11 +126,12 @@ h2 {
     text-align: center;
     }
 
-    h1 {
+
+    .sloganBlog h1{
         font-size: 40px;
     }
-  
-    h2 {
+    
+    .sloganBlog h2 {
         font-size: 20px;
     }
 }

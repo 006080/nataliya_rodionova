@@ -4,18 +4,6 @@
     color: #000000;
     font-weight: 500;
   }
-
-  .sum {
-    border-bottom: 1px solid #ddd;
-    margin-bottom: 5px;
-  }
-  
-  .orderSummary {
-    padding: 15px;
-    /* background: white; */
-    border-radius: 8px;
-    /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); */
-  }
   
   .cartItem {
     display: flex;
@@ -23,12 +11,6 @@
     gap: 15px;
     border-bottom: 1px solid #ddd;
     padding: 10px 0;
-  }
-  
-  .productImage {
-    width: 200px;
-    height: auto;
-    border-radius: 5px;
   }
   
   .submitButton {
@@ -49,6 +31,7 @@
   }
   
   .paypalContainer {
+    background-color: white;
     margin-top: 20px;
     text-align: center;
   }
@@ -263,8 +246,8 @@
   top: 50%;
   left: 0;
   right: 0;
-  height: 3px;
-  background-color: #e2e8f0;
+  height: 1px;
+  background-color: #00000010;
   transform: translateY(-50%);
   z-index: 1;
 }
@@ -325,7 +308,7 @@
 
 /* Payment Container */
 .paypalContainer {
-  background: #f8fafc;
+  background: white;
   border-radius: 12px;
   padding: 25px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
@@ -344,6 +327,7 @@
 }
 
 /* Review Section */
+
 .reviewSection {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -352,6 +336,7 @@
 }
 
 .reviewBlock {
+  border: solid 1px rgba(0, 0, 0, 0.048);
   background: white;
   border-radius: 10px;
   padding: 20px;
@@ -559,6 +544,7 @@
   background: white;
   border-radius: 12px;
   padding: 20px;
+  margin-top: 80px;
   margin-bottom: 30px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
@@ -589,7 +575,6 @@
   color: #2d3748;
   margin-top: 15px;
   padding-top: 15px;
-  border-top: 2px dashed #e2e8f0;
 }
 
 .orderDetails {

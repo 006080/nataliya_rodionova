@@ -1,0 +1,161 @@
+.container {
+  padding: 20px;
+  text-align: center;
+  }
+  
+  .heading {
+  font-family: "Playfair Display", serif;
+  margin-top: 100px;
+  font-size: 48px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  }
+  
+  .loader {
+  border: 4px solid rgba(0, 0, 0, 0.3);
+  border-top: 4px solid #000000;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: 20px auto;
+  }
+  
+  @keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+  }
+  
+  .text {
+  font-family: "Roboto Serif", serif;
+  font-size: 14px;
+  margin-bottom: 20px;
+  font-style: italic;
+  margin-bottom: 70px;
+  
+  }
+  
+  .folderGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 120px;
+  justify-content: center;
+  }
+  
+  .folderItem {
+  cursor: pointer;
+  text-align: center;
+  transition: transform 0.2s ease-in-out;
+  }
+  
+  .modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgb(0, 0, 0);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  }
+  
+  .folderImage {
+  width: 550px;
+  object-fit: cover;
+  /* box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); */
+  }
+  
+  .folderTitle {
+    font-weight: 500;
+  margin-top: 8px;
+  font-family: "Playfair Display", serif;
+  }
+  
+  .backButton {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: #000000;
+  margin-bottom: 10px;
+  }
+
+  h4 {
+    font-family: "Roboto Serif", serif;
+    font-size: 12px; 
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  h5 {
+    font-family: "Roboto Serif", serif;
+    font-size: 10px; 
+    font-style: italic;
+    font-weight: 400;
+  }
+  
+  .backButton:hover {
+  text-decoration: underline;
+  color: white;
+  text-decoration: none;
+  }
+  
+  .selectedFolderTitle {
+    font-family: "Playfair Display", serif;
+    font-weight: 600;
+  font-size: 28px;
+  margin-bottom: 20px;
+  }
+  
+  .fullscreenModal {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* background: rgba(0, 0, 0, 0.8); */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  }
+  
+  .fullscreenImage {
+  max-width: 90%;
+  max-height: 90%;
+  object-fit: contain;
+  transition: opacity 0.3s ease-in-out;
+  }
+
+  @media (max-width: 768px) {
+
+    .folderGrid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 50px;
+      justify-content: center;
+      }
+
+  }
+
+  @media (min-width: 768px) and (max-width: 1024px) {
+
+    .folderGrid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 50px;
+      justify-content: center;
+      }
+  }
+
+  @media screen and (max-width: 1024px) {
+
+    .folderGrid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 50px;
+      justify-content: center;
+      }
+
+  }

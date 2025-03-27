@@ -14,7 +14,7 @@
     "@mollie/api-client": "^4.2.0",
     "@paypal/checkout-server-sdk": "^1.0.3",
     "@paypal/paypal-server-sdk": "^0.6.1",
-    "axios": "^1.7.9",
+    "axios": "^1.8.3",
     "body-parser": "^1.20.3",
     "cloudinary": "^1.41.3",
     "cors": "^2.8.5",

@@ -142,6 +142,7 @@
   transition: color 0.2s ease;
 }
 
+
 .dropdownLinks li p:hover {
   color: #000; /* Hover color */
 }
