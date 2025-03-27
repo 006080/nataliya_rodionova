@@ -204,7 +204,168 @@
 }
 
 .paymentSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center; 
+  justify-content: center;
+  width: 100%;
   margin-top: 2rem;
   padding-top: 1rem;
   border-top: 1px solid #e0e0e0;
+}
+
+.paymentSection > * { 
+  width: 100%; 
+  max-width: 600px; 
+}
+
+
+
+
+
+/* Updated styles with unique class names and minimalist black buttons */
+
+.orderStatus_container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+  min-height: 70vh;
+}
+
+.orderStatus_errorCard {
+  background-color: white;
+  border-radius: 8px;
+  padding: 32px;
+  max-width: 550px;
+  width: 100%;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  text-align: center;
+  animation: orderStatus_fadeIn 0.5s ease-out;
+}
+
+@keyframes orderStatus_fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.orderStatus_iconContainer {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.orderStatus_systemErrorIcon, .orderStatus_notFoundIcon {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.orderStatus_systemErrorIcon {
+  background-color: #f5f5f5;
+  color: #333333;
+}
+
+.orderStatus_notFoundIcon {
+  background-color: #f5f5f5;
+  color: #333333;
+}
+
+.orderStatus_titleHeading {
+  font-size: 28px;
+  color: #1a1a1a;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+.orderStatus_messageContent {
+  margin-bottom: 32px;
+  color: #444444;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.orderStatus_errorDetail {
+  font-weight: 500;
+  color: #666666;
+  margin-bottom: 16px;
+  padding: 12px;
+  background-color: #f9f9f9;
+  border-radius: 6px;
+  border-left: 3px solid #dddddd;
+}
+
+.orderStatus_bulletList {
+  text-align: left;
+  margin: 16px auto;
+  padding-left: 16px;
+}
+
+.orderStatus_bulletList li {
+  margin-bottom: 10px;
+  position: relative;
+  padding-left: 12px;
+}
+
+.orderStatus_bulletList li::before {
+  content: "•";
+  position: absolute;
+  left: -12px;
+  color: #444444;
+}
+
+.orderStatus_reassuranceNote {
+  margin-top: 16px;
+  font-weight: 500;
+  color: #333333;
+  font-size: 17px;
+}
+
+.orderStatus_buttonGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+@media (min-width: 540px) {
+  .orderStatus_buttonGroup {
+    flex-direction: row;
+    justify-content: center;
+    gap: 16px;
+  }
+}
+
+.orderStatus_primaryBtn {
+  padding: 12px 24px;
+  border-radius: 4px;
+  font-weight: 500;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  gap: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  letter-spacing: 0.3px;
+}
+
+.orderStatus_primaryBtn {
+  background-color: #000000;
+  color: white;
+  border: 1px solid #000000;
+}
+
+.orderStatus_primaryBtn:hover {
+  background-color: #333333;
+}
+
+.orderStatus_btnIcon {
+  font-size: 16px;
 }

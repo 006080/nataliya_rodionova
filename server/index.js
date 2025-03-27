@@ -21,6 +21,7 @@ import { initializeReminderSystem } from './services/paymentReminderService.js';
 import cookieParser from 'cookie-parser';
 import authRoutes from './routes/auth.js';
 import orderRoutes from './routes/order.js';
+import cartRoutes from './routes/cart.js';
 
 
 dotenv.config({ path: './.env.local' });
@@ -311,6 +312,7 @@ app.use(productRoutes);
 app.use(paypalRoutes);
 app.use(authRoutes);
 app.use(orderRoutes);
+app.use(cartRoutes);
   
 
 

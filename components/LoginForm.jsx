@@ -83,6 +83,9 @@ const LoginForm = () => {
           localStorage.removeItem('rememberedEmail');
         }
         
+        setTimeout(() => {
+          window.location.reload();
+        }, 200);
         // Redirect to the page user was trying to access, or home
         navigate(from, { replace: true });
       } 

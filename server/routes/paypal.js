@@ -204,8 +204,73 @@ router.post("/api/payments/:orderID/capture", async (req, res) => {
   }
 });
 
+
+
+
+
+//26.03.2025
 /**
  * Get order status and details
+ */
+// router.get("/api/payments/:orderID", async (req, res) => {
+//   try {
+//     const { orderID } = req.params;
+    
+//     if (!orderID) {
+//       return res.status(400).json({ error: "Order ID is required" });
+//     }
+    
+//     const order = await Order.findOne({ paypalOrderId: orderID });
+    
+//     if (!order) {
+//       return res.status(404).json({ error: "Order not found" });
+//     }
+
+//      // If user is authenticated, ensure order is linked to their account
+//     // But only if the order email matches the user's email
+//     if (req.user && req.user._id && !order.user) {
+//       const userEmail = req.user.email.toLowerCase();
+//       // const orderEmail = (order.customer?.email || order.deliveryDetails?.email || '').toLowerCase();
+//       const orderEmail = (order.customer?.email || '').toLowerCase();
+      
+//       if (userEmail === orderEmail) {
+//         order.user = req.user._id;
+//         await order.save();
+//         console.log(`Order ${orderID} linked to user ${req.user._id}`);
+//       }
+//     }
+    
+//     res.json({
+//       id: order.paypalOrderId,
+//       status: order.status,
+//       items: order.items,
+//       totalAmount: order.totalAmount,
+//       currency: order.currency,
+//       measurements: order.measurements,
+//       deliveryDetails: order.deliveryDetails,
+//       createdAt: order.createdAt,
+//       customer: order.customer,
+//       emailSent: order.emailSent,
+//       emailSentAt: order.emailSentAt,
+//       fulfillmentStatus: order.fulfillmentStatus,
+//       trackingNumber: order.trackingNumber,
+//       shippedAt: order.shippedAt,
+//       deliveredAt: order.deliveredAt,
+//       // Include user ID if order is linked to a user
+//       user: order.user
+//     });
+//   } catch (error) {
+//     console.error("Error fetching order:", error);
+//     res.status(500).json({ error: "Failed to fetch order details" });
+//   }
+// });
+
+
+
+// Update to payment route handler in api/payments/:orderID endpoint
+
+/**
+ * Get order status and details - Enhanced for new redirect flow
  */
 router.get("/api/payments/:orderID", async (req, res) => {
   try {
@@ -215,17 +280,47 @@ router.get("/api/payments/:orderID", async (req, res) => {
       return res.status(400).json({ error: "Order ID is required" });
     }
     
+    // Try to find the order in our database
     const order = await Order.findOne({ paypalOrderId: orderID });
     
+    // If not found, try to retrieve from PayPal and persist if it exists
     if (!order) {
+      try {
+        // Check if order exists in PayPal
+        const paypalOrder = await getPayPalOrderDetails(orderID);
+        
+        if (paypalOrder) {
+          // Try to persist the order from PayPal data
+          const persistedOrder = await persistOrderToDatabase(orderID);
+          
+          if (persistedOrder) {
+            // Successfully retrieved and persisted the order
+            return res.json({
+              id: persistedOrder.paypalOrderId,
+              status: persistedOrder.status,
+              items: persistedOrder.items,
+              totalAmount: persistedOrder.totalAmount,
+              currency: persistedOrder.currency,
+              measurements: persistedOrder.measurements,
+              deliveryDetails: persistedOrder.deliveryDetails,
+              createdAt: persistedOrder.createdAt,
+              customer: persistedOrder.customer,
+              emailSent: persistedOrder.emailSent,
+              emailSentAt: persistedOrder.emailSentAt
+            });
+          }
+        }
+      } catch (paypalError) {
+        console.error("Error retrieving order from PayPal:", paypalError);
+        // Continue to return 404 if we can't find it in PayPal either
+      }
+      
       return res.status(404).json({ error: "Order not found" });
     }
 
-     // If user is authenticated, ensure order is linked to their account
-    // But only if the order email matches the user's email
+    // If user is authenticated, ensure order is linked to their account
     if (req.user && req.user._id && !order.user) {
       const userEmail = req.user.email.toLowerCase();
-      // const orderEmail = (order.customer?.email || order.deliveryDetails?.email || '').toLowerCase();
       const orderEmail = (order.customer?.email || '').toLowerCase();
       
       if (userEmail === orderEmail) {
@@ -235,6 +330,7 @@ router.get("/api/payments/:orderID", async (req, res) => {
       }
     }
     
+    // Return the order data
     res.json({
       id: order.paypalOrderId,
       status: order.status,
@@ -259,6 +355,14 @@ router.get("/api/payments/:orderID", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch order details" });
   }
 });
+
+
+
+
+
+
+
+
 
 /**
  * Manually trigger sending email for an order (useful for testing or resending)

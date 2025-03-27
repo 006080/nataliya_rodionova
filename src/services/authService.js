@@ -289,6 +289,23 @@ export const clearAllAuthData = async () => {
     
     // Clear sessionStorage
     sessionStorage.clear();
+
+
+   // Clear cart from database if we're authenticated
+   try {
+    const apiUrl = getApiUrl();
+    await fetch(`${apiUrl}/api/cart`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${getAccessToken()}`
+      },
+      credentials: 'include'
+    });
+    console.log('Cart cleared from database successfully');
+  } catch (cartError) {
+    console.error('Error clearing cart from database:', cartError);
+  }
+
     
     // Clear refresh token cookie (via API call)
     await fetch(`${getApiUrl()}/api/auth/logout`, {
@@ -323,3 +340,290 @@ export const clearAllAuthData = async () => {
   }
 };
 
+
+// /**
+//  * Login user and merge carts
+//  * @param {string} email - User email
+//  * @param {string} password - User password
+//  * @returns {Promise<Object>} - Login result
+//  */
+// export const loginUser = async (email, password) => {
+//   try {
+//     const apiUrl = getApiUrl();
+    
+//     const response = await fetch(`${apiUrl}/api/auth/login`, {
+//       method: 'POST',
+//       headers: { 'Content-Type': 'application/json' },
+//       body: JSON.stringify({ email, password }),
+//       credentials: 'include',
+//     });
+    
+//     const data = await response.json();
+    
+//     // Handle email verification error
+//     if (response.status === 403 && data.needsVerification) {
+//       return {
+//         success: false,
+//         needsVerification: true,
+//         verificationDetails: data.verificationDetails || { email }
+//       };
+//     }
+    
+//     // Handle other errors
+//     if (!response.ok) {
+//       return {
+//         success: false,
+//         error: data.error || 'Login failed'
+//       };
+//     }
+    
+//     // Store tokens securely - this will also store user data in localStorage
+//     setTokens(data.accessToken, data.refreshToken);
+    
+//     // Try to merge guest cart with user cart
+//     try {
+//       // Get local cart items
+//       const localCartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
+      
+//       // Only attempt merge if there are items
+//       if (localCartItems.length > 0) {
+//         // Import the cart service function
+//         import('./cartService.js').then(({ mergeGuestCartWithUserCart }) => {
+//           mergeGuestCartWithUserCart(localCartItems)
+//             .then(success => {
+//               if (success) {
+//                 console.log('Guest cart merged with user cart');
+                
+//                 // Dispatch an event to notify CartContext to refresh
+//                 const cartMergedEvent = new CustomEvent('cart-merged');
+//                 window.dispatchEvent(cartMergedEvent);
+//               }
+//             });
+//         });
+//       }
+//     } catch (error) {
+//       console.error('Error merging carts:', error);
+//       // Continue with login even if merge fails
+//     }
+    
+//     // Dispatch auth state changed event
+//     const authStateChangedEvent = new CustomEvent('auth-state-changed');
+//     window.dispatchEvent(authStateChangedEvent);
+    
+//     return { 
+//       success: true,
+//       user: data.user 
+//     };
+//   } catch (error) {
+//     console.error('Login error:', error);
+//     return {
+//       success: false,
+//       error: error.message || 'An unexpected error occurred'
+//     };
+//   }
+// };
+
+
+
+// /**
+//  * Login user and merge carts
+//  * @param {string} email - User email
+//  * @param {string} password - User password
+//  * @returns {Promise<Object>} - Login result
+//  */
+// export const loginUser = async (email, password) => {
+//   try {
+//     const apiUrl = getApiUrl();
+    
+//     const response = await fetch(`${apiUrl}/api/auth/login`, {
+//       method: 'POST',
+//       headers: { 'Content-Type': 'application/json' },
+//       body: JSON.stringify({ email, password }),
+//       credentials: 'include',
+//     });
+    
+//     const data = await response.json();
+    
+//     // Handle email verification error
+//     if (response.status === 403 && data.needsVerification) {
+//       return {
+//         success: false,
+//         needsVerification: true,
+//         verificationDetails: data.verificationDetails || { email }
+//       };
+//     }
+    
+//     // Handle other errors
+//     if (!response.ok) {
+//       return {
+//         success: false,
+//         error: data.error || 'Login failed'
+//       };
+//     }
+    
+//     // Store tokens securely - this will also store user data in localStorage
+//     setTokens(data.accessToken, data.refreshToken);
+    
+//     // Try to merge guest cart with user cart
+//     try {
+//       // Get local cart items
+//       const localCartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
+      
+//       // Only attempt merge if there are items
+//       if (localCartItems.length > 0) {
+//         // Import the cart service function - use the merge endpoint
+//         const mergeResponse = await fetch(`${apiUrl}/api/cart/merge`, {
+//           method: 'POST',
+//           headers: { 
+//             'Content-Type': 'application/json',
+//             'Authorization': `Bearer ${data.accessToken}`
+//           },
+//           body: JSON.stringify({ items: localCartItems }),
+//           credentials: 'include',
+//         });
+        
+//         if (mergeResponse.ok) {
+//           const mergeData = await mergeResponse.json();
+          
+//           // Update local cart with merged result
+//           localStorage.setItem('cartItems', JSON.stringify(mergeData.items || []));
+          
+//           console.log('Guest cart merged with user cart');
+          
+//           // Dispatch an event to notify CartContext to refresh
+//           const cartMergedEvent = new CustomEvent('cart-merged');
+//           window.dispatchEvent(cartMergedEvent);
+//         } else {
+//           console.error('Error merging carts:', await mergeResponse.text());
+//         }
+//       } else {
+//         // No local items to merge, just fetch user's cart
+//         const cartResponse = await fetch(`${apiUrl}/api/cart`, {
+//           headers: {
+//             'Authorization': `Bearer ${data.accessToken}`
+//           },
+//           credentials: 'include',
+//         });
+        
+//         if (cartResponse.ok) {
+//           const cartData = await cartResponse.json();
+          
+//           // Update local cart with database cart
+//           localStorage.setItem('cartItems', JSON.stringify(cartData.items || []));
+          
+//           // Dispatch an event to notify CartContext to refresh
+//           const cartMergedEvent = new CustomEvent('cart-merged');
+//           window.dispatchEvent(cartMergedEvent);
+//         }
+//       }
+//     } catch (error) {
+//       console.error('Error merging carts:', error);
+//       // Continue with login even if merge fails
+//     }
+    
+//     // Dispatch auth state changed event
+//     const authStateChangedEvent = new CustomEvent('auth-state-changed');
+//     window.dispatchEvent(authStateChangedEvent);
+    
+//     return { 
+//       success: true,
+//       user: data.user 
+//     };
+//   } catch (error) {
+//     console.error('Login error:', error);
+//     return {
+//       success: false,
+//       error: error.message || 'An unexpected error occurred'
+//     };
+//   }
+// };
+
+
+
+
+/**
+ * Login user and reload page after success
+ * @param {string} email - User email
+ * @param {string} password - User password
+ * @returns {Promise<Object>} - Login result
+ */
+export const loginUser = async (email, password) => {
+  try {
+    const apiUrl = getApiUrl();
+    
+    const response = await fetch(`${apiUrl}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+      credentials: 'include',
+    });
+    
+    const data = await response.json();
+    
+    // Handle email verification error
+    if (response.status === 403 && data.needsVerification) {
+      return {
+        success: false,
+        needsVerification: true,
+        verificationDetails: data.verificationDetails || { email }
+      };
+    }
+    
+    // Handle other errors
+    if (!response.ok) {
+      return {
+        success: false,
+        error: data.error || 'Login failed'
+      };
+    }
+    
+    // Store tokens securely - this will also store user data in localStorage
+    setTokens(data.accessToken, data.refreshToken);
+    
+    // Get local cart items
+    const localCartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
+    
+    // Only attempt merge if there are items
+    if (localCartItems.length > 0) {
+      try {
+        // Save cart items to server before reload
+        await fetch(`${apiUrl}/api/cart/merge`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${data.accessToken}`
+          },
+          body: JSON.stringify({ items: localCartItems }),
+          credentials: 'include',
+        });
+        console.log('Cart data sent to server before reload');
+      } catch (error) {
+        console.error('Error sending cart data:', error);
+        // Continue with login even if cart merge fails
+      }
+    }
+    
+    // Dispatch auth state changed event
+    const authStateChangedEvent = new CustomEvent('auth-state-changed');
+    window.dispatchEvent(authStateChangedEvent);
+    
+    // CRITICAL: Force page reload with a slight delay to ensure events are processed
+    setTimeout(() => {
+      console.log('Reloading page after successful login...');
+      window.location.href = window.location.href;
+    }, 100);
+    
+    // Return success but let the page reload happen
+    return { 
+      success: true,
+      user: data.user,
+      reloading: true
+    };
+  } catch (error) {
+    console.error('Login error:', error);
+    return {
+      success: false,
+      error: error.message || 'An unexpected error occurred'
+    };
+  }
+};
