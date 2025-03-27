@@ -8,16 +8,14 @@ router.get('/api/orders', authenticate, async (req, res) => {
   try {
     const userEmail = req.user.email.toLowerCase();
     
-    // Find both orders linked to user ID AND orders with matching email
+
     const orders = await Order.find({
       $or: [
         { user: req.user._id },
         { 'customer.email': { $regex: new RegExp(userEmail.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') } },
-        // { 'deliveryDetails.email': { $regex: new RegExp(userEmail.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') } }
       ]
     }).sort({ createdAt: -1 });
 
-    console.log(`Found ${orders.length} orders for user`);
   
 
     const formattedOrders = orders.map(order => ({
@@ -41,14 +39,11 @@ router.get('/api/orders', authenticate, async (req, res) => {
   }
 });
 
-/**
- * Get detailed order by ID
- */
+
 router.get('/api/orders/:id', authenticate, async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
 
-    // Check if order exists
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });
     }
@@ -75,7 +70,6 @@ router.get('/api/orders/:id', authenticate, async (req, res) => {
     if (!order.user && req.user._id) {
       order.user = req.user._id;
       await order.save();
-      console.log(`Order ${order._id} associated with user ${req.user._id}`);
     }
 
     // Format the shipping address
@@ -86,7 +80,7 @@ router.get('/api/orders/:id', authenticate, async (req, res) => {
         fullName: order.deliveryDetails.fullName,
         address: order.deliveryDetails.address,
         city: order.deliveryDetails.city,
-        state: '', // Add if available
+        state: '', 
         postalCode: order.deliveryDetails.postalCode,
         country: order.deliveryDetails.country,
         phone: order.deliveryDetails.phone

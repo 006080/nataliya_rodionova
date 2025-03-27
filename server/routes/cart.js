@@ -4,13 +4,10 @@ import CartItem from '../Models/CartItem.js';
 
 const router = express.Router();
 
-// Get cart items for authenticated user
 router.get('/api/cart', authenticate, async (req, res) => {
   try {
-    // User is authenticated, req.user is available from auth middleware
     const userId = req.user._id;
-    
-    // Find cart items for this user
+
     const cartItems = await CartItem.find({ userId });
     
     res.json({

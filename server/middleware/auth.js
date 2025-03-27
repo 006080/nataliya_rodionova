@@ -91,7 +91,7 @@ export const loginLimiter = rateLimit({
 
 export const refreshTokenLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 60, // 10 requests per IP
+  max: 60, // 60 requests per IP
   standardHeaders: true, 
   legacyHeaders: false,
   message: { error: 'Too many token refresh attempts. Please try again later.' },

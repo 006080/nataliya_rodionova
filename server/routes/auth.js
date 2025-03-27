@@ -19,11 +19,9 @@ router.post('/api/auth/login', loginLimiter, trackLoginAttempts, async (req, res
   try {
     const { email, password } = req.body;
     
-    console.log('Login attempt for email:', email);
     
     // Validate input
     if (!email || !password) {
-      console.log('Missing email or password');
       return res.status(400).json({ error: 'Email and password are required.' });
     }
     
@@ -31,14 +29,8 @@ router.post('/api/auth/login', loginLimiter, trackLoginAttempts, async (req, res
     const normalizedEmail = email.toLowerCase().trim();
     const user = await User.findOne({ email: normalizedEmail }).select('+password');
     
-    console.log('User lookup result:', {
-      email: normalizedEmail,
-      userFound: !!user,
-      hasPassword: user ? !!user.password : false
-    });
     
     if (!user) {
-      console.log('User not found with email:', normalizedEmail);
       return res.status(401).json({ error: 'Invalid email or password.' });
     }
     
@@ -53,14 +45,12 @@ router.post('/api/auth/login', loginLimiter, trackLoginAttempts, async (req, res
         
         // If lock period has expired, automatically unlock the account
         if (Date.now() > lockExpires.getTime()) {
-          console.log('Lock period expired, unlocking account for:', email);
           user.locked = false;
           user.failedLoginAttempts = 0;
           // Continue with login process
         } else {
           // Account is still locked - calculate and show remaining time
           const remainingMinutes = Math.ceil((lockExpires.getTime() - Date.now()) / 60000);
-          console.log(`Account for ${email} is temporarily locked. ${remainingMinutes} minutes remaining.`);
           
           return res.status(403).json({ 
             error: `Your account is temporarily locked due to multiple failed attempts. Please try again in ${remainingMinutes} minute(s).`
@@ -68,7 +58,6 @@ router.post('/api/auth/login', loginLimiter, trackLoginAttempts, async (req, res
         }
       } else {
         // If for some reason lockedAt is missing, default to a full lockout period
-        console.log('Account is locked but missing lockedAt timestamp');
         return res.status(403).json({ 
           error: 'Your account is temporarily locked. Please try again in 60 minutes.'
         });
@@ -85,7 +74,6 @@ router.post('/api/auth/login', loginLimiter, trackLoginAttempts, async (req, res
     let validPassword = false;
     try {
       validPassword = await user.comparePassword(password);
-      console.log('Password verification result:', validPassword);
     } catch (bcryptError) {
       console.error('bcrypt.compare error:', bcryptError);
       return res.status(500).json({ error: 'Error verifying credentials.' });
@@ -95,7 +83,6 @@ router.post('/api/auth/login', loginLimiter, trackLoginAttempts, async (req, res
       // Increment failed attempts
       user.failedLoginAttempts = (user.failedLoginAttempts || 0) + 1;
       
-      console.log(`Failed login attempt ${user.failedLoginAttempts} for user:`, email);
       
       // Lock account after 5 failed attempts (with temporary lockout)
       if (user.failedLoginAttempts >= 5) {
@@ -112,10 +99,7 @@ router.post('/api/auth/login', loginLimiter, trackLoginAttempts, async (req, res
       return res.status(401).json({ error: 'Invalid email or password.' });
     }
 
-    // Check if email is verified with detailed status info
-    console.log(`User ${email} email verification status:`, user.emailVerified);
 
-    // IMPROVED: Check if email is verified with more details in response
     if (!user.emailVerified) {
       // Check if there's a pending verification
       const hasToken = !!user.emailVerificationToken;
@@ -148,7 +132,6 @@ router.post('/api/auth/login', loginLimiter, trackLoginAttempts, async (req, res
     }
     
     await user.save();
-    console.log('Login successful for user:', email);
     
     // Generate tokens
     const { accessToken, refreshToken } = generateTokens(user._id, {
@@ -188,9 +171,6 @@ router.post('/api/auth/login', loginLimiter, trackLoginAttempts, async (req, res
 
 
 
-
-
-// Refresh token route
 router.post('/api/auth/refresh-token', refreshTokenLimiter, async (req, res) => {
   try {
     // Get refresh token from cookies
@@ -243,7 +223,6 @@ router.post('/api/auth/refresh-token', refreshTokenLimiter, async (req, res) => 
 
 // Store refresh token in cookie (called from client-side)
 router.post('/api/auth/store-refresh-token', (req, res) => {
-  console.log('Received refreshToken:!!!!!!!!!!!', req.body.refreshToken);
 
   try {
     const { refreshToken } = req.body;
@@ -285,8 +264,8 @@ router.post('/api/auth/logout', (req, res) => {
 
 // Register route (with rate limiting)
 const registerLimiter = rateLimit({
-  // windowMs: 60 * 60 * 1000, // 1 hour
-  windowMs: 1 * 60 * 1000, // 1 min
+  windowMs: 60 * 60 * 1000, // 1 hour
+  // windowMs: 1 * 60 * 1000, // 1 min
   max: 3, // 3 accounts per IP per hour
   message: { error: 'Too many accounts created. Please try again later.' },
 });
@@ -342,7 +321,6 @@ router.post('/api/auth/register', registerLimiter, async (req, res) => {
     // Send verification email
     try {
       await sendVerificationEmail(email, name, token);
-      console.log('Verification email sent to:', email);
     } catch (emailError) {
       console.error('Error sending verification email:', emailError);
       // Continue with registration even if email fails
@@ -388,7 +366,6 @@ router.get('/api/auth/verify-email/:token', async (req, res) => {
   try {
     const { token } = req.params;
     
-    console.log('Email verification request received for token:', token);
     
     // Hash the token to compare with stored token
     const hashedToken = crypto
@@ -396,7 +373,6 @@ router.get('/api/auth/verify-email/:token', async (req, res) => {
       .update(token)
       .digest('hex');
     
-    console.log('Looking for user with token hash:', hashedToken);
     
     // First, try to find by token
     let user = await User.findOne({
@@ -404,13 +380,12 @@ router.get('/api/auth/verify-email/:token', async (req, res) => {
     });
     
     // Log the user if found
-    if (user) {
-      console.log('User found with token:', user.email);
-    } else {
-      console.log('No user found with this token hash');
-    }
+    // if (user) {
+    //   console.log('User found with token:', user.email);
+    // } else {
+    //   console.log('No user found with this token hash');
+    // }
     
-    // If no user found with token, we need to check if this token was previously used
     if (!user) {
       // This is the key part - extract email from token if possible
       const emailMatch = token.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
@@ -418,7 +393,6 @@ router.get('/api/auth/verify-email/:token', async (req, res) => {
       
       if (emailMatch) {
         email = emailMatch[0];
-        console.log('Extracted email from token:', email);
       }
       
       if (email) {
@@ -429,7 +403,6 @@ router.get('/api/auth/verify-email/:token', async (req, res) => {
         });
         
         if (verifiedUser) {
-          console.log('Found already verified user with email:', email);
           return res.status(200).json({ 
             message: 'Your email is already verified. You can now login to your account.',
             verified: true
@@ -446,7 +419,6 @@ router.get('/api/auth/verify-email/:token', async (req, res) => {
     
     // Check if token is expired
     if (user.emailVerificationExpires && user.emailVerificationExpires < Date.now()) {
-      console.log('Token is expired for user:', user.email);
       return res.status(400).json({ 
         error: 'Verification link has expired. Please request a new one.',
         verified: false
@@ -455,7 +427,6 @@ router.get('/api/auth/verify-email/:token', async (req, res) => {
     
     // Check if already verified
     if (user.emailVerified) {
-      console.log('User already verified:', user.email);
       return res.status(200).json({ 
         message: 'Your email is already verified. You can now login to your account.',
         verified: true
@@ -468,7 +439,6 @@ router.get('/api/auth/verify-email/:token', async (req, res) => {
     user.emailVerificationExpires = undefined;
     
     await user.save();
-    console.log('User email marked as verified:', user.email);
     
     // Return success response
     res.status(200).json({ 
@@ -491,7 +461,6 @@ router.post('/api/auth/resend-verification', async (req, res) => {
   try {
     const { email } = req.body;
     
-    console.log('Resend verification request for:', email);
     
     if (!email) {
       return res.status(400).json({ error: 'Email is required.' });
@@ -502,7 +471,6 @@ router.post('/api/auth/resend-verification', async (req, res) => {
     
     // If no user found, return generic success to avoid email enumeration
     if (!user) {
-      console.log('Resend verification requested for non-existent email:', email);
       return res.status(200).json({ 
         message: 'If your email exists in our system, you will receive a verification email shortly.' 
       });
@@ -510,7 +478,6 @@ router.post('/api/auth/resend-verification', async (req, res) => {
     
     // Check if email is already verified
     if (user.emailVerified) {
-      console.log('Email already verified:', email);
       return res.status(200).json({ 
         message: 'Your email is already verified. You can now login to your account.',
         alreadyVerified: true
@@ -525,12 +492,10 @@ router.post('/api/auth/resend-verification', async (req, res) => {
     user.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
     
     await user.save();
-    console.log('Updated verification token for user:', email);
     
     // Send verification email
     try {
       await sendVerificationEmail(user.email, user.name, token);
-      console.log('Verification email sent to:', email);
     } catch (emailError) {
       console.error('Error sending verification email:', emailError);
       return res.status(500).json({ 
@@ -563,7 +528,6 @@ router.post('/api/auth/forgot-password', async (req, res) => {
     
     // Always return success, even if user is not found (security best practice)
     if (!user) {
-      console.log('Password reset requested for non-existent email:', email);
       return res.status(200).json({ 
         message: 'If your email exists in our system, you will receive a password reset link.' 
       });
@@ -587,7 +551,6 @@ router.post('/api/auth/forgot-password', async (req, res) => {
     // Send email with reset link
     try {
       await sendPasswordResetEmail(user.email, user.name, resetToken);
-      console.log('Password reset email sent to:', user.email);
     } catch (emailError) {
       console.error('Error sending password reset email:', emailError);
       // Still return success to prevent user enumeration, but log the error

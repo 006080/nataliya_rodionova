@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styles from './VerifyEmail.module.css';
 import { clearPendingVerification, updateUserVerificationStatus } from '../src/utils/authHelpers';
-import { getCurrentUser, isAuthenticated, refreshAccessToken } from '../src/services/authService';
+import { isAuthenticated } from '../src/services/authService';
 
 const VerifyEmail = () => {
   const [status, setStatus] = useState('verifying');
@@ -27,7 +27,6 @@ const VerifyEmail = () => {
     const verifyEmail = async () => {
       // Prevent double verification attempts
       if (verificationAttempted.current) {
-        console.log('Verification already attempted, skipping duplicate request');
         return;
       }
       
@@ -38,9 +37,7 @@ const VerifyEmail = () => {
       }
       
       try {
-        console.log('Verifying token:', token);
         
-        // Mark that we've attempted verification
         verificationAttempted.current = true;
         
         // Force clear any stale verification status from session storage
@@ -49,26 +46,17 @@ const VerifyEmail = () => {
         const response = await fetch(`${getApiUrl()}/api/auth/verify-email/${token}`);
         const data = await response.json();
         
-        console.log('Verification response:', {
-          status: response.status,
-          data
-        });
         
-        // Store error details for debugging
         if (!response.ok && !data.verified) {
           setErrorDetails(data);
         }
         
-        // Check if verification was successful or already done
         if (response.ok || data.verified === true) {
           setStatus('success');
           setMessage(data.message || 'Email verified successfully! You can now login to your account.');
           
-          // We DON'T update localStorage or try to refresh tokens
-          // Just clear everything to be safe
           clearPendingVerification();
           
-          // Redirect to login page immediately
           navigate('/login', { 
             state: { 
               verified: true,

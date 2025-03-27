@@ -3,14 +3,11 @@ import { countries } from "../src/utils/countries";
 import styles from "./DeliveryForm.module.css";
 
 const DeliveryForm = ({ onFormSubmit, initialData = null }) => {
-  // Initialize from props, localStorage, or defaults
   const [deliveryDetails, setDeliveryDetails] = useState(() => {
-    // First prioritize passed initialData
     if (initialData) {
       return initialData;
     }
     
-    // Then try to get from localStorage
     try {
       const savedData = localStorage.getItem('deliveryDetails');
       if (savedData) {
@@ -20,7 +17,6 @@ const DeliveryForm = ({ onFormSubmit, initialData = null }) => {
       console.error('Error loading delivery details from localStorage:', error);
     }
     
-    // Default empty state
     return {
       fullName: "",
       address: "",
@@ -99,7 +95,6 @@ const DeliveryForm = ({ onFormSubmit, initialData = null }) => {
     e.preventDefault();
     
     if (validateForm()) {
-      // Save to localStorage before submitting
       try {
         localStorage.setItem('deliveryDetails', JSON.stringify(deliveryDetails));
       } catch (error) {

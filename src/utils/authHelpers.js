@@ -10,7 +10,6 @@ export const updateUserVerificationStatus = (verified) => {
     const user = JSON.parse(userStr);
     user.emailVerified = verified;
     localStorage.setItem('user', JSON.stringify(user));
-    console.log('Updated user verification status in localStorage:', verified);
   } catch (e) {
     console.error('Error updating user verification status:', e);
   }
@@ -59,6 +58,5 @@ export const getPersistedAccessToken = () => {
  * Clear email verification data from session storage
  */
 export const clearPendingVerification = () => {
-  console.log('Force clearing pendingVerificationEmail from session storage');
   sessionStorage.removeItem('pendingVerificationEmail');
 };

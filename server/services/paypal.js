@@ -164,79 +164,6 @@ const createPayPalOrder = async (cartItems, measurements, deliveryDetails) => {
   }
 };
 
-// 23.03.2025 
-/**
- * Check if PayPal order has user interaction
- * @returns {boolean} true if user has interacted, false otherwise
- */
-// const checkPayPalUserInteraction = async (orderId) => {
-//   try {
-//     const paypalOrder = await getPayPalOrderDetails(orderId);
-    
-//     // Look for signs of user interaction
-//     return Boolean(
-//       paypalOrder.payer || 
-//       (paypalOrder.payment_source && 
-//        paypalOrder.payment_source.paypal && 
-//        (paypalOrder.payment_source.paypal.email_address || 
-//         paypalOrder.payment_source.paypal.account_id))
-//     );
-//   } catch (error) {
-//     console.error(`Error checking PayPal user interaction: ${error}`);
-//     // In case of error, assume no interaction
-//     return false;
-//   }
-// };
-
-//23.03.2025
-/**
- * Check if PayPal order has user interaction, with detailed response
- * @returns {Object} Object with interaction details
- */
-// const checkPayPalUserInteraction = async (orderId) => {
-//   try {
-//     const paypalOrder = await getPayPalOrderDetails(orderId);
-    
-//     // Check specifically for email presence
-//     const hasEmail = Boolean(
-//       (paypalOrder.payer && paypalOrder.payer.email_address) ||
-//       (paypalOrder.payment_source && 
-//        paypalOrder.payment_source.paypal && 
-//        paypalOrder.payment_source.paypal.email_address)
-//     );
-    
-//     // General interaction check
-//     const hasInteraction = Boolean(
-//       paypalOrder.payer || 
-//       (paypalOrder.payment_source && 
-//        paypalOrder.payment_source.paypal && 
-//        (paypalOrder.payment_source.paypal.email_address || 
-//         paypalOrder.payment_source.paypal.account_id))
-//     );
-    
-//     // Return detailed interaction information
-//     return {
-//       hasInteraction,
-//       hasEmail,
-//       // Extract the email if available
-//       email: hasEmail ? 
-//         (paypalOrder.payer?.email_address || 
-//          paypalOrder.payment_source?.paypal?.email_address) : 
-//         null
-//     };
-//   } catch (error) {
-//     console.error(`Error checking PayPal user interaction: ${error}`);
-//     // In case of error, return detailed error info
-//     return {
-//       hasInteraction: false,
-//       hasEmail: false,
-//       email: null,
-//       error: error.message
-//     };
-//   }
-// };
-
-
 
 /**
  * Check if PayPal order has user interaction, with detailed response
@@ -316,68 +243,6 @@ const checkPayPalUserInteraction = async (orderId) => {
   }
 };
 
-
-
-//23.03.2025
-/**
- * Persist order to MongoDB if it's not already there
- */
-// const persistOrderToDatabase = async (orderId) => {
-//   try {
-//     // First check if order already exists in database
-//     const existingOrder = await Order.findOne({ paypalOrderId: orderId });
-    
-//     if (existingOrder) {
-//       console.log(`Order already exists in database: ${orderId}`);
-//       return existingOrder;
-//     }
-    
-//     // Check if we have temp data for this order
-//     const tempOrderData = tempOrderCache.get(orderId);
-    
-//     if (!tempOrderData) {
-//       console.error(`No temp data found for order: ${orderId}`);
-//       throw new Error('Order data not found');
-//     }
-    
-//     // Check with PayPal if user has interacted
-//     const hasInteracted = await checkPayPalUserInteraction(orderId);
-    
-//     if (!hasInteracted) {
-//       console.log(`No user interaction detected for order: ${orderId}`);
-//       return null;
-//     }
-    
-//     // User has interacted, create in database
-//     const newOrder = new Order({
-//       paypalOrderId: orderId,
-//       status: 'PAYER_ACTION_REQUIRED',
-//       items: tempOrderData.items,
-//       totalAmount: tempOrderData.totalAmount,
-//       currency: tempOrderData.currency || 'EUR',
-//       createdAt: new Date(),
-//       measurements: tempOrderData.measurements,
-//       deliveryDetails: tempOrderData.deliveryDetails,
-//       fulfillmentStatus: 'Processing'
-//     });
-    
-//     await newOrder.save();
-//     console.log(`Order persisted to database: ${orderId}`);
-    
-//     // Schedule reminders since user has interacted
-//     await schedulePaymentReminders(orderId);
-    
-//     // Clean up temp data
-//     tempOrderCache.delete(orderId);
-    
-//     return newOrder;
-//   } catch (error) {
-//     console.error(`Error persisting order to database: ${error}`);
-//     throw error;
-//   }
-// };
-
-
 /**
  * Persist order to MongoDB if it's not already there
  */
@@ -387,7 +252,6 @@ const persistOrderToDatabase = async (orderId) => {
     const existingOrder = await Order.findOne({ paypalOrderId: orderId });
     
     if (existingOrder) {
-      console.log(`Order already exists in database: ${orderId}`);
       return existingOrder;
     }
     
@@ -403,7 +267,6 @@ const persistOrderToDatabase = async (orderId) => {
     const interactionData = await checkPayPalUserInteraction(orderId);
     
     if (!interactionData.hasInteraction) {
-      console.log(`No user interaction detected for order: ${orderId}`);
       return null;
     }
     
@@ -471,7 +334,6 @@ const persistOrderToDatabase = async (orderId) => {
     });
     
     await newOrder.save();
-    console.log(`Order persisted to database: ${orderId} with customer email: ${customer.email || 'none'}`);
     
     // Schedule reminders since user has interacted
     await schedulePaymentReminders(orderId);

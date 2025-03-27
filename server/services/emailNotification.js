@@ -32,7 +32,6 @@ export const sendOrderStatusEmail = async (orderId, previousStatus = null) => {
     // Skip sending immediate emails for PAYER_ACTION_REQUIRED status
     // These will be sent via the reminder system instead
     if (order.status === 'PAYER_ACTION_REQUIRED') {
-      console.log(`Order ${orderId} status is PAYER_ACTION_REQUIRED. Email will be sent via reminder system.`);
       return true;
     }
 
@@ -54,15 +53,12 @@ export const sendOrderStatusEmail = async (orderId, previousStatus = null) => {
     const recipientEmails = [...new Set([
       paypalEmail, 
       deliveryEmail
-    ].filter(email => email))]; // filter out undefined/null values
+    ].filter(email => email))]; 
 
-    console.log(`Sending order status email to: ${recipientEmails.join(', ')}`);
 
-    // Generate both HTML and plain text versions of the email
     const htmlContent = formatOrderEmail(order);
     const textContent = formatPlainTextEmail(order);
 
-    // Create appropriate subject based on order status
     const statusInfo = getStatusInfo(order.status);
     const emailSubject = `VARONA - ${statusInfo.title} #${orderId}`;
 
@@ -127,7 +123,6 @@ export const sendPayerActionRequiredEmail = async (orderId, orderUrl = null, rem
     }
     
     if (order.status !== 'PAYER_ACTION_REQUIRED') {
-      console.log(`Order ${orderId} status is ${order.status}, not sending payment action required email`);
       return false;
     }
     
@@ -146,7 +141,6 @@ export const sendPayerActionRequiredEmail = async (orderId, orderUrl = null, rem
       deliveryEmail // FIXED: Changed from deliveryDetails to deliveryEmail
     ].filter(email => email))]; // filter out undefined/null values
 
-    console.log(`Sending payment reminder email (${reminderType}) to: ${recipientEmails.join(', ')}`);
 
     // Generate order URL if not provided
     if (!orderUrl) {

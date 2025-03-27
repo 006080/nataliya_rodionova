@@ -14,7 +14,6 @@ const getApiUrl = () => {
 export const saveCartToDatabase = async (cartItems) => {
   try {
     if (!isAuthenticated() || !getAccessToken()) {
-      console.log('User not authenticated, skipping save to database');
       return false;
     }
     
@@ -31,7 +30,6 @@ export const saveCartToDatabase = async (cartItems) => {
       throw new Error('Failed to save cart to database');
     }
     
-    console.log('Cart saved to database successfully');
     return true;
   } catch (error) {
     console.error('Error saving cart to database:', error);
@@ -46,7 +44,6 @@ export const saveCartToDatabase = async (cartItems) => {
 export const fetchCartFromDatabase = async () => {
   try {
     if (!isAuthenticated() || !getAccessToken()) {
-      console.log('User not authenticated, skipping fetch from database');
       return [];
     }
     
@@ -63,7 +60,6 @@ export const fetchCartFromDatabase = async () => {
     }
     
     const data = await response.json();
-    console.log('Cart fetched from database successfully:', data.items.length, 'items');
     return data.items || [];
   } catch (error) {
     console.error('Error fetching cart from database:', error);
@@ -80,7 +76,6 @@ export const fetchCartFromDatabase = async () => {
 export const mergeGuestCartWithUserCart = async (localItems) => {
   try {
     if (!isAuthenticated() || !getAccessToken() || !localItems.length) {
-      console.log('Not authenticated or no local items to merge');
       return false;
     }
     
@@ -122,9 +117,7 @@ export const mergeGuestCartWithUserCart = async (localItems) => {
     const success = await saveCartToDatabase(mergedItems);
     
     if (success) {
-      console.log('Cart merged successfully, total items:', mergedItems.length);
       
-      // Return the merged items for UI update
       return {
         success: true,
         mergedItems

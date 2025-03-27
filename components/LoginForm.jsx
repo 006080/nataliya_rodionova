@@ -13,14 +13,12 @@ const LoginForm = () => {
   const [verificationDetails, setVerificationDetails] = useState(null);
   const [infoMessage, setInfoMessage] = useState('');
   
-  const { login, authError, resendVerificationEmail } = useAuth();
+  const { login, resendVerificationEmail } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Get redirect path from location state, or default to homepage
   const from = location.state?.from || '/';
   
-  // Load remembered email if available
   useEffect(() => {
     const rememberedEmail = localStorage.getItem('rememberedEmail');
     if (rememberedEmail) {
@@ -29,21 +27,17 @@ const LoginForm = () => {
     }
   }, []);
   
-  // Check for messages in location state
   useEffect(() => {
     if (location.state) {
-      // Show verification needed message
       if (location.state.verificationNeeded) {
         setInfoMessage(location.state.message || 'Please verify your email before logging in.');
-        setEmail(location.state.email || email); // Pre-fill email if provided
+        setEmail(location.state.email || email); 
       }
       
-      // Show verification success message
       if (location.state.verified) {
         setInfoMessage(location.state.message || 'Your email has been verified! You can now log in.');
       }
-      
-      // Clear location state after reading
+
       window.history.replaceState({}, document.title);
     }
   }, [location, email]);
@@ -51,7 +45,7 @@ const LoginForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Form validation
+
     if (!email.trim()) {
       setFormError('Email is required');
       return;
@@ -65,18 +59,15 @@ const LoginForm = () => {
     try {
       setIsSubmitting(true);
       setFormError('');
-      // Reset verification flag before login attempt
       setNeedsVerification(false);
       setVerificationDetails(null);
       
-      // Attempt login
+  
       const result = await login(email, password);
       
-      console.log('Login result:', result);
       
-      // Handle successful login
+  
       if (result.success) {
-        // If remember me is checked, store email in localStorage
         if (remember) {
           localStorage.setItem('rememberedEmail', email);
         } else {
@@ -86,17 +77,14 @@ const LoginForm = () => {
         setTimeout(() => {
           window.location.reload();
         }, 200);
-        // Redirect to the page user was trying to access, or home
         navigate(from, { replace: true });
       } 
-      // Handle verification needed
+
       else if (result.needsVerification) {
-        console.log('Email verification needed:', result.verificationDetails);
         setNeedsVerification(true);
         setVerificationDetails(result.verificationDetails);
         setInfoMessage('');
       }
-      // Handle other errors 
       else {
         setFormError(result.error || 'Login failed');
         setInfoMessage('');
@@ -124,7 +112,7 @@ const LoginForm = () => {
       
       if (success) {
         setInfoMessage('Verification email has been sent. Please check your inbox.');
-        setNeedsVerification(false); // Hide the verification UI after sending
+        setNeedsVerification(false);
       }
     } catch (error) {
       console.error('Failed to resend verification:', error);
@@ -134,24 +122,10 @@ const LoginForm = () => {
     }
   };
   
-  // Debug information in development mode
-  // const DebugInfo = () => {
-  //   if (process.env.NODE_ENV !== 'production' && verificationDetails) {
-  //     return (
-  //       <div style={{background: '#f5f5f5', padding: '5px', margin: '5px 0', fontSize: '12px'}}>
-  //         <h4>Verification Details</h4>
-  //         <pre>{JSON.stringify(verificationDetails, null, 2)}</pre>
-  //       </div>
-  //     );
-  //   }
-  //   return null;
-  // };
-  
+
   return (
     <div className={styles.loginContainer}>
       <h2>Login to Your Account</h2>
-      
-      {/* <DebugInfo /> */}
       
       {infoMessage && (
         <div className={styles.infoMessage}>

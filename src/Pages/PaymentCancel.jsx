@@ -34,8 +34,6 @@ const PaymentCancel = () => {
               reason
             })
           });
-          // We don't need to handle the response - this is just a notification
-          console.log('Backend notified of cancellation');
         } catch (error) {
           console.error('Failed to notify backend of cancellation:', error);
         }

@@ -30,7 +30,7 @@ const UserSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true,
-    select: false // Don't include in queries by default
+    select: false 
   },
   role: {
     type: String,
@@ -80,7 +80,6 @@ const UserSchema = new mongoose.Schema({
   }]
 }, { timestamps: true });
 
-// Fix the duplicate index issue by removing these
 // UserSchema.index({ email: 1 });
 UserSchema.index({ role: 1 });
 UserSchema.index({ registeredAt: 1 });
@@ -127,7 +126,6 @@ UserSchema.pre('save', async function(next) {
   try {
     // Skip hashing if the password is already hashed
     if (this.password && (this.password.startsWith('$2a$') || this.password.startsWith('$2b$'))) {
-      console.log('Password appears to be already hashed, skipping hashing');
       return next();
     }
     

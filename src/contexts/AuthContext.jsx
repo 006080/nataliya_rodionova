@@ -17,9 +17,7 @@ const getApiUrl = () => {
 
 const AuthContext = createContext(null);
 
-// Separate function for the Provider Component
 function AuthProviderComponent({ children }) {
-  // Initialize with data from localStorage to avoid flicker on reload
   const [user, setUser] = useState(() => {
     try {
       const storedUser = localStorage.getItem('user');
@@ -31,46 +29,33 @@ function AuthProviderComponent({ children }) {
   });
   const [loading, setLoading] = useState(true);
   const [authError, setAuthError] = useState('');
-  
-  // This variable helps prevent multiple refresh attempts in quick succession
+
   let refreshInProgress = false;
   
   useEffect(() => {
     const initAuth = async () => {
-      try {
-        console.log('Initializing auth state...');
-        
-        // Skip refresh if we don't have a stored user at all
+      try {      
         const storedUser = localStorage.getItem('user');
         if (!storedUser) {
-          console.log('No stored user found, skipping refresh');
           setUser(null);
           setLoading(false);
           return;
         }
         
-        // We already set the user from localStorage in the initial state,
-        // so no need to set it again here
         
-        // Only try to refresh if we're not already doing so and if we have a token
         if (!refreshInProgress && isAuthenticated()) {
-          // If token is valid, no need to refresh
-          console.log('Token is still valid, no need to refresh');
           setLoading(false);
           return;
         }
         
         if (!refreshInProgress) {
           refreshInProgress = true;
-          // Try to refresh the token if needed
-          console.log('Attempting to refresh token...');
           try {
             const newToken = await refreshAccessToken();
             
             if (newToken) {
               // Token refresh succeeded, update user
               const freshUser = getCurrentUser();
-              console.log('Token refreshed successfully, user:', freshUser.email);
               setUser(freshUser);
             } else {
               // If refresh failed but we still have a valid token, keep the user
@@ -110,7 +95,6 @@ function AuthProviderComponent({ children }) {
       // Clear previous errors
       setAuthError('');
       
-      console.log('Login attempt for:', email);
       
       const response = await fetch(`${getApiUrl()}/api/auth/login`, {
         method: 'POST',
@@ -121,11 +105,8 @@ function AuthProviderComponent({ children }) {
       
       const data = await response.json();
       
-      console.log('Login response status:', response.status);
-      
       // Handle email verification error
       if (response.status === 403 && data.needsVerification) {
-        console.log('Email not verified - response status 403 with needsVerification flag');
         setAuthError('Please verify your email address before logging in.');
         
         // Return detailed verification info from server
@@ -144,8 +125,6 @@ function AuthProviderComponent({ children }) {
           error: data.error || 'Login failed'
         };
       }
-      
-      console.log('Login successful, user data:', data.user);
       
       // Store tokens securely - this will also store user data in localStorage
       setTokens(data.accessToken, data.refreshToken);
@@ -169,10 +148,9 @@ function AuthProviderComponent({ children }) {
     try {
       setAuthError('');
       
-      // First, clear ALL existing auth data to prevent data leakage between accounts
-      await clearTokens(); // This clears cookies
-      localStorage.clear(); // Clear all localStorage including user data
-      sessionStorage.clear(); // Clear all sessionStorage
+      await clearTokens(); 
+      localStorage.clear(); 
+      sessionStorage.clear(); 
       
       const response = await fetch(`${getApiUrl()}/api/auth/register`, {
         method: 'POST',
@@ -186,11 +164,6 @@ function AuthProviderComponent({ children }) {
       if (!response.ok) {
         throw new Error(data.error || 'Registration failed');
       }
-      
-      console.log('Registration successful, but NOT logging in until email verification');
-      
-      // Do NOT set tokens or update user state - require email verification first
-      // We're intentionally not setting tokens or user state here
       
       return {
         success: true,

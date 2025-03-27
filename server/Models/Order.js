@@ -80,11 +80,9 @@ const ShippingAddressSchema = new mongoose.Schema({
 }, { _id: false });
 
 const OrderSchema = new mongoose.Schema({
-  // Add user reference to link orders to authenticated users
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
-    // Not required so guest checkout still works
   },
   
   // Add fulfillment status (separate from payment status)
@@ -157,57 +155,31 @@ OrderSchema.index({ paypalOrderId: 1 });
 OrderSchema.index({ 'customer.email': 1 });
 OrderSchema.index({ status: 1 });
 OrderSchema.index({ createdAt: 1 });
-OrderSchema.index({ user: 1 }); // Add index for user lookups
-OrderSchema.index({ fulfillmentStatus: 1 }); // Add index for fulfillment status
+OrderSchema.index({ user: 1 }); 
+OrderSchema.index({ fulfillmentStatus: 1 }); 
 
 // Virtual for formatted date
 OrderSchema.virtual('dateFormatted').get(function() {
   return this.createdAt ? this.createdAt.toISOString().split('T')[0] : '';
 });
 
-// // Method to get order status text for display
-// OrderSchema.methods.getStatusText = function() {
-//   // If we have a fulfillment status, use that for display
-//   if (this.fulfillmentStatus) {
-//     return this.fulfillmentStatus;
-//   }
-  
-//   // Otherwise, map PayPal status to display text
-//   const statusMap = {
-//     'CREATED': 'Processing',
-//     'SAVED': 'Processing',
-//     'APPROVED': 'Processing',
-//     'VOIDED': 'Cancelled',
-//     'COMPLETED': 'Processing',
-//     'PAYER_ACTION_REQUIRED': 'Payment Pending',
-//     'CANCELED': 'Cancelled'
-//   };
-  
-//   return statusMap[this.status] || this.status;
-// };
-// Method to get order status text for display
 OrderSchema.methods.getStatusText = function() {
-  // 1. First check critical PayPal statuses
   if (this.status === 'PAYER_ACTION_REQUIRED') return 'Payment Pending';
   if (this.status === 'CANCELED' || this.status === 'VOIDED') return 'Cancelled';
   
-  // 2. Check for shipping statuses in PayPal status field (data inconsistency handling)
   if (this.status === 'Shipped' || this.status === 'SHIPPED') return 'Shipped';
   if (this.status === 'Delivered' || this.status === 'DELIVERED') return 'Delivered';
   
-  // 3. Then check important fulfillment statuses
   if (this.fulfillmentStatus === 'Shipped' || 
       this.fulfillmentStatus === 'Delivered' || 
       this.fulfillmentStatus === 'Cancelled') {
     return this.fulfillmentStatus;
   }
   
-  // 4. Fall back to normal fulfillment status or PayPal mapping
   if (this.fulfillmentStatus) {
     return this.fulfillmentStatus;
   }
   
-  // 5. Map remaining PayPal statuses
   const statusMap = {
     'CREATED': 'Processing',
     'SAVED': 'Processing',

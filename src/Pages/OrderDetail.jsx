@@ -34,9 +34,6 @@ const OrderDetail = () => {
         
         const data = await response.json();
         
-        // Debug the response data
-        console.log('Order details received:', data);
-        
         // Make sure orderItems is an array
         if (!data.orderItems) {
           data.orderItems = [];

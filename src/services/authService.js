@@ -20,7 +20,6 @@ const extractUserDataFromToken = (token) => {
     if (!token) return null;
     
     const decoded = jwtDecode(token);
-    console.log('Decoded token payload:', decoded);
     
     // Make sure we store ALL user fields from the token
     return {
@@ -68,7 +67,6 @@ export const setTokens = (accessToken, refreshToken) => {
     if (accessToken) {
       const userData = extractUserDataFromToken(accessToken);
       if (userData) {
-        console.log('Storing complete user data in localStorage:', userData);
         localStorage.setItem('user', JSON.stringify(userData));
       } else {
         console.error('Failed to extract user data from token');
@@ -131,7 +129,6 @@ export const getCurrentUser = () => {
       if (token) {
         const tokenData = extractUserDataFromToken(token);
         if (tokenData && tokenData.id) {
-          console.log('Recovered user data from token:', tokenData);
           localStorage.setItem('user', JSON.stringify(tokenData));
           return tokenData;
         }
@@ -154,14 +151,12 @@ export const isAuthenticated = () => {
 export const refreshAccessToken = async () => {
   // Check if refresh is already in progress
   if (refreshInProgress) {
-    console.log('Token refresh already in progress, skipping duplicate request');
     return null;
   }
   
   // Check if we've refreshed recently
   const now = Date.now();
   if (now - lastRefreshTime < REFRESH_COOLDOWN) {
-    console.log('Token refresh on cooldown, skipping request');
     return getAccessToken();
   }
   
@@ -169,14 +164,12 @@ export const refreshAccessToken = async () => {
     refreshInProgress = true;
     lastRefreshTime = now;
     
-    console.log('Attempting to refresh token...');
     const response = await fetch(`${getApiUrl()}/api/auth/refresh-token`, {
       method: 'POST',
       credentials: 'include', // Important for sending cookies
     });
     
     if (!response.ok) {
-      console.log('Token refresh failed with status:', response.status);
       throw new Error('Failed to refresh token');
     }
     
@@ -190,7 +183,6 @@ export const refreshAccessToken = async () => {
     if (data.accessToken) {
       const userData = extractUserDataFromToken(data.accessToken);
       if (userData && userData.name && userData.email) {
-        console.log('Token refreshed successfully, updated user data:', userData);
         localStorage.setItem('user', JSON.stringify(userData));
       } else {
         console.error('Refreshed token is missing required user data');
@@ -255,9 +247,7 @@ export const clearAllAuthData = async () => {
   try {
     // Clear memory token
     window.accessToken = null;
-    
-    // Log all localStorage keys to see what's there
-    console.log('All localStorage keys before clearing:', Object.keys(localStorage));
+
     
     // WHITELIST APPROACH: Save only specific items we want to keep
     // These would be non-auth related items your app needs to preserve
@@ -274,11 +264,7 @@ export const clearAllAuthData = async () => {
       preservedData[key] = localStorage.getItem(key);
     });
     
-    // Clear ALL localStorage
     localStorage.clear();
-    
-    // Log to confirm localStorage was cleared
-    console.log('localStorage after clearing:', Object.keys(localStorage));
     
     // Restore only the whitelisted items
     Object.keys(preservedData).forEach(key => {
@@ -301,7 +287,6 @@ export const clearAllAuthData = async () => {
       },
       credentials: 'include'
     });
-    console.log('Cart cleared from database successfully');
   } catch (cartError) {
     console.error('Error clearing cart from database:', cartError);
   }
@@ -313,232 +298,16 @@ export const clearAllAuthData = async () => {
       credentials: 'include',
     });
 
-    //  // Optionally, clear PayPal session cookies
-    //  await fetch('https://www.paypal.com/auth/logout', {
-    //   method: 'GET',
-    //   credentials: 'include'
-    // });
-
-     // Optional: Clear all cookies (if needed)
      document.cookie.split(";").forEach(function(c) {
       document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
     });
     
-    // Clear other cookies that might contain auth data
-    // document.cookie.split(";").forEach(function(c) {
-    //   document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-    // });
-    
-    console.log('Final localStorage keys after clearing:', Object.keys(localStorage));
-    console.log('All auth data cleared');
-    
-    // Return true to indicate success
     return true;
   } catch (error) {
     console.error('Error clearing auth data:', error);
     return false;
   }
 };
-
-
-// /**
-//  * Login user and merge carts
-//  * @param {string} email - User email
-//  * @param {string} password - User password
-//  * @returns {Promise<Object>} - Login result
-//  */
-// export const loginUser = async (email, password) => {
-//   try {
-//     const apiUrl = getApiUrl();
-    
-//     const response = await fetch(`${apiUrl}/api/auth/login`, {
-//       method: 'POST',
-//       headers: { 'Content-Type': 'application/json' },
-//       body: JSON.stringify({ email, password }),
-//       credentials: 'include',
-//     });
-    
-//     const data = await response.json();
-    
-//     // Handle email verification error
-//     if (response.status === 403 && data.needsVerification) {
-//       return {
-//         success: false,
-//         needsVerification: true,
-//         verificationDetails: data.verificationDetails || { email }
-//       };
-//     }
-    
-//     // Handle other errors
-//     if (!response.ok) {
-//       return {
-//         success: false,
-//         error: data.error || 'Login failed'
-//       };
-//     }
-    
-//     // Store tokens securely - this will also store user data in localStorage
-//     setTokens(data.accessToken, data.refreshToken);
-    
-//     // Try to merge guest cart with user cart
-//     try {
-//       // Get local cart items
-//       const localCartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
-      
-//       // Only attempt merge if there are items
-//       if (localCartItems.length > 0) {
-//         // Import the cart service function
-//         import('./cartService.js').then(({ mergeGuestCartWithUserCart }) => {
-//           mergeGuestCartWithUserCart(localCartItems)
-//             .then(success => {
-//               if (success) {
-//                 console.log('Guest cart merged with user cart');
-                
-//                 // Dispatch an event to notify CartContext to refresh
-//                 const cartMergedEvent = new CustomEvent('cart-merged');
-//                 window.dispatchEvent(cartMergedEvent);
-//               }
-//             });
-//         });
-//       }
-//     } catch (error) {
-//       console.error('Error merging carts:', error);
-//       // Continue with login even if merge fails
-//     }
-    
-//     // Dispatch auth state changed event
-//     const authStateChangedEvent = new CustomEvent('auth-state-changed');
-//     window.dispatchEvent(authStateChangedEvent);
-    
-//     return { 
-//       success: true,
-//       user: data.user 
-//     };
-//   } catch (error) {
-//     console.error('Login error:', error);
-//     return {
-//       success: false,
-//       error: error.message || 'An unexpected error occurred'
-//     };
-//   }
-// };
-
-
-
-// /**
-//  * Login user and merge carts
-//  * @param {string} email - User email
-//  * @param {string} password - User password
-//  * @returns {Promise<Object>} - Login result
-//  */
-// export const loginUser = async (email, password) => {
-//   try {
-//     const apiUrl = getApiUrl();
-    
-//     const response = await fetch(`${apiUrl}/api/auth/login`, {
-//       method: 'POST',
-//       headers: { 'Content-Type': 'application/json' },
-//       body: JSON.stringify({ email, password }),
-//       credentials: 'include',
-//     });
-    
-//     const data = await response.json();
-    
-//     // Handle email verification error
-//     if (response.status === 403 && data.needsVerification) {
-//       return {
-//         success: false,
-//         needsVerification: true,
-//         verificationDetails: data.verificationDetails || { email }
-//       };
-//     }
-    
-//     // Handle other errors
-//     if (!response.ok) {
-//       return {
-//         success: false,
-//         error: data.error || 'Login failed'
-//       };
-//     }
-    
-//     // Store tokens securely - this will also store user data in localStorage
-//     setTokens(data.accessToken, data.refreshToken);
-    
-//     // Try to merge guest cart with user cart
-//     try {
-//       // Get local cart items
-//       const localCartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
-      
-//       // Only attempt merge if there are items
-//       if (localCartItems.length > 0) {
-//         // Import the cart service function - use the merge endpoint
-//         const mergeResponse = await fetch(`${apiUrl}/api/cart/merge`, {
-//           method: 'POST',
-//           headers: { 
-//             'Content-Type': 'application/json',
-//             'Authorization': `Bearer ${data.accessToken}`
-//           },
-//           body: JSON.stringify({ items: localCartItems }),
-//           credentials: 'include',
-//         });
-        
-//         if (mergeResponse.ok) {
-//           const mergeData = await mergeResponse.json();
-          
-//           // Update local cart with merged result
-//           localStorage.setItem('cartItems', JSON.stringify(mergeData.items || []));
-          
-//           console.log('Guest cart merged with user cart');
-          
-//           // Dispatch an event to notify CartContext to refresh
-//           const cartMergedEvent = new CustomEvent('cart-merged');
-//           window.dispatchEvent(cartMergedEvent);
-//         } else {
-//           console.error('Error merging carts:', await mergeResponse.text());
-//         }
-//       } else {
-//         // No local items to merge, just fetch user's cart
-//         const cartResponse = await fetch(`${apiUrl}/api/cart`, {
-//           headers: {
-//             'Authorization': `Bearer ${data.accessToken}`
-//           },
-//           credentials: 'include',
-//         });
-        
-//         if (cartResponse.ok) {
-//           const cartData = await cartResponse.json();
-          
-//           // Update local cart with database cart
-//           localStorage.setItem('cartItems', JSON.stringify(cartData.items || []));
-          
-//           // Dispatch an event to notify CartContext to refresh
-//           const cartMergedEvent = new CustomEvent('cart-merged');
-//           window.dispatchEvent(cartMergedEvent);
-//         }
-//       }
-//     } catch (error) {
-//       console.error('Error merging carts:', error);
-//       // Continue with login even if merge fails
-//     }
-    
-//     // Dispatch auth state changed event
-//     const authStateChangedEvent = new CustomEvent('auth-state-changed');
-//     window.dispatchEvent(authStateChangedEvent);
-    
-//     return { 
-//       success: true,
-//       user: data.user 
-//     };
-//   } catch (error) {
-//     console.error('Login error:', error);
-//     return {
-//       success: false,
-//       error: error.message || 'An unexpected error occurred'
-//     };
-//   }
-// };
-
-
 
 
 /**
@@ -569,7 +338,6 @@ export const loginUser = async (email, password) => {
       };
     }
     
-    // Handle other errors
     if (!response.ok) {
       return {
         success: false,
@@ -596,10 +364,8 @@ export const loginUser = async (email, password) => {
           body: JSON.stringify({ items: localCartItems }),
           credentials: 'include',
         });
-        console.log('Cart data sent to server before reload');
       } catch (error) {
         console.error('Error sending cart data:', error);
-        // Continue with login even if cart merge fails
       }
     }
     
@@ -609,7 +375,6 @@ export const loginUser = async (email, password) => {
     
     // CRITICAL: Force page reload with a slight delay to ensure events are processed
     setTimeout(() => {
-      console.log('Reloading page after successful login...');
       window.location.href = window.location.href;
     }, 100);
     

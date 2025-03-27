@@ -1,4 +1,3 @@
-// services/paymentReminderService.js
 import dotenv from 'dotenv';
 import Order from '../Models/Order.js';
 import ReminderTask from '../Models/ReminderTask.js';
@@ -17,7 +16,6 @@ let schedulerRunning = false;
  */
 export const schedulePaymentReminders = async (orderId) => {
   try {
-    console.log(`Scheduling payment reminders for order: ${orderId}`);
     
     // Check if order exists and has PAYER_ACTION_REQUIRED status
     const order = await Order.findOne({ paypalOrderId: orderId });
@@ -28,7 +26,6 @@ export const schedulePaymentReminders = async (orderId) => {
     }
     
     if (order.status !== 'PAYER_ACTION_REQUIRED') {
-      console.log(`Order ${orderId} status is ${order.status}, not scheduling reminders`);
       return;
     }
     
@@ -64,9 +61,6 @@ export const schedulePaymentReminders = async (orderId) => {
     });
     await followupReminder.save();
     
-    console.log(`Reminders scheduled for order ${orderId}`);
-
-    // Ensure the scheduler is running
     if (!schedulerRunning) {
       startReminderScheduler();
     }
@@ -121,9 +115,9 @@ const processReminderTasks = async () => {
       scheduledFor: { $lte: now }
     }).sort({ scheduledFor: 1 });
     
-    if (dueTasks.length > 0) {
-      console.log(`Found ${dueTasks.length} reminder tasks to process`);
-    }
+    // if (dueTasks.length > 0) {
+    //   console.log(`Found ${dueTasks.length} reminder tasks to process`);
+    // }
     
     for (const task of dueTasks) {
       try {
@@ -140,7 +134,6 @@ const processReminderTasks = async () => {
         }
         
         if (order.status !== 'PAYER_ACTION_REQUIRED') {
-          console.log(`Order ${task.orderId} status changed to ${order.status}, skipping reminder`);
           await ReminderTask.findByIdAndUpdate(task._id, { 
             status: 'cancelled',
             error: `Order status changed to ${order.status}`
@@ -177,7 +170,6 @@ const processReminderTasks = async () => {
           );
         }
         
-        console.log(`${reminderType} reminder sent for order ${task.orderId}`);
       } catch (error) {
         console.error(`Error processing reminder task ${task._id}:`, error);
         
@@ -200,7 +192,6 @@ export const startReminderScheduler = () => {
     return;
   }
   
-  console.log('Starting payment reminder scheduler');
   schedulerRunning = true;
   
   // Process immediately on startup

@@ -205,70 +205,6 @@ router.post("/api/payments/:orderID/capture", async (req, res) => {
 });
 
 
-
-
-
-//26.03.2025
-/**
- * Get order status and details
- */
-// router.get("/api/payments/:orderID", async (req, res) => {
-//   try {
-//     const { orderID } = req.params;
-    
-//     if (!orderID) {
-//       return res.status(400).json({ error: "Order ID is required" });
-//     }
-    
-//     const order = await Order.findOne({ paypalOrderId: orderID });
-    
-//     if (!order) {
-//       return res.status(404).json({ error: "Order not found" });
-//     }
-
-//      // If user is authenticated, ensure order is linked to their account
-//     // But only if the order email matches the user's email
-//     if (req.user && req.user._id && !order.user) {
-//       const userEmail = req.user.email.toLowerCase();
-//       // const orderEmail = (order.customer?.email || order.deliveryDetails?.email || '').toLowerCase();
-//       const orderEmail = (order.customer?.email || '').toLowerCase();
-      
-//       if (userEmail === orderEmail) {
-//         order.user = req.user._id;
-//         await order.save();
-//         console.log(`Order ${orderID} linked to user ${req.user._id}`);
-//       }
-//     }
-    
-//     res.json({
-//       id: order.paypalOrderId,
-//       status: order.status,
-//       items: order.items,
-//       totalAmount: order.totalAmount,
-//       currency: order.currency,
-//       measurements: order.measurements,
-//       deliveryDetails: order.deliveryDetails,
-//       createdAt: order.createdAt,
-//       customer: order.customer,
-//       emailSent: order.emailSent,
-//       emailSentAt: order.emailSentAt,
-//       fulfillmentStatus: order.fulfillmentStatus,
-//       trackingNumber: order.trackingNumber,
-//       shippedAt: order.shippedAt,
-//       deliveredAt: order.deliveredAt,
-//       // Include user ID if order is linked to a user
-//       user: order.user
-//     });
-//   } catch (error) {
-//     console.error("Error fetching order:", error);
-//     res.status(500).json({ error: "Failed to fetch order details" });
-//   }
-// });
-
-
-
-// Update to payment route handler in api/payments/:orderID endpoint
-
 /**
  * Get order status and details - Enhanced for new redirect flow
  */
@@ -326,7 +262,6 @@ router.get("/api/payments/:orderID", async (req, res) => {
       if (userEmail === orderEmail) {
         order.user = req.user._id;
         await order.save();
-        console.log(`Order ${orderID} linked to user ${req.user._id}`);
       }
     }
     
@@ -761,8 +696,6 @@ router.post("/api/payments/:orderID/update-canceled", async (req, res) => {
           { paypalOrderId: orderID },
           { customer: customerUpdate }
         );
-        
-        console.log(`Updated customer email for order ${orderID}: ${interactionData.customerData.email}`);
       }
     }
     

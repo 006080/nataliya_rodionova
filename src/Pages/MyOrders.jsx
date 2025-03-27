@@ -66,13 +66,6 @@ const MyOrders = () => {
     });
   };
 
-  useEffect(() => {
-    console.log('Received orders:', orders);
-    console.log('Unique statuses:', [...new Set(orders.map(o => o.status))]);
-  }, [orders]);
-  
-  // In the return of filteredOrders, add:
-  console.log('Filtered orders:', filter, filteredOrders().length);
 
   // Get color based on order status
   const getStatusColor = (status) => {

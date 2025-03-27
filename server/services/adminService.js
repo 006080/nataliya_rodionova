@@ -1,5 +1,3 @@
-// Add this file as services/adminService.js
-
 import Order from '../Models/Order.js';
 import { sendOrderStatusEmail } from './emailNotification.js';
 import { cancelExistingReminders } from './paymentReminderService.js';
@@ -12,34 +10,25 @@ import { cancelExistingReminders } from './paymentReminderService.js';
  */
 export const syncOrderStatus = async (orderId) => {
   try {
-    // Get the order from the database
     const order = await Order.findOne({ paypalOrderId: orderId });
     
     if (!order) {
       throw new Error(`Order not found: ${orderId}`);
     }
     
-    // If the order was manually set to CANCELED or VOIDED, 
-    // we need to cancel any reminders and send email
     if (order.status === 'CANCELED' || order.status === 'VOIDED') {
-      // Cancel any scheduled reminders
       await cancelExistingReminders(orderId);
       
-      // Reset email sent flag to ensure a notification is sent
       await Order.findOneAndUpdate(
         { paypalOrderId: orderId },
         { 
           emailSent: false,
           updatedAt: new Date(),
-          // If cancelledAt isn't set, set it now
           cancelledAt: order.cancelledAt || new Date()
         }
       );
       
-      // Send the cancellation email notification
-      await sendOrderStatusEmail(orderId, 'PAYER_ACTION_REQUIRED'); // Assume it was previously in PAYER_ACTION_REQUIRED
-      
-      console.log(`Synced cancelled order ${orderId} and sent notifications`);
+      await sendOrderStatusEmail(orderId, 'PAYER_ACTION_REQUIRED'); 
     }
     
     return order;

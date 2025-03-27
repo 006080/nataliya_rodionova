@@ -1,7 +1,6 @@
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
 
-// Configure transporter from environment variables
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -17,7 +16,6 @@ const transporter = nodemailer.createTransport({
  * @returns {Object} token and hashed token
  */
 export const generateVerificationToken = (email) => {
-  // Create a base token with 24 random bytes
   const randomBytes = crypto.randomBytes(24).toString('hex');
   
   // Embed a truncated and encoded version of the email in the token
@@ -43,12 +41,6 @@ export const generateVerificationToken = (email) => {
     .update(token)
     .digest('hex');
     
-  console.log('Generated verification token:', {
-    token, 
-    hashedToken,
-    tokenLength: token.length,
-    hashedTokenLength: hashedToken.length
-  });
     
   return { token, hashedToken };
 };
@@ -70,7 +62,6 @@ export const sendVerificationEmail = async (email, name, token) => {
     // This provides redundancy if the token is lost from the database
     const verificationUrl = `${frontendUrl}/verify-email/${token}?email=${encodeURIComponent(email)}`;
     
-    console.log('Sending verification email with URL:', verificationUrl);
     
     const mailOptions = {
       from: `"VARONA" <${process.env.EMAIL_USER}>`,
@@ -95,7 +86,6 @@ export const sendVerificationEmail = async (email, name, token) => {
     };
     
     const result = await transporter.sendMail(mailOptions);
-    console.log('Verification email sent successfully:', result.messageId);
     return result;
   } catch (error) {
     console.error('Error sending verification email:', error);
@@ -119,7 +109,6 @@ export const sendPasswordResetEmail = async (email, name, token) => {
       
     const resetUrl = `${frontendUrl}/reset-password/${token}`;
     
-    console.log('Sending password reset email with URL:', resetUrl);
     
     const mailOptions = {
       from: `"VARONA" <${process.env.EMAIL_USER}>`,
@@ -144,7 +133,6 @@ export const sendPasswordResetEmail = async (email, name, token) => {
     };
     
     const result = await transporter.sendMail(mailOptions);
-    console.log('Password reset email sent successfully:', result.messageId);
     return result;
   } catch (error) {
     console.error('Error sending password reset email:', error);

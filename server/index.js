@@ -35,7 +35,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(helmet()); 
 app.use(cors({
     origin: (origin, callback) => {
-        const allowedOrigins = [FRONTEND_URL_LOCAL, FRONTEND_URL_PROD, 'http://localhost:5173/cart' ];
+        const allowedOrigins = [FRONTEND_URL_LOCAL, FRONTEND_URL_PROD];
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {

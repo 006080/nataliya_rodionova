@@ -19,7 +19,6 @@ useEffect(() => {
         ? import.meta.env.VITE_API_BASE_URL_PROD
         : import.meta.env.VITE_API_BASE_URL_LOCAL;
         
-      console.log(`Fetching order details for ID: ${orderId} from ${apiUrl}/api/payments/${orderId}`);
       const response = await fetch(`${apiUrl}/api/payments/${orderId}`);
       
       if (!response.ok) {
@@ -32,7 +31,6 @@ useEffect(() => {
         }
       } else {
         const data = await response.json();
-        console.log("Order details:", data);
         setOrder(data);
       }
       
@@ -50,8 +48,11 @@ useEffect(() => {
 }, [orderId]);
 
 
-const handlePaymentSuccess = (data) => {
-  console.log("Payment success:", data);
+// const handlePaymentSuccess = (data) => {
+//   console.log("Payment success:", data);
+//   window.location.reload(); 
+// };
+const handlePaymentSuccess = () => {
   window.location.reload(); 
 };
 
