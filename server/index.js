@@ -16,11 +16,36 @@ import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import bodyParser from "body-parser";
 import paypalRoutes from './routes/paypal.js';
 import productRoutes from './routes/product.js';
+import { initializeReminderSystem } from './services/paymentReminderService.js';
+import cookieParser from 'cookie-parser';
+import authRoutes from './routes/auth.js';
+import orderRoutes from './routes/order.js';
+import cartRoutes from './routes/cart.js';
+
 
 dotenv.config({ path: './.env.local' });
 
 const app = express();
 const server = http.createServer(app);
+
+app.use(cookieParser());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(helmet()); 
+app.use(cors({
+    origin: (origin, callback) => {
+        const allowedOrigins = [FRONTEND_URL_LOCAL, FRONTEND_URL_PROD];
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true
+}));
+app.use(express.json({ limit: '10mb' })); // Limit payload size
+
+
 
 // Middleware setup
 app.use(bodyParser.json());
@@ -91,20 +116,6 @@ const feedbackLimiter = rateLimit({
 
 // Middleware
 app.use("/api/feedback", feedbackLimiter);
-app.use(helmet()); 
-
-app.use(express.json({ limit: '10mb' })); 
-app.use(cors({
-    origin: (origin, callback) => {
-        const allowedOrigins = [FRONTEND_URL_LOCAL, FRONTEND_URL_PROD, 'http://localhost:5173/cart'];
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
-    credentials: true
-}));
 
 // Feedback schema validation
 const feedbackSchema = Joi.object({
@@ -138,6 +149,9 @@ const transporter = nodemailer.createTransport({
 mongoose.connect(MONGO_URI) 
     .then(() => {
         console.log('Connected to MongoDB');
+        // Initialize the payment reminder system
+        initializeReminderSystem();
+        console.log('Payment reminder system initialized');
     })
     .catch((err) => {
         console.error('MongoDB connection error:', err);
@@ -314,6 +328,12 @@ app.get('/api/reviews', async (req, res) => {
 // Product and PayPal routes
 app.use(productRoutes);
 app.use(paypalRoutes);
+app.use(authRoutes);
+app.use(orderRoutes);
+app.use(cartRoutes);
+  
+
+
 
 // Handle 404 errors
 app.use((req, res) => {

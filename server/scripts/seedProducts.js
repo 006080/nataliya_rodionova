@@ -1,15 +1,8 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import Product from '../Models/Product.js';
-// import { Cloudinary } from '@cloudinary/url-gen';
 
 dotenv.config({ path: './.env.local' });
-
-// const cld = new Cloudinary({
-//   cloud: {
-//     cloudName: "dwenvtwyx",
-//   },
-// });
 
 
 const productData = [
