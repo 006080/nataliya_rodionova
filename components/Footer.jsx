@@ -29,22 +29,7 @@ const Footer = () => {
       <h4 className={styles.foot} onClick={() => navigate("/return")}>
         Return Policy
       </h4>
-      {/* <a style={{color:"white"}}
-        target="_blank"
-        href="https://thefashionvox.wordpress.com/2018/07/27/varona/"
-      >
-        <h4 className={styles.foot}>Press</h4>
-      </a> */}
 
-<a 
-  style={{ color: "white", textDecoration: "none", margin: '20px' }} 
-  target="_blank" 
-  href="https://thefashionvox.wordpress.com/2018/07/27/varona/"
-  onMouseEnter={(e) => e.target.style.textDecoration = "underline"}
-  onMouseLeave={(e) => e.target.style.textDecoration = "none"}
->
-  Press
-</a>
       <div className={styles.iconsLine}>
         <div className={styles.paymentIcons}>
           <div className={styles.iconWrapper}>

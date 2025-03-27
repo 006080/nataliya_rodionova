@@ -23,7 +23,7 @@ import VerifyEmail from "../components/VerifyEmail";
 import ResetPasswordForm from "../components/ResetPasswordForm";
 import MyOrders from "./Pages/MyOrders";
 import OrderDetail from "./Pages/OrderDetail";
-
+import Collaboration from "./Pages/Collaboration";
 
 const Unauthorized = () => (
   <div style={{ padding: '2rem', textAlign: 'center' }}>
@@ -55,6 +55,7 @@ const AppContent = () => {
         <Route style={{ position: 'relative' }} path="/terms" element={<Terms />} />
         <Route style={{ position: 'relative' }} path="/return" element={<ReturnPolicy />} />
         <Route style={{ position: 'relative' }} path="/checkout" element={<Checkout />} />
+        <Route style={{ position: 'relative' }} path="/collaboration" element={<Collaboration />} />
         <Route path="/contacts" element={<Contacts />} />
         <Route path="/shop" element={<Shop />} />
         <Route path="/order-status/:orderId" element={<OrderStatus />} />
