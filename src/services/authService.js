@@ -8,97 +8,80 @@ const getApiUrl = () => {
 };
 
 let lastRefreshTime = 0;
-// Set minimum time between refreshes (10 seconds)
 const REFRESH_COOLDOWN = 10000;
+let refreshPromise = null;
 
-// Track if a refresh is in progress to prevent duplicate requests
-let refreshInProgress = false;
-
-// Extract complete user data from token
+// Extract user data from token
 const extractUserDataFromToken = (token) => {
   try {
     if (!token) return null;
     
     const decoded = jwtDecode(token);
     
-    // Make sure we store ALL user fields from the token
+    // Store minimal user data
     return {
       id: decoded.sub || null,
-      name: decoded.name || '', 
-      email: decoded.email || '', 
       role: decoded.role || 'customer',
       emailVerified: decoded.emailVerified || false,
       expiresAt: decoded.exp ? decoded.exp * 1000 : null
     };
   } catch (error) {
-    console.error('Error decoding token:', error);
     return null;
   }
 };
 
-export const setTokens = (accessToken, refreshToken) => {
+export const setTokens = (accessToken, refreshToken, userData = {}) => {
   try {
-    // Store the access token in memory and localStorage for persistence
+    // Store the access token in memory
     window.accessToken = accessToken;
     persistAccessToken(accessToken);
     
-    // Only attempt to store refresh token if it exists
-    if (refreshToken) {
-      // Store refresh token in httpOnly cookie (via API call)
-      fetch(`${getApiUrl()}/api/auth/store-refresh-token`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refreshToken }),
-        credentials: 'include', // Important for cookies
-      })
-      .then(response => {
-        if (!response.ok) {
-          console.error('Failed to store refresh token:', response.status);
-        }
-      })
-      .catch(error => {
-        console.error('Error storing refresh token:', error);
-      });
-    } else {
-      console.warn('No refresh token provided to setTokens function. Authentication may be incomplete.');
-    }
-    
-    // Store non-sensitive user info in localStorage for UI purposes
+    // Store minimal user info in memory for UI purposes
     if (accessToken) {
-      const userData = extractUserDataFromToken(accessToken);
-      if (userData) {
-        localStorage.setItem('user', JSON.stringify(userData));
-      } else {
-        console.error('Failed to extract user data from token');
+      const tokenData = extractUserDataFromToken(accessToken);
+      if (tokenData) {
+        window.currentUser = {
+          ...tokenData,
+          name: userData.name || '',
+          email: userData.email || ''
+        };
       }
     }
+    
+    // Broadcast auth state to other tabs
+    if (window.authChannel) {
+      window.authChannel.postMessage({
+        type: 'AUTH_STATE_CHANGED',
+        accessToken: window.accessToken,
+        currentUser: window.currentUser
+      });
+    }
   } catch (error) {
-    console.error('Error storing auth tokens:', error);
+    console.error('Error storing auth tokens');
   }
 };
 
 // Clear auth data on logout
 export const clearTokens = async () => {
   try {
-    // Clear memory token
+    // Clear memory tokens
     window.accessToken = null;
-    // Clear localStorage token
-    persistAccessToken(null);
+    window.currentUser = null;
+    
+    // Clear session indicators
+    sessionStorage.removeItem('sessionActive');
     
     // Clear refresh token cookie (via API call)
     await fetch(`${getApiUrl()}/api/auth/logout`, {
       method: 'POST',
       credentials: 'include',
     });
-    
-    // Clear user data
-    localStorage.removeItem('user');
   } catch (error) {
-    console.error('Error clearing auth tokens:', error);
+    console.error('Error clearing auth tokens');
   }
 };
 
-// Get current access token from memory or localStorage
+// Get current access token from memory
 export const getAccessToken = () => {
   return window.accessToken || getPersistedAccessToken();
 };
@@ -106,7 +89,7 @@ export const getAccessToken = () => {
 // Check if token is expired
 export const isTokenExpired = () => {
   try {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const user = window.currentUser || {};
     return !user.expiresAt || user.expiresAt <= Date.now();
   } catch (error) {
     return true;
@@ -115,29 +98,23 @@ export const isTokenExpired = () => {
 
 export const getCurrentUser = () => {
   try {
-    const storedUser = localStorage.getItem('user');
-    if (!storedUser) return {};
+    // Return the in-memory user object
+    if (window.currentUser) {
+      return window.currentUser;
+    }
     
-    const user = JSON.parse(storedUser);
-    
-    // Debug: Check what fields are missing
-    if (!user.name || !user.email) {
-      console.warn('User data is missing critical fields:', user);
-      
-      // Try to recover by re-extracting from token
-      const token = getAccessToken();
-      if (token) {
-        const tokenData = extractUserDataFromToken(token);
-        if (tokenData && tokenData.id) {
-          localStorage.setItem('user', JSON.stringify(tokenData));
-          return tokenData;
-        }
+    // Try to recover by extracting from token
+    const token = getAccessToken();
+    if (token) {
+      const tokenData = extractUserDataFromToken(token);
+      if (tokenData && tokenData.id) {
+        window.currentUser = tokenData;
+        return tokenData;
       }
     }
     
-    return user;
+    return {};
   } catch (error) {
-    console.error('Error getting current user:', error);
     return {};
   }
 };
@@ -147,56 +124,125 @@ export const isAuthenticated = () => {
   return !!getAccessToken() && !isTokenExpired();
 };
 
-// Refresh the access token using refresh token, with rate limiting
+
+
+// Modified refreshAccessToken function in authService.js
 export const refreshAccessToken = async () => {
-  // Check if refresh is already in progress
-  if (refreshInProgress) {
-    return null;
+  // Check if another tab is already refreshing
+  if (window.isRefreshingToken) {
+    // Wait a bit and check if it's completed
+    await new Promise(resolve => setTimeout(resolve, 500));
+    if (window.accessToken) {
+      return window.accessToken;
+    }
   }
   
-  // Check if we've refreshed recently
+  // Return existing promise if refresh is already in progress in this tab
+  if (refreshPromise) {
+    return refreshPromise;
+  }
+  
+  // Check if we've refreshed recently in this tab
   const now = Date.now();
   if (now - lastRefreshTime < REFRESH_COOLDOWN) {
     return getAccessToken();
   }
   
   try {
-    refreshInProgress = true;
-    lastRefreshTime = now;
+    // Signal to other tabs that we're starting a refresh
+    if (window.authChannel) {
+      window.authChannel.postMessage({
+        type: 'REFRESH_STARTED'
+      });
+    }
     
-    const response = await fetch(`${getApiUrl()}/api/auth/refresh-token`, {
-      method: 'POST',
-      credentials: 'include', // Important for sending cookies
+    window.isRefreshingToken = true;
+    
+    refreshPromise = new Promise((resolve, reject) => {
+      // Set last refresh time
+      lastRefreshTime = now;
+      
+      // Make the API call
+      fetch(`${getApiUrl()}/api/auth/refresh-token`, {
+        method: 'POST',
+        credentials: 'include',
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to refresh token');
+        }
+        return response.json();
+      })
+      .then(data => {
+        // Store in memory
+        window.accessToken = data.accessToken;
+        persistAccessToken(data.accessToken);
+
+        if (data.user && data.user.name && data.user.email) {
+          window.currentUser = {
+            id: data.user.id,
+            role: data.user.role,
+            emailVerified: data.user.emailVerified,
+            name: data.user.name,
+            email: data.user.email,
+            expiresAt: extractUserDataFromToken(data.accessToken)?.expiresAt
+          };
+        } else {
+          // Fallback to using token data + preserving existing user info
+          const existingUserData = window.currentUser || {};
+          const tokenData = extractUserDataFromToken(data.accessToken);
+          
+          if (tokenData && tokenData.id) {
+            window.currentUser = {
+              ...tokenData,
+              name: existingUserData.name || '',
+              email: existingUserData.email || ''
+            };
+          }
+        }
+        
+        sessionStorage.setItem('sessionActive', 'true');
+        
+        // Broadcast to other tabs
+        if (window.authChannel) {
+          window.authChannel.postMessage({
+            type: 'AUTH_STATE_CHANGED',
+            accessToken: window.accessToken,
+            currentUser: window.currentUser
+          });
+        }
+        
+        resolve(data.accessToken);
+      })
+      .catch(error => {
+        // Clear session on refresh failure
+        sessionStorage.removeItem('sessionActive');
+        reject(error);
+      })
+      .finally(() => {
+        // Signal that refresh is complete
+        if (window.authChannel) {
+          window.authChannel.postMessage({
+            type: 'REFRESH_COMPLETE'
+          });
+        }
+        window.isRefreshingToken = false;
+      });
     });
     
-    if (!response.ok) {
-      throw new Error('Failed to refresh token');
-    }
-    
-    const data = await response.json();
-    
-    // Store in both memory and localStorage
-    window.accessToken = data.accessToken;
-    persistAccessToken(data.accessToken);
-    
-    // Update user data with new token info
-    if (data.accessToken) {
-      const userData = extractUserDataFromToken(data.accessToken);
-      if (userData && userData.name && userData.email) {
-        localStorage.setItem('user', JSON.stringify(userData));
-      } else {
-        console.error('Refreshed token is missing required user data');
-      }
-    }
-    
-    return data.accessToken;
+    return await refreshPromise;
   } catch (error) {
-    console.error('Error refreshing token:', error);
     return null;
   } finally {
-    refreshInProgress = false;
+    refreshPromise = null;
   }
 };
+
+
+
+
+
+
 
 // Auth API client with automatic token refresh
 export const authFetch = async (url, options = {}) => {
@@ -245,12 +291,11 @@ export const authFetch = async (url, options = {}) => {
 
 export const clearAllAuthData = async () => {
   try {
-    // Clear memory token
+    // Clear memory tokens
     window.accessToken = null;
-
+    window.currentUser = null;
     
     // WHITELIST APPROACH: Save only specific items we want to keep
-    // These would be non-auth related items your app needs to preserve
     const whitelistedKeys = [
       'cartItems',
       'measurements',
@@ -273,24 +318,28 @@ export const clearAllAuthData = async () => {
       }
     });
     
-    // Clear sessionStorage
-    sessionStorage.clear();
+    // Clear sessionStorage except for whitelisted items
+    const whitelistedSessionKeys = [];
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const key = sessionStorage.key(i);
+      if (!whitelistedSessionKeys.includes(key)) {
+        sessionStorage.removeItem(key);
+      }
+    }
 
-
-   // Clear cart from database if we're authenticated
-   try {
-    const apiUrl = getApiUrl();
-    await fetch(`${apiUrl}/api/cart`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${getAccessToken()}`
-      },
-      credentials: 'include'
-    });
-  } catch (cartError) {
-    console.error('Error clearing cart from database:', cartError);
-  }
-
+    // Clear cart from database if authenticated
+    try {
+      const apiUrl = getApiUrl();
+      await fetch(`${apiUrl}/api/cart`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${getAccessToken()}`
+        },
+        credentials: 'include'
+      });
+    } catch (cartError) {
+      // Continue despite cart error
+    }
     
     // Clear refresh token cookie (via API call)
     await fetch(`${getApiUrl()}/api/auth/logout`, {
@@ -298,23 +347,19 @@ export const clearAllAuthData = async () => {
       credentials: 'include',
     });
 
-     document.cookie.split(";").forEach(function(c) {
+    // Clear cookies
+    document.cookie.split(";").forEach(function(c) {
       document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
     });
     
     return true;
   } catch (error) {
-    console.error('Error clearing auth data:', error);
     return false;
   }
 };
 
-
 /**
  * Login user and reload page after success
- * @param {string} email - User email
- * @param {string} password - User password
- * @returns {Promise<Object>} - Login result
  */
 export const loginUser = async (email, password) => {
   try {
@@ -328,7 +373,7 @@ export const loginUser = async (email, password) => {
     });
     
     const data = await response.json();
-    
+
     // Handle email verification error
     if (response.status === 403 && data.needsVerification) {
       return {
@@ -345,8 +390,8 @@ export const loginUser = async (email, password) => {
       };
     }
     
-    // Store tokens securely - this will also store user data in localStorage
-    setTokens(data.accessToken, data.refreshToken);
+    // Store tokens securely
+    setTokens(data.accessToken, data.refreshToken, data.user);
     
     // Get local cart items
     const localCartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
@@ -365,7 +410,7 @@ export const loginUser = async (email, password) => {
           credentials: 'include',
         });
       } catch (error) {
-        console.error('Error sending cart data:', error);
+        // Continue despite cart error
       }
     }
     
@@ -373,22 +418,24 @@ export const loginUser = async (email, password) => {
     const authStateChangedEvent = new CustomEvent('auth-state-changed');
     window.dispatchEvent(authStateChangedEvent);
     
-    // CRITICAL: Force page reload with a slight delay to ensure events are processed
+    // Force page reload
     setTimeout(() => {
-      window.location.href = window.location.href;
+      // window.location.href = window.location.href;
+      window.location.reload();
     }, 100);
     
-    // Return success but let the page reload happen
     return { 
       success: true,
       user: data.user,
       reloading: true
     };
   } catch (error) {
-    console.error('Login error:', error);
     return {
       success: false,
       error: error.message || 'An unexpected error occurred'
     };
   }
 };
+
+// Make refreshAccessToken available globally
+window.refreshAccessToken = refreshAccessToken;

@@ -11,8 +11,28 @@ import {
 } from '../middleware/auth.js';
 import rateLimit from 'express-rate-limit';
 import { generateVerificationToken, sendPasswordResetEmail, sendVerificationEmail } from '../services/emailVerification.js';
+import { addToBlacklist } from '../services/tokenBlacklist.js';
+import jwt from 'jsonwebtoken';
+// import csurf from 'csurf';
 
 const router = express.Router();
+
+
+// const csrfProtection = csurf({ 
+//   cookie: { 
+//     httpOnly: true,
+//     secure: process.env.NODE_ENV === 'production',
+//     sameSite: 'strict'
+//   } 
+// });
+
+
+const {
+  JWT_ACCESS_SECRET,
+  JWT_REFRESH_SECRET,
+  JWT_ACCESS_EXPIRES = '15m',
+  JWT_REFRESH_EXPIRES = '7d',
+} = process.env;
 
 // server/routes/auth.js - Improved login route with better verification handling
 router.post('/api/auth/login', loginLimiter, trackLoginAttempts, async (req, res) => {
@@ -147,6 +167,7 @@ router.post('/api/auth/login', loginLimiter, trackLoginAttempts, async (req, res
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      path: '/api/auth/refresh-token'
     });
     
     // Return access token and user info
@@ -166,9 +187,6 @@ router.post('/api/auth/login', loginLimiter, trackLoginAttempts, async (req, res
     res.status(500).json({ error: 'Internal server error.' });
   }
 });
-
-
-
 
 
 router.post('/api/auth/refresh-token', refreshTokenLimiter, async (req, res) => {
@@ -197,29 +215,72 @@ router.post('/api/auth/refresh-token', refreshTokenLimiter, async (req, res) => 
       return res.status(403).json({ error: 'Account is locked. Please contact support.' });
     }
     
-    // Generate new tokens
-    const tokens = generateTokens(user._id, {
-      name: user.name,
-      email: user.email,
-      emailVerified: user.emailVerified,
-      role: user.role
-    });
+    // Check if refresh token is close to expiration (e.g., less than 1 day left)
+    const tokenExp = decoded.exp;
+    const nowInSeconds = Math.floor(Date.now() / 1000);
+    const oneDayInSeconds = 24 * 60 * 60;
+    const shouldRotateToken = tokenExp - nowInSeconds < oneDayInSeconds;
     
-    // Update refresh token cookie
-    res.cookie('refreshToken', tokens.refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
+    // Always generate a new access token
+    const accessToken = jwt.sign(
+      { 
+        sub: user._id, 
+        role: user.role, 
+        emailVerified: user.emailVerified 
+      },
+      JWT_ACCESS_SECRET,
+      { expiresIn: JWT_ACCESS_EXPIRES }
+    );
+    
+    // Only generate a new refresh token if it's close to expiration
+    if (shouldRotateToken) {
+      console.log('Rotating refresh token - expiration approaching');
+      
+      // Generate new refresh token
+      const newRefreshToken = jwt.sign(
+        { 
+          sub: user._id, 
+          role: user.role, 
+          emailVerified: user.emailVerified 
+        },
+        JWT_REFRESH_SECRET,
+        { expiresIn: JWT_REFRESH_EXPIRES }
+      );
+      
+      // Update refresh token cookie
+      res.cookie('refreshToken', newRefreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        path: '/api/auth/refresh-token'
+      });
+    }
     
     // Return new access token
-    res.json({ accessToken: tokens.accessToken });
+    res.json({ 
+      accessToken,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        emailVerified: user.emailVerified
+      }
+    });
   } catch (error) {
     console.error('Token refresh error:', error);
     res.status(500).json({ error: 'Internal server error.' });
   }
 });
+
+
+
+
+
+
+
+
 
 // Store refresh token in cookie (called from client-side)
 router.post('/api/auth/store-refresh-token', (req, res) => {
@@ -236,6 +297,7 @@ router.post('/api/auth/store-refresh-token', (req, res) => {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      path: '/api/auth/refresh-token'
     });
     
     res.json({ success: true });
@@ -246,13 +308,22 @@ router.post('/api/auth/store-refresh-token', (req, res) => {
 });
 
 // Logout route
-router.post('/api/auth/logout', (req, res) => {
+router.post('/api/auth/logout', async (req, res) => {
   try {
+
+    const refreshToken = req.cookies.refreshToken;
+    
+    // Blacklist token if it exists
+    if (refreshToken) {
+      await addToBlacklist(refreshToken);
+    }
+
     //Clear refresh token cookie
     res.clearCookie('refreshToken', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
+      path: '/api/auth/refresh-token'
     });
     
     res.json({ success: true });
@@ -340,6 +411,7 @@ router.post('/api/auth/register', registerLimiter, async (req, res) => {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      path: '/api/auth/refresh-token'
     });
     
     // Return access token and user info

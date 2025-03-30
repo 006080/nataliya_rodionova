@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { 
   setTokens, 
   clearTokens, 
@@ -20,63 +20,64 @@ const AuthContext = createContext(null);
 function AuthProviderComponent({ children }) {
   const [user, setUser] = useState(() => {
     try {
-      const storedUser = localStorage.getItem('user');
-      return storedUser ? JSON.parse(storedUser) : null;
+      // Initialize from memory first
+      if (window.currentUser) {
+        return window.currentUser;
+      }
+      
+      // Check for active session indicator
+      const sessionActive = sessionStorage.getItem('sessionActive');
+      return sessionActive === 'true' ? {} : null;
     } catch (e) {
-      console.error('Error parsing stored user data:', e);
       return null;
     }
   });
   const [loading, setLoading] = useState(true);
   const [authError, setAuthError] = useState('');
 
-  let refreshInProgress = false;
-  
+
   useEffect(() => {
     const initAuth = async () => {
-      try {      
-        const storedUser = localStorage.getItem('user');
-        if (!storedUser) {
+      try {
+        setLoading(true);
+        
+        // Check if we already have valid data in memory
+        if (window.currentUser && window.accessToken) {
+          setUser(window.currentUser);
+          setLoading(false);
+          return;
+        }
+        
+        // Check if we have an active session
+        const sessionActive = sessionStorage.getItem('sessionActive');
+        if (sessionActive !== 'true') {
           setUser(null);
           setLoading(false);
           return;
         }
         
-        
-        if (!refreshInProgress && isAuthenticated()) {
-          setLoading(false);
-          return;
-        }
-        
-        if (!refreshInProgress) {
-          refreshInProgress = true;
-          try {
-            const newToken = await refreshAccessToken();
-            
-            if (newToken) {
-              // Token refresh succeeded, update user
-              const freshUser = getCurrentUser();
-              setUser(freshUser);
-            } else {
-              // If refresh failed but we still have a valid token, keep the user
-              if (isAuthenticated()) {
-                console.log('Token refresh failed but existing token is valid');
-              } else {
-                // No valid token, clear auth state
-                console.log('No valid token available, clearing auth state');
-                await clearTokens();
-                setUser(null);
-              }
-            }
-          } catch (refreshError) {
-            console.error('Error during token refresh:', refreshError);
-            // Don't clear tokens here - only do that if isAuthenticated() is false
-            if (!isAuthenticated()) {
-              await clearTokens();
-              setUser(null);
-            }
-          } finally {
-            refreshInProgress = false;
+        // Try to refresh token - with better error handling
+        try {
+          const newToken = await refreshAccessToken();
+          
+          if (newToken) {
+            // Token refresh succeeded, update user state
+            const freshUser = getCurrentUser();
+            setUser(freshUser);
+          } else {
+            // Clear auth state if refresh failed
+            await clearTokens();
+            setUser(null);
+            sessionStorage.removeItem('sessionActive');
+          }
+        } catch (refreshError) {
+          console.error('Error refreshing token during initialization:', refreshError);
+          
+          // Only clear if no valid token exists
+          if (!isAuthenticated()) {
+            await clearTokens();
+            setUser(null);
+            sessionStorage.removeItem('sessionActive');
           }
         }
       } catch (error) {
@@ -87,14 +88,46 @@ function AuthProviderComponent({ children }) {
     };
     
     initAuth();
+    
+    // Listen for visibility changes to sync auth state between tabs
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // When tab becomes visible, check if we need to refresh auth
+        const shouldRefresh = sessionStorage.getItem('sessionActive') === 'true' && !window.currentUser;
+        if (shouldRefresh) {
+          initAuth();
+        }
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, []);
 
-  // Login function with improved error handling for email verification
+
+  useEffect(() => {
+    // Listen for auth sync events from other tabs
+    const handleAuthSync = () => {
+      if (window.currentUser) {
+        setUser(window.currentUser);
+      }
+    };
+    
+    window.addEventListener('auth-state-sync', handleAuthSync);
+    
+    return () => {
+      window.removeEventListener('auth-state-sync', handleAuthSync);
+    };
+  }, []);
+
+
+  // Login function
   const login = async (email, password) => {
     try {
-      // Clear previous errors
       setAuthError('');
-      
       
       const response = await fetch(`${getApiUrl()}/api/auth/login`, {
         method: 'POST',
@@ -109,7 +142,6 @@ function AuthProviderComponent({ children }) {
       if (response.status === 403 && data.needsVerification) {
         setAuthError('Please verify your email address before logging in.');
         
-        // Return detailed verification info from server
         return {
           success: false,
           needsVerification: true,
@@ -126,15 +158,28 @@ function AuthProviderComponent({ children }) {
         };
       }
       
-      // Store tokens securely - this will also store user data in localStorage
-      setTokens(data.accessToken, data.refreshToken);
+      // Store tokens securely
+      setTokens(data.accessToken, data.refreshToken, data.user);
       
-      // Update user state
-      setUser(data.user);
+      // Set session active marker
+      sessionStorage.setItem('sessionActive', 'true');
+      
+      const completeUser = {
+        id: data.user.id,
+        role: data.user.role,
+        emailVerified: data.user.emailVerified,
+        name: data.user.name,
+        email: data.user.email
+      };
+      
+      // Update both in-memory storage and React state
+      window.currentUser = completeUser;
+      setUser(completeUser);
+      // const userData = getCurrentUser();
+      // setUser(userData);
       
       return { success: true };
     } catch (error) {
-      console.error('Login error:', error);
       setAuthError(error.message || 'An unexpected error occurred');
       return {
         success: false,
@@ -143,13 +188,12 @@ function AuthProviderComponent({ children }) {
     }
   };
 
-  // Register function - updated to prevent auto-authentication
+  // Register function
   const register = async (name, email, password) => {
     try {
       setAuthError('');
       
       await clearTokens(); 
-      localStorage.clear(); 
       sessionStorage.clear(); 
       
       const response = await fetch(`${getApiUrl()}/api/auth/register`, {
@@ -171,7 +215,6 @@ function AuthProviderComponent({ children }) {
         message: data.message || 'Registration successful. Please verify your email address.'
       };
     } catch (error) {
-      console.error('Registration error:', error);
       setAuthError(error.message);
       return {
         success: false,
@@ -199,35 +242,40 @@ function AuthProviderComponent({ children }) {
       
       return true;
     } catch (error) {
-      console.error('Resend verification error:', error);
       setAuthError(error.message);
       return false;
     }
   };
 
-  // Logout handler with credential management
+  // Logout handler
   const logout = async () => {
     try {
       setLoading(true);
       
-      // Clear authentication data from cookies and storage
+      // Clear authentication data
       const success = await clearAllAuthData();
       
       if (success) {
-        // Dispatch logout event for other components to respond to
+        // Dispatch logout event
         const logoutEvent = new CustomEvent('user-logout');
         window.dispatchEvent(logoutEvent);
         
         // Clear user state
         setUser(null);
         
-        // If Credential Management API is supported, clear stored credentials
+        // Clear session marker
+        sessionStorage.removeItem('sessionActive');
+        
+        // Clear memory
+        window.accessToken = null;
+        window.currentUser = null;
+        
+        // Clear auto-sign-in
         if (navigator.credentials && navigator.credentials.preventSilentAccess) {
           try {
-            // This prevents the browser from automatically signing in the user next time
             await navigator.credentials.preventSilentAccess();
           } catch (credError) {
-            console.error('Error clearing credential auto-sign-in:', credError);
+            // Continue despite credential error
           }
         }
       }
@@ -238,15 +286,14 @@ function AuthProviderComponent({ children }) {
       
       return true;
     } catch (error) {
-      console.error('Logout error:', error);
       return false;
     } finally {
       setLoading(false);
     }
   };
 
-  // Context value
-  const contextValue = {
+  // Memoize context value to prevent unnecessary re-renders
+  const contextValue = useMemo(() => ({
     user,
     isAuthenticated: !!user?.id && isAuthenticated(),
     loading,
@@ -256,14 +303,17 @@ function AuthProviderComponent({ children }) {
     logout,
     resendVerificationEmail,
     clearAuthError: () => setAuthError(''),
-    authFetch, // Export authFetch for protected API calls
-    setUser, // Expose setUser for updates after profile changes
-  };
+    authFetch,
+    setUser: (newUserData) => {
+      window.currentUser = newUserData;
+      setUser(newUserData);
+    },
+  }), [user, loading, authError]);
 
   return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
 }
 
-// Named exports compatible with Fast Refresh
+// Named exports
 export function AuthProvider(props) {
   return <AuthProviderComponent {...props} />;
 }

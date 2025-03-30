@@ -28,10 +28,26 @@ dotenv.config({ path: './.env.local' });
 const app = express();
 const server = http.createServer(app);
 
+
+app.set('trust proxy', 1);
+app.disable('x-powered-by');
+
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(helmet()); 
+
+// This is a security feature that helps prevent XSS and data injection attacks
+app.use(helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'"], // Only allow resources from same origin by default
+      scriptSrc: ["'self'", "'unsafe-inline'"], // Scripts from same origin & inline
+      styleSrc: ["'self'", "'unsafe-inline'"], // Styles from same origin & inline
+    //   imgSrc: ["'self'", "data:", "https://yourcdn.com"], // Images from same origin, data URIs & your CDN
+    //   connectSrc: ["'self'", "https://yourapi.com"] // API connections to same origin & your API domain
+    }
+  }));
+
 app.use(cors({
     origin: (origin, callback) => {
         const allowedOrigins = [FRONTEND_URL_LOCAL, FRONTEND_URL_PROD];
@@ -113,6 +129,26 @@ const feedbackLimiter = rateLimit({
     max: 100, 
     message: 'Too many feedbacks submitted. Please try again later.'
 });
+
+// Global rate limit for all routes
+// app.use(rateLimit({
+//     windowMs: 15 * 60 * 1000, // 15 minutes
+//     max: 100, // 100 requests per IP
+//     standardHeaders: true,
+//     legacyHeaders: false
+//   }));
+  
+  // Stronger limits specifically for auth routes
+  const authLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: 30, // 30 requests per IP
+    message: { error: 'Too many requests from this IP, please try again after an hour' }
+  });
+  
+  // Apply to auth routes
+  app.use('/api/auth/', authLimiter);
+
+
 
 // Middleware
 app.use("/api/feedback", feedbackLimiter);
@@ -341,10 +377,21 @@ app.use((req, res) => {
 });
 
 // General error handler
+// app.use((err, req, res, next) => {
+//     console.error('Server error:', err);
+//     res.status(500).json({ error: 'Internal server error' });
+// });
 app.use((err, req, res, next) => {
-    console.error('Server error:', err);
-    res.status(500).json({ error: 'Internal server error' });
-});
+    // Log detailed error internally
+    console.error(err);
+    
+    // Send generic response to client
+    res.status(err.status || 500).json({
+      error: process.env.NODE_ENV === 'production' 
+        ? 'An unexpected error occurred' 
+        : err.message
+    });
+  });
 
 // Health Check route
 app.get('/api/health', (req, res) => {

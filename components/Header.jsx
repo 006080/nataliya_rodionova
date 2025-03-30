@@ -23,21 +23,31 @@ const Header = () => {
   const navRef = useOutsideClick(() => openMenu(false))
   const userMenuRef = useOutsideClick(() => setUserMenuOpen(false));
 
+  // useEffect(() => {
+  //   if (user && user.name && user.email) {
+  //     setUserData({ name: user.name, email: user.email });
+  //   } else if (isAuthenticated) {
+  //     // Try to get user data from localStorage if not in context
+  //     try {
+  //       const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+  //       if (storedUser && storedUser.name && storedUser.email) {
+  //         setUserData({ name: storedUser.name, email: storedUser.email });
+  //       }
+  //     } catch (e) {
+  //       console.error('Error parsing user data from localStorage:', e);
+  //     }
+  //   }
+  // }, [user, isAuthenticated]);
+
   useEffect(() => {
-    if (user && user.name && user.email) {
-      setUserData({ name: user.name, email: user.email });
-    } else if (isAuthenticated) {
-      // Try to get user data from localStorage if not in context
-      try {
-        const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
-        if (storedUser && storedUser.name && storedUser.email) {
-          setUserData({ name: storedUser.name, email: storedUser.email });
-        }
-      } catch (e) {
-        console.error('Error parsing user data from localStorage:', e);
-      }
+    if (user) {
+      setUserData({
+        name: user.name || 'User', 
+        email: user.email || 'No email'
+      });
     }
   }, [user, isAuthenticated]);
+  
 
   const handleCartClick = () => {
     setCartIsOpen(!cartIsOpen);

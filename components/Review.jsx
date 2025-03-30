@@ -1,10 +1,10 @@
 import PropTypes from 'prop-types';
 import styles from "./Review.module.css";
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { FaStar } from "react-icons/fa";
 import SubmitModal from "./SubmitModal";
 
-const Review = ({ setReviews, setError }) => {
+const Review = ({ setReviews, setError, apiUrl, onSubmit }) => {
   const [reviewFields, setReviewFields] = useState({
     name: "",
     rating: 0,
@@ -16,28 +16,6 @@ const Review = ({ setReviews, setError }) => {
   const [hover, setHover] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const getApiUrl = () => {
-    return import.meta.env.VITE_NODE_ENV === "production"
-      ? import.meta.env.VITE_API_URL_PROD
-      : import.meta.env.VITE_API_URL_LOCAL;
-  };
-
-  const fetchReviews = useCallback(async () => {
-    try {
-      const response = await fetch(getApiUrl());
-      if (!response.ok) throw new Error("Failed to fetch reviews");
-      const data = await response.json();
-      setReviews(data);
-    } catch (error) {
-      console.error("Error fetching reviews:", error);
-      setError("Failed to load reviews");
-    }
-  }, [getApiUrl, setReviews, setError]);
-
-  useEffect(() => {
-    fetchReviews();
-  }, [fetchReviews]);
 
   const resizeImage = (file) => {
     return new Promise((resolve) => {
@@ -124,7 +102,7 @@ const Review = ({ setReviews, setError }) => {
       formData.append("message", message.trim());
       formData.append("image", image);
 
-      const response = await fetch(getApiUrl(), {
+      const response = await fetch(apiUrl, {
         method: "POST",
         body: formData,
         credentials: "include",
@@ -134,9 +112,17 @@ const Review = ({ setReviews, setError }) => {
         throw new Error("Failed to submit review");
       }
 
+      // After successful submission, fetch updated reviews once
+      const getReviewsResponse = await fetch(apiUrl);
+      if (getReviewsResponse.ok) {
+        const updatedReviews = await getReviewsResponse.json();
+        setReviews(updatedReviews);
+      }
+
       setReviewFields({ name: "", rating: 0, message: "", image: null, preview: null });
       setHover(null);
       setIsModalOpen(true);
+      if (onSubmit) onSubmit();
     } catch (error) {
       console.error("Submission error:", error);
       setError(error.message);
@@ -199,6 +185,8 @@ const Review = ({ setReviews, setError }) => {
 Review.propTypes = {
   setReviews: PropTypes.func.isRequired,
   setError: PropTypes.func.isRequired,
+  apiUrl: PropTypes.string.isRequired,
+  onSubmit: PropTypes.func,
 };
 
 export default Review;

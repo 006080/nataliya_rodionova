@@ -10,27 +10,31 @@ const Reviews = () => {
   const [reviews, setReviews] = useState([]);
   const [loadingImages, setLoadingImages] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [error, setError] = useState(null);  // Error state added here
+  const [error, setError] = useState(null);
+
+  
+  const apiUrl = window.location.hostname === "localhost"
+    ? "http://localhost:4000/api/reviews"
+    : "https://www.nataliyarodionova.com/api/reviews";
 
   useEffect(() => {
     const fetchReviews = async () => {
-      const apiUrl =
-        window.location.hostname === "localhost"
-          ? "http://localhost:4000/api/reviews"
-          : "https://www.nataliyarodionova.com/api/reviews";
-
-      const response = await fetch(apiUrl);
-      
-      if (response.ok) {
-        const data = await response.json();
-        setReviews(data);
-      } else {
-        setError("");  // Set error message if fetch fails
+      try {
+        const response = await fetch(apiUrl);
+        
+        if (response.ok) {
+          const data = await response.json();
+          setReviews(data);
+        } else {
+          setError("Failed to fetch reviews. Please try again later.");
+        }
+      } catch (err) {
+        setError("Error connecting to the server. Please try again later.");
       }
     };
 
     fetchReviews();
-  }, []);
+  }, []); 
 
   const cld = new Cloudinary({
     cloud: { cloudName: 'dwenvtwyx' },
@@ -80,7 +84,7 @@ const Reviews = () => {
 
       <section className={styles.review}>
         <h1 style={{ color: 'black' }}>Reviews:</h1>
-        {error && <div style={{ color: 'red' }}>{error}</div>}  {/* Display error here if there is one */}
+        {error && <div style={{ color: 'red' }}>{error}</div>}
         <div className={styles.reviewsList}>
           {reviews.map((review) => (
             <div key={review._id} className={styles.reviewItem}>
@@ -102,7 +106,7 @@ const Reviews = () => {
 
       <div className={styles.overlay}>
         {isModalOpen && <SubmitModal onClose={handleCloseModal} />}
-        <Review onSubmit={handleOpenModal} setReviews={setReviews} setError={setError} />  {/* Pass setError here */}
+        <Review onSubmit={handleOpenModal} setReviews={setReviews} setError={setError} apiUrl={apiUrl} />
       </div>
     </div>
   );

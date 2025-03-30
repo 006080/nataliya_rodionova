@@ -1,4 +1,3 @@
-// server/middleware/auth.js
 import jwt from 'jsonwebtoken';
 import User from '../Models/User.js';
 import { rateLimit } from 'express-rate-limit';
@@ -14,15 +13,14 @@ const {
 
 // Generate tokens with complete user data in the payload
 export const generateTokens = (userId, user = {}) => {
-  // Create a payload with better error handling
-  // Make sure user is always at least an empty object
+
   const userData = user || {};
   
   const payload = {
     sub: userId,
     // Include other essential user data with fallbacks
-    name: userData.name || '',
-    email: userData.email || '',
+    // name: userData.name || '',
+    // email: userData.email || '',
     emailVerified: userData.emailVerified || false,
     role: userData.role || 'customer'
   };
@@ -83,7 +81,7 @@ export const authenticate = async (req, res, next) => {
 // Rate limiters
 export const loginLimiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 15 minutes
-  max: 5, // 5 requests per IP
+  max: 50, // 5 requests per IP
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many login attempts. Please try again later.' },
@@ -91,7 +89,7 @@ export const loginLimiter = rateLimit({
 
 export const refreshTokenLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 60, // 60 requests per IP
+  max: 180, // 60 requests per IP
   standardHeaders: true, 
   legacyHeaders: false,
   message: { error: 'Too many token refresh attempts. Please try again later.' },
