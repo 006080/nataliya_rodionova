@@ -11,7 +11,7 @@ import {
 } from '../middleware/auth.js';
 import rateLimit from 'express-rate-limit';
 import { generateVerificationToken, sendPasswordResetEmail, sendVerificationEmail } from '../services/emailVerification.js';
-import { addToBlacklist } from '../services/tokenBlacklist.js';
+import { addToBlacklist, isBlacklisted } from '../services/tokenBlacklist.js';
 import jwt from 'jsonwebtoken';
 // import csurf from 'csurf';
 
@@ -197,6 +197,21 @@ router.post('/api/auth/refresh-token', refreshTokenLimiter, async (req, res) => 
     if (!refreshToken) {
       return res.status(401).json({ error: 'Refresh token not found.' });
     }
+
+        // Check if token is blacklisted
+        const isTokenBlacklisted = await isBlacklisted(refreshToken);
+        if (isTokenBlacklisted) {
+          // Clear the cookie if token is blacklisted
+          res.clearCookie('refreshToken', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            path: '/api/auth/refresh-token',
+            // maxAge: 0,
+            // expires: new Date(0)
+          });
+          return res.status(401).json({ error: 'Token has been revoked.' });
+        }
     
     // Verify refresh token
     const decoded = verifyToken(refreshToken, process.env.JWT_REFRESH_SECRET);
@@ -307,10 +322,9 @@ router.post('/api/auth/store-refresh-token', (req, res) => {
   }
 });
 
-// Logout route
+
 router.post('/api/auth/logout', async (req, res) => {
   try {
-
     const refreshToken = req.cookies.refreshToken;
     
     // Blacklist token if it exists
@@ -318,12 +332,14 @@ router.post('/api/auth/logout', async (req, res) => {
       await addToBlacklist(refreshToken);
     }
 
-    //Clear refresh token cookie
+    // Clear refresh token cookie - with proper settings to ensure deletion
     res.clearCookie('refreshToken', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      path: '/api/auth/refresh-token'
+      path: '/api/auth/refresh-token',
+      maxAge: 0,  // Expire immediately
+      expires: new Date(0) // Force expire the cookie
     });
     
     res.json({ success: true });
@@ -333,10 +349,10 @@ router.post('/api/auth/logout', async (req, res) => {
   }
 });
 
-// Register route (with rate limiting)
+
+
 const registerLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  // windowMs: 1 * 60 * 1000, // 1 min
   max: 3, // 3 accounts per IP per hour
   message: { error: 'Too many accounts created. Please try again later.' },
 });

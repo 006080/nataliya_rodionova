@@ -13,13 +13,29 @@ const getApiUrl = () => {
  */
 export const saveCartToDatabase = async (cartItems) => {
   try {
-    if (!isAuthenticated() || !getAccessToken()) {
+    // Check for logout flag first
+    if (sessionStorage.getItem('isUserLogout') === 'true') {
+      console.log('Skipping cart save due to logout flag');
       return false;
     }
     
+    // Then check authentication
+    if (!isAuthenticated() || !getAccessToken()) {
+      console.log('Cannot save cart: User not authenticated');
+      return false;
+    }
+    
+    // Skip if no items (avoid unnecessary API calls)
+    if (!cartItems || cartItems.length === 0) {
+      console.log('No items to save to database');
+      return true;
+    }
+    
+    console.log('Saving cart to database:', cartItems.length, 'items');
+    
     const apiUrl = getApiUrl();
     const response = await authFetch(`${apiUrl}/api/cart`, {
-      method: 'POST',
+      method: 'POST', // Keep your original method
       headers: {
         'Content-Type': 'application/json',
       },
@@ -27,9 +43,14 @@ export const saveCartToDatabase = async (cartItems) => {
     });
     
     if (!response.ok) {
-      throw new Error('Failed to save cart to database');
+      // Handle 401 specifically
+      if (response.status === 401) {
+        console.error('Unauthorized while saving cart - token may be expired');
+      }
+      throw new Error(`Failed to save cart to database: ${response.status}`);
     }
     
+    console.log('Cart saved successfully');
     return true;
   } catch (error) {
     console.error('Error saving cart to database:', error);
@@ -43,9 +64,19 @@ export const saveCartToDatabase = async (cartItems) => {
  */
 export const fetchCartFromDatabase = async () => {
   try {
-    if (!isAuthenticated() || !getAccessToken()) {
+    // Check for logout flag first
+    if (sessionStorage.getItem('isUserLogout') === 'true') {
+      console.log('Skipping cart fetch due to logout flag');
       return [];
     }
+    
+    // Then check authentication
+    if (!isAuthenticated() || !getAccessToken()) {
+      console.log('Cannot fetch cart: User not authenticated');
+      return [];
+    }
+    
+    console.log('Fetching cart from database');
     
     const apiUrl = getApiUrl();
     const response = await authFetch(`${apiUrl}/api/cart`, {
@@ -56,10 +87,16 @@ export const fetchCartFromDatabase = async () => {
     });
     
     if (!response.ok) {
-      throw new Error('Failed to fetch cart from database');
+      // Handle 401 specifically
+      if (response.status === 401) {
+        console.error('Unauthorized while fetching cart - token may be expired');
+        return [];
+      }
+      throw new Error(`Failed to fetch cart from database: ${response.status}`);
     }
     
     const data = await response.json();
+    console.log('Cart fetched successfully:', (data.items || []).length, 'items');
     return data.items || [];
   } catch (error) {
     console.error('Error fetching cart from database:', error);
@@ -71,20 +108,32 @@ export const fetchCartFromDatabase = async () => {
  * Merge guest cart with authenticated user's cart
  * Prioritizes items in database cart but combines quantities when same item exists
  * @param {Array} localItems - Local cart items from localStorage
- * @returns {Promise<boolean>} - True if successful, false otherwise
+ * @returns {Promise<boolean|Object>} - Result object or false if failed
  */
 export const mergeGuestCartWithUserCart = async (localItems) => {
   try {
-    if (!isAuthenticated() || !getAccessToken() || !localItems.length) {
+    // Check for logout flag first
+    if (sessionStorage.getItem('isUserLogout') === 'true') {
+      console.log('Skipping cart merge due to logout flag');
       return false;
     }
+    
+    // Then check authentication and items
+    if (!isAuthenticated() || !getAccessToken() || !localItems.length) {
+      console.log('Cannot merge carts: User not authenticated or no local items');
+      return false;
+    }
+    
+    console.log('Merging guest cart with user cart');
     
     // Fetch current database cart first
     const dbItems = await fetchCartFromDatabase();
     
     // If no database items, just save local items directly
     if (!dbItems.length) {
-      return await saveCartToDatabase(localItems);
+      console.log('No database items, saving local items directly');
+      const success = await saveCartToDatabase(localItems);
+      return success ? { success: true, mergedItems: localItems } : false;
     }
     
     // Merge logic: combine items, add quantities for duplicates
@@ -117,6 +166,10 @@ export const mergeGuestCartWithUserCart = async (localItems) => {
     const success = await saveCartToDatabase(mergedItems);
     
     if (success) {
+      console.log('Carts merged successfully:', mergedItems.length, 'total items');
+      
+      // Trigger the cart-merged event
+      window.dispatchEvent(new CustomEvent('cart-merged'));
       
       return {
         success: true,
@@ -137,16 +190,26 @@ export const mergeGuestCartWithUserCart = async (localItems) => {
  */
 export const clearDatabaseCart = async () => {
   try {
+    
     if (!isAuthenticated() || !getAccessToken()) {
-      return false;
+      console.log('Cannot clear cart: User not authenticated');
+      return true; // Return true as we're essentially "done" if not authenticated
     }
+    
+    console.log('Clearing database cart');
     
     const apiUrl = getApiUrl();
     const response = await authFetch(`${apiUrl}/api/cart`, {
       method: 'DELETE',
     });
     
-    return response.ok;
+    if (!response.ok) {
+      console.error('Error clearing cart:', response.status);
+      return false;
+    }
+    
+    console.log('Cart cleared successfully');
+    return true;
   } catch (error) {
     console.error('Error clearing database cart:', error);
     return false;

@@ -126,8 +126,13 @@ export const isAuthenticated = () => {
 
 
 
-// Modified refreshAccessToken function in authService.js
 export const refreshAccessToken = async () => {
+  // Don't refresh if user has deliberately logged out - use correct flag name
+  if (window.hasLoggedOut || sessionStorage.getItem('isUserLogout') === 'true') {
+    console.log('Skipping token refresh due to previous logout');
+    return null;
+  }
+  
   // Check if another tab is already refreshing
   if (window.isRefreshingToken) {
     // Wait a bit and check if it's completed
@@ -169,11 +174,22 @@ export const refreshAccessToken = async () => {
       })
       .then(response => {
         if (!response.ok) {
+          // If refresh fails with 401 Unauthorized, mark as logged out
+          if (response.status === 401) {
+            window.hasLoggedOut = true;
+            sessionStorage.setItem('isUserLogout', 'true');
+            sessionStorage.removeItem('sessionActive');
+          }
           throw new Error('Failed to refresh token');
         }
         return response.json();
       })
       .then(data => {
+        // Check for deliberate logout before processing the response
+        if (window.hasLoggedOut || sessionStorage.getItem('isUserLogout') === 'true') {
+          throw new Error('User has logged out, ignoring token refresh');
+        }
+        
         // Store in memory
         window.accessToken = data.accessToken;
         persistAccessToken(data.accessToken);
@@ -201,15 +217,26 @@ export const refreshAccessToken = async () => {
           }
         }
         
-        sessionStorage.setItem('sessionActive', 'true');
-        
-        // Broadcast to other tabs
-        if (window.authChannel) {
-          window.authChannel.postMessage({
-            type: 'AUTH_STATE_CHANGED',
-            accessToken: window.accessToken,
-            currentUser: window.currentUser
-          });
+        // Only update session if not logged out
+        if (!window.hasLoggedOut && sessionStorage.getItem('isUserLogout') !== 'true') {
+          sessionStorage.setItem('sessionActive', 'true');
+          
+          // Broadcast to other tabs
+          if (window.authChannel) {
+            window.authChannel.postMessage({
+              type: 'AUTH_STATE_CHANGED',
+              accessToken: window.accessToken,
+              currentUser: window.currentUser
+            });
+          }
+          
+          // Trigger cart load for the user after successful refresh
+          try {
+            const cartLoadEvent = new CustomEvent('load-user-cart');
+            window.dispatchEvent(cartLoadEvent);
+          } catch (cartError) {
+            console.error('Error triggering cart load:', cartError);
+          }
         }
         
         resolve(data.accessToken);
@@ -240,11 +267,6 @@ export const refreshAccessToken = async () => {
 
 
 
-
-
-
-
-// Auth API client with automatic token refresh
 export const authFetch = async (url, options = {}) => {
   // Check if token needs refresh
   if (isTokenExpired()) {
@@ -289,11 +311,27 @@ export const authFetch = async (url, options = {}) => {
   return response;
 };
 
+
+
 export const clearAllAuthData = async () => {
   try {
+    // Set logout flag before anything else - using the correct flag name "isUserLogout"
+    window.hasLoggedOut = true;
+    sessionStorage.setItem('isUserLogout', 'true');
+    
+    // Broadcast logout to all tabs
+    if (window.authChannel) {
+      window.authChannel.postMessage({
+        type: 'USER_LOGOUT'
+      });
+    }
+    
     // Clear memory tokens
     window.accessToken = null;
     window.currentUser = null;
+    
+    // Clear session indicators
+    sessionStorage.removeItem('sessionActive');
     
     // WHITELIST APPROACH: Save only specific items we want to keep
     const whitelistedKeys = [
@@ -318,14 +356,15 @@ export const clearAllAuthData = async () => {
       }
     });
     
-    // Clear sessionStorage except for whitelisted items
-    const whitelistedSessionKeys = [];
-    for (let i = 0; i < sessionStorage.length; i++) {
-      const key = sessionStorage.key(i);
+    // Clear sessionStorage except for isUserLogout flag and any whitelisted items
+    const whitelistedSessionKeys = ['isUserLogout'];
+    const sessionKeys = Object.keys(sessionStorage);
+    
+    sessionKeys.forEach(key => {
       if (!whitelistedSessionKeys.includes(key)) {
         sessionStorage.removeItem(key);
       }
-    }
+    });
 
     // Clear cart from database if authenticated
     try {
@@ -341,28 +380,44 @@ export const clearAllAuthData = async () => {
       // Continue despite cart error
     }
     
-    // Clear refresh token cookie (via API call)
-    await fetch(`${getApiUrl()}/api/auth/logout`, {
+    // Clear refresh token cookie (via API call) - wait for this to complete
+    const response = await fetch(`${getApiUrl()}/api/auth/logout`, {
       method: 'POST',
       credentials: 'include',
     });
+    
+    if (!response.ok) {
+      console.error('Logout API call failed');
+    }
 
-    // Clear cookies
+    // Client-side attempt to clear cookies (won't work for HttpOnly cookies)
     document.cookie.split(";").forEach(function(c) {
       document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
     });
     
     return true;
   } catch (error) {
+    console.error('Error during logout:', error);
     return false;
   }
 };
 
-/**
- * Login user and reload page after success
- */
 export const loginUser = async (email, password) => {
   try {
+    // Important: Reset logout flag - use the correct flag name "isUserLogout"
+    window.hasLoggedOut = false;
+    sessionStorage.removeItem('isUserLogout');
+    
+    // Also remove the old flag name for compatibility
+    sessionStorage.removeItem('hasLoggedOut');
+    
+    // Broadcast login to all tabs
+    if (window.authChannel) {
+      window.authChannel.postMessage({
+        type: 'USER_LOGIN'
+      });
+    }
+    
     const apiUrl = getApiUrl();
     
     const response = await fetch(`${apiUrl}/api/auth/login`, {
@@ -390,16 +445,12 @@ export const loginUser = async (email, password) => {
       };
     }
     
-    // Store tokens securely
     setTokens(data.accessToken, data.refreshToken, data.user);
     
-    // Get local cart items
     const localCartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
     
-    // Only attempt merge if there are items
     if (localCartItems.length > 0) {
       try {
-        // Save cart items to server before reload
         await fetch(`${apiUrl}/api/cart/merge`, {
           method: 'POST',
           headers: {
@@ -414,15 +465,21 @@ export const loginUser = async (email, password) => {
       }
     }
     
-    // Dispatch auth state changed event
     const authStateChangedEvent = new CustomEvent('auth-state-changed');
     window.dispatchEvent(authStateChangedEvent);
     
-    // Force page reload
+
+    try {
+      const cartLoadEvent = new CustomEvent('load-user-cart');
+      window.dispatchEvent(cartLoadEvent);
+    } catch (cartError) {
+      console.error('Error triggering cart load:', cartError);
+    }
+    
+    // Force page reload after allowing time for cart load
     setTimeout(() => {
-      // window.location.href = window.location.href;
       window.location.reload();
-    }, 100);
+    }, 300); 
     
     return { 
       success: true,
@@ -436,6 +493,8 @@ export const loginUser = async (email, password) => {
     };
   }
 };
+
+
 
 // Make refreshAccessToken available globally
 window.refreshAccessToken = refreshAccessToken;

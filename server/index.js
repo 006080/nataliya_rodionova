@@ -140,7 +140,8 @@ const feedbackLimiter = rateLimit({
   
   // Stronger limits specifically for auth routes
   const authLimiter = rateLimit({
-    windowMs: 60 * 60 * 1000, // 1 hour
+    // windowMs: 60 * 60 * 1000, // 1 hour
+    windowMs: 1 * 60 * 1000, // 1 min to test
     max: 30, // 30 requests per IP
     message: { error: 'Too many requests from this IP, please try again after an hour' }
   });

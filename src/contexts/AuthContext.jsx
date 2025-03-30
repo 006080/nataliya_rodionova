@@ -1,12 +1,12 @@
 import { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { 
-  setTokens, 
   clearTokens, 
   isAuthenticated, 
   clearAllAuthData, 
   getCurrentUser,
   refreshAccessToken,
-  authFetch
+  authFetch,
+  loginUser
 } from '../services/authService';
 
 const getApiUrl = () => {
@@ -89,7 +89,6 @@ function AuthProviderComponent({ children }) {
     
     initAuth();
     
-    // Listen for visibility changes to sync auth state between tabs
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         // When tab becomes visible, check if we need to refresh auth
@@ -124,61 +123,25 @@ function AuthProviderComponent({ children }) {
   }, []);
 
 
-  // Login function
+
   const login = async (email, password) => {
     try {
       setAuthError('');
       
-      const response = await fetch(`${getApiUrl()}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-        credentials: 'include',
-      });
+      const result = await loginUser(email, password);
       
-      const data = await response.json();
-      
-      // Handle email verification error
-      if (response.status === 403 && data.needsVerification) {
-        setAuthError('Please verify your email address before logging in.');
-        
-        return {
-          success: false,
-          needsVerification: true,
-          verificationDetails: data.verificationDetails || { email }
-        };
+
+      if (!result.success) {
+        setAuthError(result.error || 'Login failed');
+        return result;
       }
       
-      // Handle other errors
-      if (!response.ok) {
-        setAuthError(data.error || 'Login failed');
-        return {
-          success: false,
-          error: data.error || 'Login failed'
-        };
+
+      if (result.user && !result.reloading) {
+        setUser(result.user);
       }
       
-      // Store tokens securely
-      setTokens(data.accessToken, data.refreshToken, data.user);
-      
-      // Set session active marker
-      sessionStorage.setItem('sessionActive', 'true');
-      
-      const completeUser = {
-        id: data.user.id,
-        role: data.user.role,
-        emailVerified: data.user.emailVerified,
-        name: data.user.name,
-        email: data.user.email
-      };
-      
-      // Update both in-memory storage and React state
-      window.currentUser = completeUser;
-      setUser(completeUser);
-      // const userData = getCurrentUser();
-      // setUser(userData);
-      
-      return { success: true };
+      return result;
     } catch (error) {
       setAuthError(error.message || 'An unexpected error occurred');
       return {
@@ -188,7 +151,8 @@ function AuthProviderComponent({ children }) {
     }
   };
 
-  // Register function
+
+
   const register = async (name, email, password) => {
     try {
       setAuthError('');
