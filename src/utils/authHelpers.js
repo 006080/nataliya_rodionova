@@ -80,30 +80,28 @@ export const getPersistedAccessToken = () => {
     return window.accessToken;
   }
   
-  const sessionActive = sessionStorage.getItem('sessionActive');
-  
-  // If session should be active but we don't have a token, trigger refresh
-  if (sessionActive === 'true') {
-    if (!sessionStorage.getItem('refreshPending')) {
-      sessionStorage.setItem('refreshPending', 'true');
-      
-      window.refreshAccessToken?.()
-        .then(token => {
-          if (token && window.currentUser) {
-            window.dispatchEvent(new CustomEvent('auth-state-sync'));
-          }
-        })
-        .catch(err => {
-          console.error('Token refresh failed:', err);
-          sessionStorage.removeItem('sessionActive');
-        })
-        .finally(() => {
-          sessionStorage.removeItem('refreshPending');
-        });
-    }
+  // Check if user has explicitly logged out
+  if (sessionStorage.getItem('isUserLogout') === 'true' || window.hasLoggedOut) {
+    return null;
   }
   
-  return null; 
+  // If no token and not logged out, try to refresh
+  if (!sessionStorage.getItem('refreshPending')) {
+    sessionStorage.setItem('refreshPending', 'true');
+    
+    window.refreshAccessToken?.()
+      .then(token => {
+        if (token && window.currentUser) {
+          window.dispatchEvent(new CustomEvent('auth-state-sync'));
+        }
+      })
+      .catch(console.error)
+      .finally(() => {
+        sessionStorage.removeItem('refreshPending');
+      });
+  }
+  
+  return null;
 };
 
 /**

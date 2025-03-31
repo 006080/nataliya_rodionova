@@ -1,3 +1,39 @@
+export const initializeAuth = () => {
+  if (typeof window === 'undefined') return;
+
+  window.accessToken = null;
+  window.currentUser = null;
+  
+  setupCrossTabAuth();
+  
+  const hasLoggedOut = sessionStorage.getItem('isUserLogout') === 'true' || window.hasLoggedOut;
+  
+  if (!hasLoggedOut) {
+    setTimeout(() => {
+      if (!window.accessToken && !window.isRefreshingToken) {
+        window.refreshAccessToken?.()
+          .then(token => {
+            if (token && window.currentUser) {
+              sessionStorage.setItem('sessionActive', 'true');
+              window.dispatchEvent(new CustomEvent('auth-state-sync'));
+              
+              // Broadcast updated auth state to other tabs if needed
+              if (window.authChannel) {
+                window.authChannel.postMessage({
+                  type: 'AUTH_STATE_CHANGED',
+                  accessToken: window.accessToken,
+                  currentUser: window.currentUser
+                });
+              }
+            }
+          })
+          .catch(console.error);
+      }
+    }, 300);
+  }
+};
+
+
 export const setupCrossTabAuth = () => {
   if (typeof window === 'undefined' || !window.BroadcastChannel) return;
   
@@ -77,32 +113,4 @@ export const setupCrossTabAuth = () => {
   }
   
   return authChannel;
-};
-
-export const initializeAuth = () => {
-  if (typeof window === 'undefined') return;
-
-  window.accessToken = null;
-  window.currentUser = null;
-  
-  const authChannel = setupCrossTabAuth();
-  
-  // On new page load, check if other tabs have auth data first
-  if (sessionStorage.getItem('sessionActive') === 'true' && 
-      sessionStorage.getItem('isUserLogout') !== 'true' && 
-      authChannel) {
-    
-    // Ask other tabs for auth state
-    authChannel.postMessage({
-      type: 'AUTH_STATUS_CHECK'
-    });
-    
-    // Wait a short time for responses before proceeding with normal init
-    setTimeout(() => {
-      // If we still don't have auth data from other tabs and haven't logged out, try to refresh
-      if (!window.accessToken && !window.isRefreshingToken && !window.hasLoggedOut) {
-        window.refreshAccessToken?.().catch(console.error);
-      }
-    }, 300); 
-  }
 };

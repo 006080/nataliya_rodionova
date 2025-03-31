@@ -166,6 +166,8 @@ export const refreshAccessToken = async () => {
       // Set last refresh time
       lastRefreshTime = now;
       
+
+
       // Make the API call
       fetch(`${getApiUrl()}/api/auth/refresh-token`, {
         method: 'POST',
@@ -215,6 +217,9 @@ export const refreshAccessToken = async () => {
             };
           }
         }
+
+         // Always set session as active when refresh is successful
+      sessionStorage.setItem('sessionActive', 'true');
         
         // Only update session if not logged out
         if (!window.hasLoggedOut && sessionStorage.getItem('isUserLogout') !== 'true') {

@@ -35,7 +35,6 @@ function AuthProviderComponent({ children }) {
   const [loading, setLoading] = useState(true);
   const [authError, setAuthError] = useState('');
 
-
   useEffect(() => {
     const initAuth = async () => {
       try {
@@ -48,15 +47,14 @@ function AuthProviderComponent({ children }) {
           return;
         }
         
-        // Check if we have an active session
-        const sessionActive = sessionStorage.getItem('sessionActive');
-        if (sessionActive !== 'true') {
+        // Check if user has explicitly logged out
+        if (sessionStorage.getItem('isUserLogout') === 'true' || window.hasLoggedOut) {
           setUser(null);
           setLoading(false);
           return;
         }
         
-        // Try to refresh token - with better error handling
+        // Always try to refresh the token on mount unless explicitly logged out
         try {
           const newToken = await refreshAccessToken();
           
@@ -68,7 +66,6 @@ function AuthProviderComponent({ children }) {
             // Clear auth state if refresh failed
             await clearTokens();
             setUser(null);
-            sessionStorage.removeItem('sessionActive');
           }
         } catch (refreshError) {
           console.error('Error refreshing token during initialization:', refreshError);
@@ -77,7 +74,6 @@ function AuthProviderComponent({ children }) {
           if (!isAuthenticated()) {
             await clearTokens();
             setUser(null);
-            sessionStorage.removeItem('sessionActive');
           }
         }
       } catch (error) {

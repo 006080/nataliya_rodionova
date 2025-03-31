@@ -159,15 +159,6 @@ useEffect(() => {
 
     setCartItems([])
     localStorage.removeItem('cartItems')
-      
-    // if (isUserAuthenticated) {
-    //   try {
-    //     // const success = await clearDatabaseCart()
-    //     // console.log('Database cart cleared:', success)
-    //   } catch (error) {
-    //     console.error('Error clearing database cart:', error)
-    //   }
-    // }
 
 
       setIsUserAuthenticated(false)
