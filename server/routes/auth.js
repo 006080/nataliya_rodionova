@@ -13,19 +13,8 @@ import rateLimit from 'express-rate-limit';
 import { generateVerificationToken, sendPasswordResetEmail, sendVerificationEmail } from '../services/emailVerification.js';
 import { addToBlacklist, isBlacklisted } from '../services/tokenBlacklist.js';
 import jwt from 'jsonwebtoken';
-// import csurf from 'csurf';
 
 const router = express.Router();
-
-
-// const csrfProtection = csurf({ 
-//   cookie: { 
-//     httpOnly: true,
-//     secure: process.env.NODE_ENV === 'production',
-//     sameSite: 'strict'
-//   } 
-// });
-
 
 const {
   JWT_ACCESS_SECRET,
@@ -34,18 +23,15 @@ const {
   JWT_REFRESH_EXPIRES = '7d',
 } = process.env;
 
-// server/routes/auth.js - Improved login route with better verification handling
 router.post('/api/auth/login', loginLimiter, trackLoginAttempts, async (req, res) => {
   try {
     const { email, password } = req.body;
     
     
-    // Validate input
     if (!email || !password) {
       return res.status(400).json({ error: 'Email and password are required.' });
     }
     
-    // Find user with password explicitly included
     const normalizedEmail = email.toLowerCase().trim();
     const user = await User.findOne({ email: normalizedEmail }).select('+password');
     
@@ -54,9 +40,7 @@ router.post('/api/auth/login', loginLimiter, trackLoginAttempts, async (req, res
       return res.status(401).json({ error: 'Invalid email or password.' });
     }
     
-    // Check if account is locked and handle temporary lockouts
     if (user.locked) {
-      // Define lockout period (1 hour)
       const lockoutDuration = 60 * 60 * 1000; // 1 hour in milliseconds
       
       // Only process if we have a lockedAt timestamp
@@ -165,9 +149,9 @@ router.post('/api/auth/login', loginLimiter, trackLoginAttempts, async (req, res
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      path: '/api/auth/refresh-token'
+      path: '/'
     });
     
     // Return access token and user info
@@ -205,8 +189,8 @@ router.post('/api/auth/refresh-token', refreshTokenLimiter, async (req, res) => 
           res.clearCookie('refreshToken', {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            path: '/api/auth/refresh-token',
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+            path: '/',
             // maxAge: 0,
             // expires: new Date(0)
           });
@@ -266,9 +250,9 @@ router.post('/api/auth/refresh-token', refreshTokenLimiter, async (req, res) => 
       res.cookie('refreshToken', newRefreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-        path: '/api/auth/refresh-token'
+        path: '/'
       });
     }
     
@@ -310,9 +294,9 @@ router.post('/api/auth/store-refresh-token', (req, res) => {
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      path: '/api/auth/refresh-token'
+      path: '/'
     });
     
     res.json({ success: true });
@@ -336,10 +320,10 @@ router.post('/api/auth/logout', async (req, res) => {
     res.clearCookie('refreshToken', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      path: '/api/auth/refresh-token',
-      maxAge: 0,  // Expire immediately
-      expires: new Date(0) // Force expire the cookie
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      path: '/',
+      maxAge: 0, 
+      expires: new Date(0) 
     });
     
     res.json({ success: true });
@@ -425,9 +409,9 @@ router.post('/api/auth/register', registerLimiter, async (req, res) => {
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      path: '/api/auth/refresh-token'
+      path: '/'
     });
     
     // Return access token and user info
