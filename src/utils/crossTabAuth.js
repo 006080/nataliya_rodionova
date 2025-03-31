@@ -10,7 +10,6 @@ export const setupCrossTabAuth = () => {
   authChannel.onmessage = (event) => {
     if (event.data.type === 'USER_LOGOUT') {
       // Handle logout from another tab
-      console.log('Received logout event from another tab');
       window.accessToken = null;
       window.currentUser = null;
       window.isRefreshingToken = false;

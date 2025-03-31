@@ -129,7 +129,6 @@ export const isAuthenticated = () => {
 export const refreshAccessToken = async () => {
   // Don't refresh if user has deliberately logged out - use correct flag name
   if (window.hasLoggedOut || sessionStorage.getItem('isUserLogout') === 'true') {
-    console.log('Skipping token refresh due to previous logout');
     return null;
   }
   
@@ -315,9 +314,10 @@ export const authFetch = async (url, options = {}) => {
 
 export const clearAllAuthData = async () => {
   try {
-    // Set logout flag before anything else - using the correct flag name "isUserLogout"
     window.hasLoggedOut = true;
     sessionStorage.setItem('isUserLogout', 'true');
+
+    localStorage.removeItem('cartItems');
     
     // Broadcast logout to all tabs
     if (window.authChannel) {
@@ -395,11 +395,19 @@ export const clearAllAuthData = async () => {
       document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
     });
     
-    return true;
+   // Dispatch an additional cart-cleared event
+   try {
+    const cartClearedEvent = new CustomEvent('cart-cleared');
+    window.dispatchEvent(cartClearedEvent);
   } catch (error) {
-    console.error('Error during logout:', error);
-    return false;
+    console.error('Error dispatching cart-cleared event:', error);
   }
+  
+  return true;
+} catch (error) {
+  console.error('Error during logout:', error);
+  return false;
+}
 };
 
 export const loginUser = async (email, password) => {
@@ -417,6 +425,8 @@ export const loginUser = async (email, password) => {
         type: 'USER_LOGIN'
       });
     }
+
+    localStorage.removeItem('cartItems')
     
     const apiUrl = getApiUrl();
     

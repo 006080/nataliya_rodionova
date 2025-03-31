@@ -1,5 +1,5 @@
 import { createContext, useState, useContext, useEffect } from 'react'
-import { isAuthenticated } from '../src/services/authService'
+import { getAccessToken, isAuthenticated } from '../src/services/authService'
 import {
   saveCartToDatabase,
   fetchCartFromDatabase,
@@ -26,25 +26,32 @@ export const CartProvider = ({ children }) => {
     isAuthenticated()
   )
 
+  const getApiUrl = () => {
+    return import.meta.env.VITE_NODE_ENV === "production"
+      ? import.meta.env.VITE_API_BASE_URL_PROD
+      : import.meta.env.VITE_API_BASE_URL_LOCAL;
+  };
+
   const syncCartWithDatabase = async (force = false) => {
-    // Don't sync if logged out flag is set
     if (sessionStorage.getItem('isUserLogout') === 'true') {
       return
     }
     
     if (isAuthenticated() && (!initialSyncDone || force)) {
       try {
-        const dbCartItems = await fetchCartFromDatabase()
-
-        if (dbCartItems && dbCartItems.length > 0) {
-          setCartItems(dbCartItems)
-          localStorage.setItem('cartItems', JSON.stringify(dbCartItems))
-        } else {
-          if (cartItems.length > 0) {
-            await saveCartToDatabase(cartItems)
+        if (!initialSyncDone || force) {
+          const dbCartItems = await fetchCartFromDatabase()
+  
+          if (dbCartItems && dbCartItems.length > 0) {
+            setCartItems(dbCartItems)
+            localStorage.setItem('cartItems', JSON.stringify(dbCartItems))
+          } else {
+            if (cartItems.length > 0) {
+              await saveCartToDatabase(cartItems)
+            }
           }
         }
-
+  
         setInitialSyncDone(true)
         setIsUserAuthenticated(true)
       } catch (error) {
@@ -74,7 +81,7 @@ export const CartProvider = ({ children }) => {
           const dbCartItems = await fetchCartFromDatabase()
 
           if (dbCartItems.length > 0 && cartItems.length > 0) {
-            console.log('CartContext: Merging carts')
+            // console.log('CartContext: Merging carts')
           } else if (dbCartItems.length > 0) {
             setCartItems(dbCartItems)
             localStorage.setItem('cartItems', JSON.stringify(dbCartItems))
@@ -99,11 +106,11 @@ export const CartProvider = ({ children }) => {
     }
   }, [isUserAuthenticated, cartItems])
 
-  // NEW: Listen for load-user-cart event
   useEffect(() => {
     const handleLoadUserCart = async () => {
-      console.log('Cart Context: Received load-user-cart event')
-      // Force a sync with the database
+
+      localStorage.removeItem('cartItems')
+      setCartItems([])
       if (isAuthenticated()) {
         await syncCartWithDatabase(true)
       }
@@ -116,38 +123,51 @@ export const CartProvider = ({ children }) => {
     }
   }, [])
 
-  // Save cart to localStorage and database
-  useEffect(() => {
-    localStorage.setItem('cartItems', JSON.stringify(cartItems))
+  
+useEffect(() => {
+  localStorage.setItem('cartItems', JSON.stringify(cartItems))
 
-    // Skip if logout flag is set
-    if (sessionStorage.getItem('isUserLogout') === 'true') {
-      return
-    }
+  if (sessionStorage.getItem('isUserLogout') === 'true') {
+    return
+  }
 
-    if (isUserAuthenticated && initialSyncDone) {
-      const timeoutId = setTimeout(() => {
-        saveCartToDatabase(cartItems).catch((error) => {
+  // For authenticated users, sync with database (with debounce)
+  if (isUserAuthenticated && initialSyncDone) {
+    const timeoutId = setTimeout(() => {
+      // Use a direct check before saving to avoid timing issues
+      if (isAuthenticated()) {
+        saveCartToDatabase(cartItems).then(success => {
+          if (success) {
+            // console.log('Cart successfully synced with database');
+          } else {
+            console.error('Failed to sync cart with database');
+          }
+        }).catch((error) => {
           console.error('Error saving cart to database:', error)
         })
-      }, 500)
+      } else {
+        // console.log('Skipping database sync - user no longer authenticated');
+      }
+    }, 500)
 
-      return () => clearTimeout(timeoutId)
-    }
-  }, [cartItems, isUserAuthenticated, initialSyncDone])
+    return () => clearTimeout(timeoutId)
+  }
+}, [cartItems, isUserAuthenticated, initialSyncDone])
 
-  // Listen for logout event
   useEffect(() => {
     const handleLogout = async () => {
-      console.log('Cart Context: Received logout event')
+
+    setCartItems([])
+    localStorage.removeItem('cartItems')
       
-      if (isUserAuthenticated) {
-        try {
-          await clearDatabaseCart()
-        } catch (error) {
-          console.error('Error clearing database cart:', error)
-        }
-      }
+    // if (isUserAuthenticated) {
+    //   try {
+    //     // const success = await clearDatabaseCart()
+    //     // console.log('Database cart cleared:', success)
+    //   } catch (error) {
+    //     console.error('Error clearing database cart:', error)
+    //   }
+    // }
 
 
       setIsUserAuthenticated(false)
@@ -247,55 +267,104 @@ export const CartProvider = ({ children }) => {
     })
   }
 
-  const removeFromCart = (itemIdentifier) => {
+  const removeFromCart = async (itemIdentifier) => {
+    let updatedCartItems = [];
+    
     if (!itemIdentifier) {
-      setCartItems([])
-      return
+      setCartItems([]);
+      localStorage.removeItem('cartItems');
+      
+      if (isUserAuthenticated) {
+        try {
+          await clearDatabaseCart();
+        } catch (error) {
+          console.error('Error clearing database cart:', error);
+        }
+      }
+      return;
     }
-
+  
+    // Remove specific item
     if (typeof itemIdentifier === 'string') {
-      const matchById = cartItems.some((item) => item.id === itemIdentifier)
-
+      const matchById = cartItems.some((item) => item.id === itemIdentifier);
+  
       if (matchById) {
-        setCartItems((prevItems) =>
-          prevItems.filter((item) => item.id !== itemIdentifier)
-        )
+        updatedCartItems = cartItems.filter((item) => item.id !== itemIdentifier);
       } else {
-        setCartItems((prevItems) =>
-          prevItems.filter((item) => item.name !== itemIdentifier)
-        )
+        updatedCartItems = cartItems.filter((item) => item.name !== itemIdentifier);
       }
     } else if (typeof itemIdentifier === 'object' && itemIdentifier !== null) {
-      const { id, name } = itemIdentifier
-
+      const { id, name } = itemIdentifier;
+  
       if (id) {
-        setCartItems((prevItems) => prevItems.filter((item) => item.id !== id))
+        updatedCartItems = cartItems.filter((item) => item.id !== id);
       } else if (name) {
-        setCartItems((prevItems) =>
-          prevItems.filter((item) => item.name !== name)
-        )
+        updatedCartItems = cartItems.filter((item) => item.name !== name);
+      }
+    }
+    
+    setCartItems(updatedCartItems);
+    localStorage.setItem('cartItems', JSON.stringify(updatedCartItems));
+    
+    if (isUserAuthenticated && initialSyncDone) {
+      try {
+        await saveCartToDatabase(updatedCartItems);
+      } catch (error) {
+        console.error('Error saving updated cart to database:', error);
       }
     }
   }
 
-  const clearPendingOrder = () => {
+  const clearPendingOrder = async () => {
+    setCartItems([]);
+    localStorage.removeItem('cartItems');
+  
+    if (isUserAuthenticated) {
+      try {
+        
+        const apiUrl = getApiUrl();
+        const token = getAccessToken();
+        
+        const response = await fetch(`${apiUrl}/api/cart`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          credentials: 'include'
+        });
+        
+        if (!response.ok) {
+          console.error('Direct API call to clear cart failed:', response.status);
+     
+          const success = await clearDatabaseCart();
+          if (!success) {
+            console.error('Helper function also failed to clear cart');
+          }
+        } else {
+          // console.log('Cart cleared successfully from database');
+        }
+      } catch (error) {
+        console.error('Error clearing database cart:', error);
+      }
+    }
+  }
+
+
+useEffect(() => {
+  const handleCartCleared = () => {
     setCartItems([])
     localStorage.removeItem('cartItems')
-
-    if (isUserAuthenticated) {
-      clearDatabaseCart().catch((error) => {
-        console.error('Error clearing database cart:', error)
-      })
-    }
+    setIsUserAuthenticated(false)
+    setInitialSyncDone(false)
   }
 
-  const forceCartSync = async () => {
-    if (isAuthenticated()) {
-      await syncCartWithDatabase(true)
-      return true
-    }
-    return false
+  window.addEventListener('cart-cleared', handleCartCleared)
+
+  return () => {
+    window.removeEventListener('cart-cleared', handleCartCleared)
   }
+}, [])
+
 
   return (
     <CartContext.Provider
@@ -304,8 +373,16 @@ export const CartProvider = ({ children }) => {
         addToCart,
         removeFromCart,
         updateQuantity,
-        clearPendingOrder,
-        forceCartSync, 
+        clearPendingOrder: async () => {
+          await clearPendingOrder();
+        },
+        forceCartSync: async () => {
+          if (isAuthenticated()) {
+            await syncCartWithDatabase(true);
+            return true;
+          }
+          return false;
+        },
       }}
     >
       {children}
