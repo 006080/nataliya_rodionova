@@ -1,8 +1,58 @@
 import PropTypes from 'prop-types';
 import styles from "./Review.module.css";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { FaStar } from "react-icons/fa";
 import SubmitModal from "./SubmitModal";
+
+const hardcodedReviews = [
+  {
+    id: 1,
+    name: "Marina",
+    rating: 5,
+    message: "Varona is modern and captivating. The garments are expertly finished. Finally, a style that can appeal to everyone. Very well done, my brilliant friend!😘",
+    image: "https://res.cloudinary.com/dwenvtwyx/image/upload/v1741449828/reviews/lgbkmqn8iqhmreespqep.jpg",
+  date: ""
+  },
+  {
+    id: 5,
+    name: "Miki",
+    rating: 5,
+    message: "Complimenti per la sfilata, per i materiali e le fluidità dei tessuti.Parlavi già 10 anni fa di gender fluid e collezione unisex. Inoltre mi piace molto le vestibilità e le assimetrie.  Complimenti Natalia. Un grande baci ❤️",
+    image: "https://res.cloudinary.com/dwenvtwyx/image/upload/v1737314284/reviews/tqjcusg3f7nwj8dvpjr7.jpg",
+  date: ""
+  },
+  {
+    id: 5,
+    name: "Louis",
+    rating: 5,
+    message: "I’m super happy to own a beautiful sweater from Varona.Perfect fit and amazing quality that lasts for life.I can only recommend!",
+    image: "https://res.cloudinary.com/dwenvtwyx/image/upload/v1741045888/reviews/gxhloroitnkgevt0wj66.jpg",
+    date: ""
+  },
+  {
+    id: 5,
+    name: "Wolfgang Jger",
+    rating: 5,
+    message: "",
+    image: "https://res.cloudinary.com/dwenvtwyx/image/upload/v1739534959/reviews/gsrlobxiixf7jzxonfld.jpg",
+  date: "",
+  },
+  {
+    id: 5,
+    name: "Maggie Angelova",
+    rating: 5,
+    message: "Highly recommend checking out this new brand!!Very cool and unique designs - perfect balance between trendy and timeless. Definitely a brand to watch out for!",
+  date: ""
+  },
+  {
+    id: 5,
+    name: "Howie B",
+    rating: 5,
+    message: "Looking forward to your new adventure . I hope you will take part in Berlin Fashion Week.",
+    image: "https://res.cloudinary.com/dwenvtwyx/image/upload/v1737057088/reviews/pumx8tqijnetfq1hyybp.jpg",
+  date: "1/16/2025"
+  },
+];
 
 const Review = ({ setReviews, setError }) => {
   const [reviewFields, setReviewFields] = useState({
@@ -11,54 +61,15 @@ const Review = ({ setReviews, setError }) => {
     message: "",
     image: null,
     preview: null,
+    dat: ""
   });
   
-  const [hover, setHover] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const getApiUrl = () => {
-    return import.meta.env.VITE_NODE_ENV === "production"
-      ? import.meta.env.VITE_API_URL_PROD
-      : import.meta.env.VITE_API_URL_LOCAL;
-  };
-
-  const fetchReviews = useCallback(async () => {
-    try {
-      const response = await fetch(getApiUrl());
-      if (!response.ok) throw new Error("Failed to fetch reviews");
-      const data = await response.json();
-      setReviews(data);
-    } catch (error) {
-      console.error("Error fetching reviews:", error);
-      setError("Failed to load reviews");
-    }
-  }, [getApiUrl, setReviews, setError]);
-
   useEffect(() => {
-    fetchReviews();
-  }, [fetchReviews]);
-
-  const resizeImage = (file) => {
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = (event) => {
-        const img = new Image();
-        img.src = event.target.result;
-        img.onload = () => {
-          const canvas = document.createElement("canvas");
-          const ctx = canvas.getContext("2d");
-          const maxWidth = 800;
-          const scaleSize = maxWidth / img.width;
-          canvas.width = maxWidth;
-          canvas.height = img.height * scaleSize;
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          canvas.toBlob((blob) => resolve(blob), "image/jpeg", 0.7);
-        };
-      };
-    });
-  };
+    setReviews([...hardcodedReviews]);
+  }, [setReviews]);
 
   const handleImageChange = async (e) => {
     const file = e.target.files[0];
@@ -74,11 +85,10 @@ const Review = ({ setReviews, setError }) => {
       return;
     }
 
-    const resizedImage = await resizeImage(file);
     setReviewFields((prev) => ({
       ...prev,
-      image: resizedImage,
-      preview: URL.createObjectURL(resizedImage),
+      image: file,
+      preview: URL.createObjectURL(file),
     }));
   };
 
@@ -97,20 +107,8 @@ const Review = ({ setReviews, setError }) => {
 
     const { name, rating, message, image } = reviewFields;
 
-    if (!name.trim()) {
-      alert("Please enter your name");
-      return;
-    }
-    if (!rating) {
-      alert("Please provide a rating");
-      return;
-    }
-    if (!message.trim()) {
-      alert("Please write a review message");
-      return;
-    }
-    if (!image) {
-      alert("Please upload an image with your review");
+    if (!name.trim() || !rating || !message.trim()) {
+      alert("All fields are required, including a rating");
       return;
     }
 
@@ -122,25 +120,25 @@ const Review = ({ setReviews, setError }) => {
       formData.append("name", name.trim());
       formData.append("rating", rating);
       formData.append("message", message.trim());
-      formData.append("image", image);
+      if (image) formData.append("image", image);
 
-      const response = await fetch(getApiUrl(), {
+      const response = await fetch("/api/reviews", {
         method: "POST",
         body: formData,
-        credentials: "include",
       });
 
       if (!response.ok) {
         throw new Error("Failed to submit review");
       }
 
-      setReviewFields({ name: "", rating: 0, message: "", image: null, preview: null });
-      setHover(null);
+      const newReview = await response.json();
+      setReviews((prev) => [...prev, newReview]);
+
+      setReviewFields({ name: "", rating: 0, message: "", image: null, preview: null, data:""});
       setIsModalOpen(true);
     } catch (error) {
       console.error("Submission error:", error);
-      setError(error.message);
-      alert(error.message);
+      setError("Failed to submit review");
     } finally {
       setIsSubmitting(false);
     }
@@ -149,7 +147,7 @@ const Review = ({ setReviews, setError }) => {
   return (
     <div className={styles.reviewComponent}>
       <form onSubmit={handleSubmit} className={styles.reviewForm}>
-        <h2>Leave a Review</h2>
+        <h2 >Leave a Review</h2>
 
         <label className={styles.imageUpload}>
           <span>Add Image</span>
@@ -172,10 +170,8 @@ const Review = ({ setReviews, setError }) => {
                 <input type="radio" name="rating" value={ratingValue} onClick={() => handleRatingClick(ratingValue)} className={styles.radio} />
                 <FaStar
                   className={styles.star}
-                  color={ratingValue <= (hover || reviewFields.rating) ? "#ffc107" : "#e4e5e9"}
+                  color={ratingValue <= (reviewFields.rating) ? "#ffc107" : "#e4e5e9"}
                   size={20}
-                  onMouseEnter={() => setHover(ratingValue)}
-                  onMouseLeave={() => setHover(null)}
                 />
               </label>
             );
@@ -191,7 +187,7 @@ const Review = ({ setReviews, setError }) => {
         </button>
       </form>
 
-      {isModalOpen && <SubmitModal onClose={() => setIsModalOpen(false)} message="Thank you for your review! It will be visible after moderation." />}
+      {isModalOpen && <SubmitModal onClose={() => setIsModalOpen(false)} />}
     </div>
   );
 };

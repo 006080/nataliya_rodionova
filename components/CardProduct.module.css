@@ -4,7 +4,7 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-radius: 10px;
   overflow: hidden;
-  width: 400px;
+  width: 500px;
   margin: 10px;
   text-align: center;
   display: flex;
@@ -18,7 +18,7 @@
 }
 
 .carouselImage {
-  width: 100%;
+  width: 50%;
   height: auto;
 }
 
@@ -92,7 +92,7 @@
 }
 
 .starPrice {
-  margin-top: 15px;
+  margin-top: 0;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -107,6 +107,8 @@
 }
 
 .description {
+  margin-top: 10px;
+  margin-bottom: 5px;
   text-decoration: underline;
   font-family: Cambria, Cochin, Georgia, Times, "Times New Roman", serif;
   font-size: 21px;
