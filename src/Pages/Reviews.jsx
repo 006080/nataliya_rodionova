@@ -12,16 +12,19 @@ const Reviews = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [error, setError] = useState(null);
 
-  
-  const apiUrl = window.location.hostname === "localhost"
-    ? "http://localhost:4000/api/reviews"
-    : "https://www.nataliyarodionova.com/api/reviews";
+
+  const getApiUrl = () => {
+    return import.meta.env.VITE_NODE_ENV === "production"
+      ? import.meta.env.VITE_API_URL_PROD
+      : import.meta.env.VITE_API_URL_LOCAL
+  };
+
+  const apiUrl = getApiUrl()
 
   useEffect(() => {
     const fetchReviews = async () => {
       try {
         const response = await fetch(apiUrl);
-        
         if (response.ok) {
           const data = await response.json();
           setReviews(data);
@@ -106,7 +109,7 @@ const Reviews = () => {
 
       <div className={styles.overlay}>
         {isModalOpen && <SubmitModal onClose={handleCloseModal} />}
-        <Review onSubmit={handleOpenModal} setReviews={setReviews} setError={setError} apiUrl={apiUrl} />
+        <Review onSubmit={handleOpenModal} setReviews={setReviews} setError={setError} />
       </div>
     </div>
   );

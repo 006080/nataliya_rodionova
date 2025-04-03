@@ -4,7 +4,7 @@ import { useState } from "react";
 import { FaStar } from "react-icons/fa";
 import SubmitModal from "./SubmitModal";
 
-const Review = ({ setReviews, setError, apiUrl, onSubmit }) => {
+const Review = ({ setReviews, setError, onSubmit }) => {
   const [reviewFields, setReviewFields] = useState({
     name: "",
     rating: 0,
@@ -16,6 +16,14 @@ const Review = ({ setReviews, setError, apiUrl, onSubmit }) => {
   const [hover, setHover] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const getApiUrl = () => {
+    return import.meta.env.VITE_NODE_ENV === "production"
+      ? import.meta.env.VITE_API_URL_PROD
+      : import.meta.env.VITE_API_URL_LOCAL
+  };
+
+  const apiUrl = getApiUrl()
 
   const resizeImage = (file) => {
     return new Promise((resolve) => {
