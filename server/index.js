@@ -16,11 +16,52 @@ import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import bodyParser from "body-parser";
 import paypalRoutes from './routes/paypal.js';
 import productRoutes from './routes/product.js';
+import { initializeReminderSystem } from './services/paymentReminderService.js';
+import cookieParser from 'cookie-parser';
+import authRoutes from './routes/auth.js';
+import orderRoutes from './routes/order.js';
+import cartRoutes from './routes/cart.js';
+
 
 dotenv.config({ path: './.env.local' });
 
 const app = express();
 const server = http.createServer(app);
+
+
+app.set('trust proxy', 1);
+app.disable('x-powered-by');
+
+app.use(cookieParser());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(helmet()); 
+
+// This is a security feature that helps prevent XSS and data injection attacks
+app.use(helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'"], // Only allow resources from same origin by default
+      scriptSrc: ["'self'", "'unsafe-inline'"], // Scripts from same origin & inline
+      styleSrc: ["'self'", "'unsafe-inline'"], // Styles from same origin & inline
+    //   imgSrc: ["'self'", "data:", "https://yourcdn.com"], // Images from same origin, data URIs & your CDN
+    //   connectSrc: ["'self'", "https://yourapi.com"] // API connections to same origin & your API domain
+    }
+  }));
+
+app.use(cors({
+    origin: (origin, callback) => {
+        const allowedOrigins = [FRONTEND_URL_LOCAL, FRONTEND_URL_PROD];
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true
+}));
+app.use(express.json({ limit: '10mb' })); // Limit payload size
+
+
 
 // Middleware setup
 app.use(bodyParser.json());
@@ -89,22 +130,29 @@ const feedbackLimiter = rateLimit({
     message: 'Too many feedbacks submitted. Please try again later.'
 });
 
+// Global rate limit for all routes
+// app.use(rateLimit({
+//     windowMs: 15 * 60 * 1000, // 15 minutes
+//     max: 100, // 100 requests per IP
+//     standardHeaders: true,
+//     legacyHeaders: false
+//   }));
+  
+  // Stronger limits specifically for auth routes
+  const authLimiter = rateLimit({
+    // windowMs: 60 * 60 * 1000, // 1 hour
+    windowMs: 1 * 60 * 1000, // 1 min to test
+    max: 30, // 30 requests per IP
+    message: { error: 'Too many requests from this IP, please try again after an hour' }
+  });
+  
+  // Apply to auth routes
+  app.use('/api/auth/', authLimiter);
+
+
+
 // Middleware
 app.use("/api/feedback", feedbackLimiter);
-app.use(helmet()); 
-
-app.use(express.json({ limit: '10mb' })); 
-app.use(cors({
-    origin: (origin, callback) => {
-        const allowedOrigins = [FRONTEND_URL_LOCAL, FRONTEND_URL_PROD, 'http://localhost:5173/cart'];
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
-    credentials: true
-}));
 
 // Feedback schema validation
 const feedbackSchema = Joi.object({
@@ -138,6 +186,9 @@ const transporter = nodemailer.createTransport({
 mongoose.connect(MONGO_URI) 
     .then(() => {
         console.log('Connected to MongoDB');
+        // Initialize the payment reminder system
+        initializeReminderSystem();
+        console.log('Payment reminder system initialized');
     })
     .catch((err) => {
         console.error('MongoDB connection error:', err);
@@ -286,6 +337,12 @@ app.get('/api/reviews', async (req, res) => {
 // Product and PayPal routes
 app.use(productRoutes);
 app.use(paypalRoutes);
+app.use(authRoutes);
+app.use(orderRoutes);
+app.use(cartRoutes);
+  
+
+
 
 // Handle 404 errors
 app.use((req, res) => {
@@ -293,10 +350,21 @@ app.use((req, res) => {
 });
 
 // General error handler
+// app.use((err, req, res, next) => {
+//     console.error('Server error:', err);
+//     res.status(500).json({ error: 'Internal server error' });
+// });
 app.use((err, req, res, next) => {
-    console.error('Server error:', err);
-    res.status(500).json({ error: 'Internal server error' });
-});
+    // Log detailed error internally
+    console.error(err);
+    
+    // Send generic response to client
+    res.status(err.status || 500).json({
+      error: process.env.NODE_ENV === 'production' 
+        ? 'An unexpected error occurred' 
+        : err.message
+    });
+  });
 
 // Health Check route
 app.get('/api/health', (req, res) => {

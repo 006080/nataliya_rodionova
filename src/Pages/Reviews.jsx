@@ -12,27 +12,31 @@ const Reviews = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [error, setError] = useState(null);
 
+  
+  const apiUrl = window.location.hostname === "localhost"
+    ? "http://localhost:4000/api/reviews"
+    : "https://www.nataliyarodionova.com/api/reviews";
+
+
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const apiUrl =
-          window.location.hostname === "localhost"
-            ? "http://localhost:4000/api/reviews"  // Updated to match backend URL
-            : "https://www.nataliyarodionova.com/api/reviews";  // Use production URL for deployed version
-
-        const response = await fetch(apiUrl); // Fetch reviews from the backend
-        if (!response.ok) {
-          throw new Error(`Failed to fetch reviews: ${response.status}`);
+        const response = await fetch(apiUrl);
+        
+        if (response.ok) {
+          const data = await response.json();
+          setReviews(data);
+        } else {
+          setError("Failed to fetch reviews. Please try again later.");
         }
-        const data = await response.json();  // Parse JSON data from the response
-        setReviews(data);  // Set reviews state with fetched data
       } catch (err) {
-        setError("Failed to load reviews. Please try again later.");
+        setError("Error connecting to the server. Please try again later.");
       }
     };
 
     fetchReviews();
-  }, []);  // Empty dependency array ensures this runs once after the first render
+  }, []); 
+
 
   const cld = new Cloudinary({
     cloud: { cloudName: "dwenvtwyx" },
@@ -85,8 +89,8 @@ const Reviews = () => {
       </div>
 
       <section className={styles.review}>
-        <h1 style={{ color: "black" }}>Reviews:</h1>
-        {error && <div style={{ color: "red" }}>{error}</div>}
+        <h1 style={{ color: 'black' }}>Reviews:</h1>
+        {error && <div style={{ color: 'red' }}>{error}</div>}
 
         <div className={styles.reviewsList}>
           {reviews.map((review, index) => (
@@ -112,8 +116,9 @@ const Reviews = () => {
       </section>
 
       <div className={styles.overlay}>
-        {isModalOpen && <SubmitModal onClose={() => setIsModalOpen(false)} />}
-        <Review setReviews={setReviews} setError={setError} />
+        {isModalOpen && <SubmitModal onClose={handleCloseModal} />}
+        <Review onSubmit={handleOpenModal} setReviews={setReviews} setError={setError} apiUrl={apiUrl} />
+
       </div>
     </div>
   );

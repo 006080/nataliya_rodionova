@@ -15,7 +15,6 @@ const ProductSchema = new mongoose.Schema({
   imageUrl: {
     type: String
   },
-  // Add support for multiple images
   imageUrls: [{
     type: String
   }],
@@ -30,15 +29,12 @@ const ProductSchema = new mongoose.Schema({
   tags: [{
     type: String
   }],
-  // For tracking reservations
   reservedAt: {
     type: Date
   },
-  // For tracking sales
   soldAt: {
     type: Date
   },
-  // For tracking the order that bought this product
   orderId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Order'

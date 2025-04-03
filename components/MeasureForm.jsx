@@ -1,137 +1,27 @@
-// import { useState, createContext, useContext } from "react";
-// import styles from "./MeasureForm.module.css";
-
-// // Create a context for measurements
-// export const MeasurementsContext = createContext(null);
-
-// // Custom hook to use the measurements context
-// export const useMeasurements = () => {
-//   const context = useContext(MeasurementsContext);
-//   if (!context) {
-//     throw new Error('useMeasurements must be used within a MeasurementsProvider');
-//   }
-//   return context;
-// };
-
-// // Provider component
-// export const MeasurementsProvider = ({ children }) => {
-//   const [measurements, setMeasurements] = useState({
-//     height: "",
-//     chest: "",
-//     waist: "",
-//     hips: ""
-//   });
-  
-//   const [isSubmitted, setIsSubmitted] = useState(false);
-
-//   const updateMeasurements = (newMeasurements) => {
-//     setMeasurements(newMeasurements);
-//   };
-
-//   const setSubmitted = (value) => {
-//     setIsSubmitted(value);
-//   };
-
-//   return (
-//     <MeasurementsContext.Provider value={{ 
-//       measurements, 
-//       updateMeasurements, 
-//       isSubmitted, 
-//       setSubmitted 
-//     }}>
-//       {children}
-//     </MeasurementsContext.Provider>
-//   );
-// };
-
-// const MeasureForm = ({ onFormValid }) => {
-//   const { measurements, updateMeasurements, isSubmitted, setSubmitted } = useMeasurements();
-
-//   const handleChange = (e) => {
-//     updateMeasurements({ ...measurements, [e.target.name]: e.target.value });
-//   };
-
-//   const handleSubmit = (e) => {
-//     e.preventDefault();
-//     // Check if all required fields are filled
-//     if (measurements.height && measurements.chest && measurements.waist && measurements.hips) {
-//       setSubmitted(true);
-//       // If onFormValid prop exists, call it
-//       if (onFormValid && typeof onFormValid === 'function') {
-//         onFormValid(true);
-//       }
-//     } else {
-//       alert("Your measurements have been successfully added.");
-//     }
-//   };
-
-//   return (
-//     <form onSubmit={handleSubmit} className={styles.measureForm}>
-//       <h3>Enter Your Measurements</h3>
-//       <label>
-//         Height (cm):
-//         <input 
-//           type="number" 
-//           name="height" 
-//           value={measurements.height} 
-//           onChange={handleChange} 
-//           required 
-//         />
-//       </label>
-//       <label>
-//         Chest (cm):
-//         <input 
-//           type="number" 
-//           name="chest" 
-//           value={measurements.chest} 
-//           onChange={handleChange} 
-//           required 
-//         />
-//       </label>
-//       <label>
-//         Waist (cm):
-//         <input 
-//           type="number" 
-//           name="waist" 
-//           value={measurements.waist} 
-//           onChange={handleChange} 
-//           required 
-//         />
-//       </label>
-//       <label>
-//         Hips (cm):
-//         <input 
-//           type="number" 
-//           name="hips" 
-//           value={measurements.hips} 
-//           onChange={handleChange} 
-//           required 
-//         />
-//       </label>
-//       <button 
-//         type="submit" 
-//         className={styles.submitButton} 
-//         disabled={isSubmitted}
-//       >
-//         {isSubmitted ? "Measurements Submitted" : "Submit Measurements"}
-//       </button>
-//     </form>
-//   );
-// };
-
-// export default MeasureForm;
-
-
-
 import { useState } from "react";
 import styles from "./MeasureForm.module.css";
 
-const MeasureForm = ({ onSubmit }) => {
-  const [measurements, setMeasurements] = useState({
-    height: "",
-    chest: "",
-    waist: "",
-    hips: ""
+const MeasureForm = ({ onSubmit, initialData = null }) => {
+  const [measurements, setMeasurements] = useState(() => {
+    if (initialData) {
+      return initialData;
+    }
+    
+    try {
+      const savedData = localStorage.getItem('measurements');
+      if (savedData) {
+        return JSON.parse(savedData);
+      }
+    } catch (error) {
+      console.error('Error loading measurements from localStorage:', error);
+    }
+    
+    return {
+      height: "",
+      chest: "",
+      waist: "",
+      hips: ""
+    };
   });
   
   const [submitted, setSubmitted] = useState(false);
@@ -147,6 +37,13 @@ const MeasureForm = ({ onSubmit }) => {
     // Check if all required fields are filled
     if (measurements.height && measurements.chest && measurements.waist && measurements.hips) {
       setSubmitted(true);
+      
+      // Save to localStorage before submitting
+      try {
+        localStorage.setItem('measurements', JSON.stringify(measurements));
+      } catch (error) {
+        console.error('Error saving measurements to localStorage:', error);
+      }
       
       // Call the onSubmit prop with the measurements data
       if (onSubmit && typeof onSubmit === 'function') {

@@ -1,0 +1,279 @@
+.loginContainer {
+  max-width: 450px;
+  margin: 2rem auto;
+  padding: 2.5rem;
+  border-radius: 12px;
+  background-color: #ffffff;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  font-family: 'Poppins', sans-serif;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.loginContainer h2 {
+  font-size: 1.8rem;
+  color: #333;
+  margin-bottom: 1.8rem;
+  text-align: center;
+  font-weight: 600;
+}
+
+.infoMessage {
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+  background-color: #e0f2fe;
+  color: #0369a1;
+  border-left: 4px solid #0ea5e9;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.errorMessage {
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+  background-color: #fee2e2;
+  color: #b91c1c;
+  border-left: 4px solid #ef4444;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.formGroup {
+  position: relative;
+  margin-bottom: 1.2rem;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #555;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.formGroup input {
+  width: 100%;
+  padding: 0.9rem 1rem;
+  font-size: 1rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.formGroup input:focus {
+  outline: none;
+  border-color: #6366f1;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+.formGroup input:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.formOptions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0.5rem 0 1.5rem;
+}
+
+.rememberMe {
+  display: flex;
+  align-items: center;
+}
+
+.rememberMe input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  height: 18px;
+  width: 18px;
+  border: 1px solid #d4d4d4;
+  border-radius: 4px;
+  margin-right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.rememberMe input[type="checkbox"]:checked {
+  background-color: #6366f1;
+  border-color: #6366f1;
+}
+
+.rememberMe input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute;
+  width: 5px;
+  height: 10px;
+  border-right: 2px solid white;
+  border-bottom: 2px solid white;
+  transform: rotate(45deg) translate(-1px, -1px);
+}
+
+.rememberMe input[type="checkbox"]:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.rememberMe label {
+  font-size: 0.9rem;
+  color: #666;
+  cursor: pointer;
+}
+
+.forgotPassword {
+  color: #6366f1;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.forgotPassword:hover {
+  color: #4f46e5;
+  text-decoration: underline;
+}
+
+.loginButton {
+  background-color: #6366f1;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 1rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  margin-top: 0.5rem;
+  font-family: inherit;
+}
+
+.loginButton:hover {
+  transform: scale(1.01);
+}
+
+.loginButton:active {
+  transform: translateY(0);
+}
+
+.loginButton:disabled {
+  background-color: #a5a6f6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.registerLink {
+  text-align: center;
+  margin-top: 1.8rem;
+  font-size: 0.95rem;
+  color: #666;
+}
+
+.registerLink a, .link {
+  color: #6366f1;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.registerLink a:hover, .link:hover {
+  color: #4f46e5;
+  text-decoration: underline;
+}
+
+/* Password strength styles */
+.passwordStrength {
+  margin-top: 0.5rem;
+  background-color: #e0e0e0;
+  height: 5px;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.strengthMeter {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.strengthText {
+  display: block;
+  font-size: 0.8rem;
+  text-align: right;
+  margin-top: 0.3rem;
+  color: #555;
+}
+
+.passwordRequirements {
+  margin: 0.8rem 0;
+  padding: 0 0 0 1.5rem;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.passwordRequirements li {
+  margin: 0.3rem 0;
+  transition: color 0.3s ease;
+  list-style-type: circle;
+}
+
+.passwordRequirements li.met {
+  color: #10b981;
+  list-style-type: disc;
+  font-weight: 500;
+}
+
+.passwordMatch {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  transition: color 0.3s ease;
+}
+
+.matched {
+  color: #10b981;
+}
+
+.notMatched {
+  color: #ef4444;
+}
+
+.termsAgreement {
+  margin: 1.5rem 0;
+  font-size: 0.85rem;
+  color: #666;
+  line-height: 1.5;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 500px) {
+  .loginContainer {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+  
+  .formOptions {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.8rem;
+  }
+}
