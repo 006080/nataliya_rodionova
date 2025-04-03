@@ -5,15 +5,16 @@ import { FaStar } from "react-icons/fa";
 import SubmitModal from "./SubmitModal";
 
 const Review = ({ setReviews, setError, apiUrl, onSubmit }) => {
+
   const [reviewFields, setReviewFields] = useState({
     name: "",
     rating: 0,
     message: "",
     image: null,
     preview: null,
+    date: ""
   });
   
-  const [hover, setHover] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -38,12 +39,13 @@ const Review = ({ setReviews, setError, apiUrl, onSubmit }) => {
     });
   };
 
+
   const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     if (file.size > 10 * 1024 * 1024) {
-      alert("Image size should be less than 5MB");
+      alert("Image size should be less than 10MB");
       return;
     }
 
@@ -52,11 +54,10 @@ const Review = ({ setReviews, setError, apiUrl, onSubmit }) => {
       return;
     }
 
-    const resizedImage = await resizeImage(file);
     setReviewFields((prev) => ({
       ...prev,
-      image: resizedImage,
-      preview: URL.createObjectURL(resizedImage),
+      image: file,
+      preview: URL.createObjectURL(file),
     }));
   };
 
@@ -69,33 +70,28 @@ const Review = ({ setReviews, setError, apiUrl, onSubmit }) => {
     setReviewFields((prev) => ({ ...prev, rating: ratingValue }));
   };
 
+ 
+
+
+
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isSubmitting) return;
 
     const { name, rating, message, image } = reviewFields;
 
-    if (!name.trim()) {
-      alert("Please enter your name");
-      return;
-    }
-    if (!rating) {
-      alert("Please provide a rating");
-      return;
-    }
-    if (!message.trim()) {
-      alert("Please write a review message");
-      return;
-    }
-    if (!image) {
-      alert("Please upload an image with your review");
-      return;
+    if (!name.trim() || !rating || !message.trim()) {
+        alert("All fields are required, including a rating");
+        return;
     }
 
     setIsSubmitting(true);
     setError(null);
 
     try {
+
       const formData = new FormData();
       formData.append("name", name.trim());
       formData.append("rating", rating);
@@ -123,14 +119,20 @@ const Review = ({ setReviews, setError, apiUrl, onSubmit }) => {
       setHover(null);
       setIsModalOpen(true);
       if (onSubmit) onSubmit();
+
     } catch (error) {
-      console.error("Submission error:", error);
-      setError(error.message);
-      alert(error.message);
+        console.error("Submission error:", error);
+        setError("Failed to submit review");
     } finally {
-      setIsSubmitting(false);
+        setIsSubmitting(false);
     }
-  };
+};
+
+
+
+
+
+
 
   return (
     <div className={styles.reviewComponent}>
@@ -158,26 +160,41 @@ const Review = ({ setReviews, setError, apiUrl, onSubmit }) => {
                 <input type="radio" name="rating" value={ratingValue} onClick={() => handleRatingClick(ratingValue)} className={styles.radio} />
                 <FaStar
                   className={styles.star}
-                  color={ratingValue <= (hover || reviewFields.rating) ? "#ffc107" : "#e4e5e9"}
+                  color={ratingValue <= reviewFields.rating ? "#ffc107" : "#e4e5e9"}
                   size={20}
-                  onMouseEnter={() => setHover(ratingValue)}
-                  onMouseLeave={() => setHover(null)}
                 />
               </label>
             );
           })}
         </div>
 
-        <input type="text" name="name" placeholder="Your Name" value={reviewFields.name} onChange={handleOnChange} className={styles.input} required maxLength={100} />
+        <input
+          type="text"
+          name="name"
+          placeholder="Your Name"
+          value={reviewFields.name}
+          onChange={handleOnChange}
+          className={styles.input}
+          required
+          maxLength={100}
+        />
 
-        <textarea placeholder="Write your review..." name="message" value={reviewFields.message} onChange={handleOnChange} required className={styles.textArea} maxLength={1000}></textarea>
+        <textarea
+          placeholder="Write your review..."
+          name="message"
+          value={reviewFields.message}
+          onChange={handleOnChange}
+          required
+          className={styles.textArea}
+          maxLength={1000}
+        ></textarea>
 
         <button type="submit" className={styles.button} disabled={isSubmitting}>
           {isSubmitting ? "Submitting..." : "Submit Review"}
         </button>
       </form>
 
-      {isModalOpen && <SubmitModal onClose={() => setIsModalOpen(false)} message="Thank you for your review! It will be visible after moderation." />}
+      {isModalOpen && <SubmitModal onClose={() => setIsModalOpen(false)} />}
     </div>
   );
 };

@@ -25,6 +25,10 @@ z-index: 100;
    filter: invert(1); 
 }
 
+.img{
+  
+}
+
 .item {
     font-style: italic;
     font-size: small;
