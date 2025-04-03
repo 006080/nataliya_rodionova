@@ -26,6 +26,10 @@ const trousersImages = [
   cld.image("trousers_x3ryc0").toURL(),
 ];
 
+const sweater = [
+  cld.image("IMG_6615_m661tg").toURL(),
+]
+
 const Shop = () => {
   const [cartItems, setCartItems] = useState([]);
   const [cartIsOpen, setCartIsOpen] = useState(false);
@@ -59,7 +63,7 @@ const Shop = () => {
         addToCart={addToCart}
         images={collarImages}
         name="COLLAR"
-        price={180}
+        price={120}
         description="Made entirely from 100% cotton, this collar ensures comfort and breathability. The ruffled style, adorned with delicate lace detailing, exudes vintage elegance. Convenient drawstrings at the front allow for easy closure or adjustment."
       />
 
@@ -75,8 +79,16 @@ const Shop = () => {
         addToCart={addToCart}
         images={trousersImages}
         name="TROUSERS"
-        price={180}
+        price={480}
         description="Made entirely from 100% cotton, these trousers ensure comfort and breathability. The ruffled style, adorned with delicate lace detailing, exudes vintage elegance. Convenient drawstrings at the front allow for easy closure or adjustment."
+      />
+  
+  <CardProduct
+        addToCart={addToCart}
+        images={sweater}
+        name="MEN'S SWEATER"
+        price={680}
+        description="Designed for both comfort and style, this piece features a cozy wool-blend fabric in a classic checkerboard pattern. The deep V-neck and ribbed hem add a touch of elegance, while the relaxed fit allows for effortless layering. Pair it with combat boots and high socks for a trendy street-style look."
       />
 
       {cartIsOpen && (

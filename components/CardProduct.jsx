@@ -69,6 +69,8 @@ const CardProduct = ({ id, name, images, price, description }) => {
         <div className={styles.notes}>
           <p className={styles.description}>Description:</p>
           <p>{description}</p>
+          {/* <p className={styles.description}>Material: </p> */}
+          {/* <p>Soft wool-blend knit</p> */}
         </div>
 
         <div className={styles.starPrice}>

@@ -1,4 +1,6 @@
-import styles from "./ReturnPolicy.module.css"; // Make sure to create a corresponding CSS file
+import React from "react";
+import styles from "./ReturnPolicy.module.css"; 
+
 
 const ReturnPolicy = () => {
   return (

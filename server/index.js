@@ -292,69 +292,41 @@ app.get('/api/cloudinary-folders', async (req, res) => {
 
 
 // Reviews Route
-app.post('/api/reviews', reviewLimiter, upload.single('image'), async (req, res) => {
+// Reviews Route
+app.post('/api/reviews', async (req, res) => {
     try {
-        const { name, rating, message } = req.body;
+        const { name, message, rating, image } = req.body;
 
-        if (!name || !rating || !message) {
-            return res.status(400).json({ 
-                error: 'Name, rating, and message are required' 
-            });
+        if (!name || !message || !rating) {
+            return res.status(400).json({ error: 'Name, message, and rating are required' });
         }
-
-        const numericRating = Number(rating);
-        if (isNaN(numericRating) || numericRating < 1 || numericRating > 5) {
-            return res.status(400).json({ 
-                error: 'Rating must be a number between 1 and 5' 
-            });
-        }
-
-        const sanitizedMessage = sanitizeHtml(message, {
-            allowedTags: [],
-            allowedAttributes: {}
-        });
-
-        const imageUrl = req.file ? req.file.path : null;
 
         const newReview = new Review({
-            name: name.trim(),
-            rating: numericRating,
-            message: sanitizedMessage.trim(),
-            image: imageUrl,
+            name,
+            message,
+            rating,
+            image,
             approved: false,
-            ipAddress: req.ip,
+            createdAt: new Date()
         });
 
-        const savedReview = await newReview.save();
-
-        const responseReview = {
-            id: savedReview._id,
-            name: savedReview.name,
-            rating: savedReview.rating,
-            message: savedReview.message,
-            image: savedReview.image,
-            createdAt: savedReview.createdAt
-        };
-
-        res.status(201).json({
-            success: true,
-            message: 'Review submitted successfully and pending approval',
-            data: responseReview
-        });
+        await newReview.save();
+        res.status(201).json({ message: 'Review submitted successfully', review: newReview });
     } catch (error) {
-        console.error('Error submitting review:', error);
-        res.status(500).json({ 
-            error: 'Failed to submit review. Please try again later.' 
-        });
+        console.error('Error saving review:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
+
+
 
 // Reviews GET route
 app.get('/api/reviews', async (req, res) => {
     try {
         const reviews = await Review.find({ approved: true })
-            .select('-ipAddress')
-            .sort({ createdAt: -1 });
+            .select('-ipAddress')  // Excluding 'ipAddress' from the response
+            .sort({ createdAt: -1 }); // Sorting reviews by creation date, newest first
+
         res.status(200).json(reviews);
     } catch (error) {
         console.error('Error fetching reviews:', error);
