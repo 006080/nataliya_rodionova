@@ -17,19 +17,22 @@ const Reviews = () => {
       try {
         const apiUrl =
           window.location.hostname === "localhost"
-            ? "http://localhost:4000/api/reviews"
-            : "https://www.nataliyarodionova.com/api/reviews";
+            ? "http://localhost:4000/api/reviews"  // Updated to match backend URL
+            : "https://www.nataliyarodionova.com/api/reviews";  // Use production URL for deployed version
 
-        const response = await fetch(apiUrl); // Use apiUrl instead of hardcoded URL
-        const data = await response.json();
-        setReviews(data);
+        const response = await fetch(apiUrl); // Fetch reviews from the backend
+        if (!response.ok) {
+          throw new Error(`Failed to fetch reviews: ${response.status}`);
+        }
+        const data = await response.json();  // Parse JSON data from the response
+        setReviews(data);  // Set reviews state with fetched data
       } catch (err) {
-        setError("Error loading reviews. Please try again later.");
+        setError("Failed to load reviews. Please try again later.");
       }
     };
 
     fetchReviews();
-  }, []);
+  }, []);  // Empty dependency array ensures this runs once after the first render
 
   const cld = new Cloudinary({
     cloud: { cloudName: "dwenvtwyx" },
@@ -86,8 +89,8 @@ const Reviews = () => {
         {error && <div style={{ color: "red" }}>{error}</div>}
 
         <div className={styles.reviewsList}>
-          {reviews.map((review) => (
-            <div key={review._id} className={styles.reviewItem}>
+          {reviews.map((review, index) => (
+            <div key={review._id || index} className={styles.reviewItem}>
               <div className={styles.reviewHeader}>
                 <span className={styles.reviewerName}>{review.name}</span>
                 <div className={styles.reviewStars}>
@@ -111,9 +114,6 @@ const Reviews = () => {
       <div className={styles.overlay}>
         {isModalOpen && <SubmitModal onClose={() => setIsModalOpen(false)} />}
         <Review setReviews={setReviews} setError={setError} />
-        <button className={styles.openModalButton} onClick={handleModalOpen}>
-          Submit a Review
-        </button>
       </div>
     </div>
   );

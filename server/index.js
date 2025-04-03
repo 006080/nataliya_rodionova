@@ -244,33 +244,29 @@ app.get('/api/cloudinary-folders', async (req, res) => {
 // Reviews Route
 app.post('/api/reviews', async (req, res) => {
     try {
-        const { name, message, rating, image } = req.body; // Assuming these fields are coming from the frontend
-        
-        // Basic validation
+        const { name, message, rating, image } = req.body;
+
         if (!name || !message || !rating) {
             return res.status(400).json({ error: 'Name, message, and rating are required' });
         }
 
-        // Create a new review document
         const newReview = new Review({
             name,
             message,
             rating,
-            image, // Optional image if provided
-            approved: false, // Reviews may need to be approved before showing
+            image,
+            approved: false,
             createdAt: new Date()
         });
 
-        // Save the review
         await newReview.save();
-
-        // Send success response
         res.status(201).json({ message: 'Review submitted successfully', review: newReview });
     } catch (error) {
         console.error('Error saving review:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
+
 
 
 // Reviews GET route
