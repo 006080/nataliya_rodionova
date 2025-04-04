@@ -291,21 +291,21 @@ app.get('/api/cloudinary-folders', async (req, res) => {
 });
 
 
-// Reviews Route
-// Reviews Route
-app.post('/api/reviews', async (req, res) => {
+app.post('/api/reviews', upload.single('image'), async (req, res) => {
     try {
-        const { name, message, rating, image } = req.body;
+        const { name, message, rating } = req.body;
 
         if (!name || !message || !rating) {
             return res.status(400).json({ error: 'Name, message, and rating are required' });
         }
 
+        const imageUrl = req.file ? req.file.path : null;
+
         const newReview = new Review({
             name,
             message,
-            rating,
-            image,
+            rating: Number(rating),
+            image: imageUrl,
             approved: false,
             createdAt: new Date()
         });
@@ -319,20 +319,39 @@ app.post('/api/reviews', async (req, res) => {
 });
 
 
-
-// Reviews GET route
 app.get('/api/reviews', async (req, res) => {
     try {
-        const reviews = await Review.find({ approved: true })
-            .select('-ipAddress')  // Excluding 'ipAddress' from the response
-            .sort({ createdAt: -1 }); // Sorting reviews by creation date, newest first
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 5;
+        const skip = (page - 1) * limit;
 
-        res.status(200).json(reviews);
+        const totalReviews = await Review.countDocuments({ approved: true });
+        
+        const reviews = await Review.find({ approved: true })
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
+        
+        res.status(200).json({
+            reviews,
+            pagination: {
+                totalReviews,
+                currentPage: page,
+                totalPages: Math.ceil(totalReviews / limit),
+                hasMore: page < Math.ceil(totalReviews / limit)
+            }
+        });
     } catch (error) {
         console.error('Error fetching reviews:', error);
         res.status(500).json({ error: 'Failed to fetch reviews' });
     }
 });
+
+
+
+
+
+
 
 // Product and PayPal routes
 app.use(productRoutes);
