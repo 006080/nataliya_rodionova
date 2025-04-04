@@ -68,8 +68,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 40px;
-  width: 120px;
+  height: 30px;
+  width: 100px;
   background-color: #f2f2f2;
   border-radius: 9px;
   cursor: pointer;
@@ -78,7 +78,7 @@
 .incr {
   color: black;
   padding: 0 10px;
-  font-size: 18px;
+  font-size: 14px;
   user-select: none;
 }
 
@@ -87,8 +87,8 @@
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  margin-top: 15px;
-  margin-bottom: 15px;
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
 .starPrice {
@@ -101,8 +101,9 @@
 
 .info {
   display: flex;
+  text-align: left;
   flex-direction: column;
-  width: 80%;
+  width: 90%;
   margin: 20px auto;
 }
 
@@ -114,6 +115,20 @@
   font-size: 21px;
   font-weight: 400;
   font-style: italic;
+}
+
+.heart {
+  font-size: 22px;
+  color: rgba(0, 0, 0, 0.37);
+}
+
+.titleLine {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+justify-content: space-between;
+  justify-items: center;
+ align-items: center;
 }
 
 h3 {

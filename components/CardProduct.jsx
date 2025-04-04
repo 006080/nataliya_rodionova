@@ -6,7 +6,7 @@ import "slick-carousel/slick/slick-theme.css";
 import Button from "./Button";
 import styles from "./CardProduct.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faStar, faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
+import { faStar, faChevronLeft, faChevronRight, faHeart } from "@fortawesome/free-solid-svg-icons";
 import { useCart } from "./CartContext";
 
 // Custom Arrow Components (Centered on Image)
@@ -22,23 +22,29 @@ const NextArrow = ({ onClick }) => (
   </div>
 );
 
-const CardProduct = ({ id, name, images, price, description }) => {
+const CardProduct = ({ id, name, images, price, description, material, color }) => {
   const [count, setCount] = useState(0);
   const { addToCart } = useCart();
   const [selectedStars, setSelectedStars] = useState(0);
+  const [isHeartSelected, setIsHeartSelected] = useState(false); // Manage heart selection state
 
   const increment = () => setCount(count + 1);
   const decrement = () => count > 0 && setCount(count - 1);
 
   const itemAdd = () => {
     if (count > 0) {
-      const product = { id, name, image: images[0], price, quantity: count }; // Store first image as default
+      const product = { id, name, image: images[0], price, quantity: count, material, color }; // Store first image as default
       addToCart(product);
       setCount(0); // Reset the count after adding to cart
     }
   };
 
   const handleStarClick = (starIndex) => setSelectedStars(starIndex + 1);
+
+  // Toggle Heart Click
+  const handleHeartClick = () => {
+    setIsHeartSelected((prev) => !prev);
+  };
 
   // Slick Carousel settings
   const settings = {
@@ -65,22 +71,32 @@ const CardProduct = ({ id, name, images, price, description }) => {
       </div>
 
       <div className={styles.info}>
-        <h3>{name}</h3>
+        <div className={styles.titleLine}>
+          <h3 style={{ textAlign: 'left' }}>{name}</h3>
+
+          {/* Heart Icon - Toggle Between Red & Grey */}
+          <FontAwesomeIcon 
+            icon={faHeart}
+            className={styles.heart}
+            style={{ color: isHeartSelected ? "" : "black", cursor: "pointer" }}
+            onClick={handleHeartClick} // Toggle heart selection
+          />
+        </div>
+
         <div className={styles.notes}>
-          <p className={styles.description}>Description:</p>
-          <p>{description}</p>
-          {/* <p className={styles.description}>Material: </p> */}
-          {/* <p>Soft wool-blend knit</p> */}
+          <p style={{ fontSize: '14px' }}>{description}</p>
+          <p style={{ fontSize: '14px' }}>Material:{material}</p>
+          <p style={{ fontSize: '14px' }}>Color:{color}</p>
         </div>
 
         <div className={styles.starPrice}>
-          <p style={{ fontSize: "30px", fontStyle: "italic" }}>${price}</p>
+          <p style={{ fontSize: "20px", fontStyle: "italic" }}>${price}</p>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
             {[...Array(5)].map((_, index) => (
               <FontAwesomeIcon
                 key={index}
                 icon={faStar}
-                style={{ color: index < selectedStars ? "yellow" : "grey", cursor: "pointer" }}
+                style={{ color: index < selectedStars ? "black" : "grey", cursor: "pointer" }}
                 onClick={() => handleStarClick(index)}
               />
             ))}

@@ -27,6 +27,8 @@ const trousersImages = [
 ];
 
 const sweater = [
+  cld.image("D0E227A5-60B3-4456-BCF2-27D5D733BCEB_o5trfb").toURL(),
+  cld.image("IMG_6698_tskhrb").toURL(), 
   cld.image("IMG_6615_m661tg").toURL(),
 ]
 
@@ -65,7 +67,9 @@ const Shop = () => {
         name="COLLAR"
         price={120}
         description="Made entirely from 100% cotton, this collar ensures comfort and breathability. The ruffled style, adorned with delicate lace detailing, exudes vintage elegance. Convenient drawstrings at the front allow for easy closure or adjustment."
-      />
+     material={'100% cotton'}
+     color={'white'}
+     />
 
       <CardProduct
         addToCart={addToCart}
@@ -73,7 +77,9 @@ const Shop = () => {
         name="SCARF"
         price={180}
         description="Made entirely from 100% cotton, this scarf ensures comfort and breathability. The ruffled style, adorned with delicate lace detailing, exudes vintage elegance. Convenient drawstrings at the front allow for easy closure or adjustment."
-      />
+        material={'100% Wool'}
+        color={'grey'}
+     />
 
       <CardProduct
         addToCart={addToCart}
@@ -81,7 +87,9 @@ const Shop = () => {
         name="TROUSERS"
         price={480}
         description="Made entirely from 100% cotton, these trousers ensure comfort and breathability. The ruffled style, adorned with delicate lace detailing, exudes vintage elegance. Convenient drawstrings at the front allow for easy closure or adjustment."
-      />
+        material={'80% wool  20% cashmere'}
+        color={'grey'}
+     />
   
   <CardProduct
         addToCart={addToCart}
@@ -89,6 +97,8 @@ const Shop = () => {
         name="MEN'S SWEATER"
         price={680}
         description="Designed for both comfort and style, this piece features a cozy wool-blend fabric in a classic checkerboard pattern. The deep V-neck and ribbed hem add a touch of elegance, while the relaxed fit allows for effortless layering. Pair it with combat boots and high socks for a trendy street-style look."
+        material={"100% sheep wool"}
+        color={""}
       />
 
       {cartIsOpen && (
