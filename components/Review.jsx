@@ -75,12 +75,23 @@ const Review = ({ setError }) => {
     setReviewFields((prev) => ({ ...prev, rating: ratingValue }));
   };
 
+  const resetForm = () => {
+    setReviewFields({
+      name: "",
+      rating: 0,
+      message: "",
+      image: null,
+      preview: null
+    });
+    setHover(null);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isSubmitting) return;
-
+  
     const { name, rating, message, image } = reviewFields;
-
+  
     if (!name.trim()) {
       alert("Please enter your name");
       return;
@@ -97,29 +108,28 @@ const Review = ({ setError }) => {
       alert("Please upload an image with your review");
       return;
     }
-
+  
     setIsSubmitting(true);
     setError(null);
-
+  
     try {
       const formData = new FormData();
       formData.append("name", name.trim());
       formData.append("rating", rating);
       formData.append("message", message.trim());
       formData.append("image", image);
-
+  
       const response = await fetch(getApiUrl(), {
         method: "POST",
         body: formData,
         credentials: "include",
       });
-
+  
       if (!response.ok) {
         throw new Error("Failed to submit review");
       }
 
-      setReviewFields({ name: "", rating: 0, message: "", image: null, preview: null });
-      setHover(null);
+      resetForm();
       setIsModalOpen(true);
     } catch (error) {
       console.error("Submission error:", error);
