@@ -13,7 +13,7 @@ const hardcodedReviews = [
     rating: 5,
     message: "Varona is modern and captivating. The garments are expertly finished. Finally, a style that can appeal to everyone. Very well done, my brilliant friend!😘",
     image: "https://res.cloudinary.com/dwenvtwyx/image/upload/v1741449828/reviews/lgbkmqn8iqhmreespqep.jpg",
-  date: ""
+    date: "3/8/2025"
   },
   {
     id: 5,
@@ -21,7 +21,7 @@ const hardcodedReviews = [
     rating: 5,
     message: "Complimenti per la sfilata, per i materiali e le fluidità dei tessuti.Parlavi già 10 anni fa di gender fluid e collezione unisex. Inoltre mi piace molto le vestibilità e le assimetrie.  Complimenti Natalia. Un grande baci ❤️",
     image: "https://res.cloudinary.com/dwenvtwyx/image/upload/v1737314284/reviews/tqjcusg3f7nwj8dvpjr7.jpg",
-  date: ""
+    date: "1/19/2025"
   },
   {
     id: 5,
@@ -29,7 +29,7 @@ const hardcodedReviews = [
     rating: 5,
     message: "I’m super happy to own a beautiful sweater from Varona.Perfect fit and amazing quality that lasts for life.I can only recommend!",
     image: "https://res.cloudinary.com/dwenvtwyx/image/upload/v1741045888/reviews/gxhloroitnkgevt0wj66.jpg",
-    date: ""
+    date: "3/4/2025"
   },
   {
     id: 5,
@@ -37,14 +37,14 @@ const hardcodedReviews = [
     rating: 5,
     message: "",
     image: "https://res.cloudinary.com/dwenvtwyx/image/upload/v1739534959/reviews/gsrlobxiixf7jzxonfld.jpg",
-  date: "",
+    date: "2/14/2025",
   },
   {
     id: 5,
     name: "Maggie Angelova",
     rating: 5,
     message: "Highly recommend checking out this new brand!!Very cool and unique designs - perfect balance between trendy and timeless. Definitely a brand to watch out for!",
-  date: ""
+    date: "1/19/2025"
   },
   {
     id: 5,
@@ -52,7 +52,7 @@ const hardcodedReviews = [
     rating: 5,
     message: "Looking forward to your new adventure . I hope you will take part in Berlin Fashion Week.",
     image: "https://res.cloudinary.com/dwenvtwyx/image/upload/v1737057088/reviews/pumx8tqijnetfq1hyybp.jpg",
-  date: "1/16/2025"
+    date: "1/16/2025"
   },
 ];
 
@@ -219,7 +219,7 @@ const Reviews = () => {
                   )}
                   <p className={styles.reviewMessage}>{review.message}</p>
                   <span className={styles.reviewDate}>
-                    {new Date(review.createdAt).toLocaleDateString()}
+                    {review.date}
                   </span>
                 </div>
               ))}
