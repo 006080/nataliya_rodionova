@@ -191,11 +191,7 @@ const Reviews = () => {
         <h1 style={{ color: 'black' }}>Reviews:</h1>
         {error && <div className={styles.error}>{error}</div>}
 
-        {loadingReviews && page === 1 ? (
-          <LoadingSpinner />
-        ) : (
-          <>
-            <div className={styles.reviewsList}>
+        <div className={styles.reviewsList}>
               {hardcodedReviews.map((review) => (
                 <div key={review._id} className={styles.reviewItem}>
                   <div className={styles.reviewHeader}>
@@ -224,6 +220,11 @@ const Reviews = () => {
                 </div>
               ))}
             </div>
+
+        {loadingReviews && page === 1 ? (
+          <LoadingSpinner />
+        ) : (
+          <>
             <div className={styles.reviewsList}>
               {reviews.length === 0 ? (
                 <p className={styles.noReviews}>
