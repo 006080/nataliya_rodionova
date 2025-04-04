@@ -272,3 +272,105 @@
     top: 70vh;
   }
 }
+
+.spinnerContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  margin: 20px 0;
+}
+
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border-left-color: #09f;
+  animation: spin 1s linear infinite;
+  margin-bottom: 10px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.loadMoreButtonContainer {
+  display: flex;
+  justify-content: center;
+  margin: 30px 0;
+}
+
+.loadMoreButton {
+  background-color: #4a4a4a;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  min-width: 180px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.loadMoreButton:hover {
+  background-color: #333;
+}
+
+.loadMoreButton:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+
+.loadingDot {
+  width: 8px;
+  height: 8px;
+  background-color: white;
+  border-radius: 50%;
+  display: inline-block;
+  margin: 0 3px;
+  animation: dotPulse 1.5s infinite ease-in-out;
+}
+
+.loadingDot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.loadingDot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes dotPulse {
+  0%, 100% { transform: scale(0.7); opacity: 0.7; }
+  50% { transform: scale(1); opacity: 1; }
+}
+
+
+.noReviews {
+  text-align: center;
+  padding: 30px;
+  color: #666;
+  font-style: italic;
+  border: 1px dashed #ccc;
+  border-radius: 8px;
+  margin: 20px 0;
+}
+
+.error {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 10px 15px;
+  border-radius: 4px;
+  margin: 10px 0;
+  text-align: center;
+}

@@ -1,21 +1,53 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Nav from "./Nav";
 import logo from "../src/assets/Logo.webp";
 import styles from "./Header.module.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBars, faUser, faCartShopping } from "@fortawesome/free-solid-svg-icons";
+import { faBars, faUser, faCartShopping, faSignInAlt } from "@fortawesome/free-solid-svg-icons";
 import CartSummary from "./CartSummary";
 import { useCart } from "./CartContext";
+import { useAuth } from "../src/contexts/AuthContext";
 import useOutsideClick from '../src/hooks/useOutsideClick';
 
 const Header = () => {
   const navigate = useNavigate();
   const [cartIsOpen, setCartIsOpen] = useState(false);
   const [menu, openMenu] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const { cartItems } = useCart();
+  const { user, isAuthenticated, logout } = useAuth();
+
+  const [userData, setUserData] = useState({ name: '', email: '' });
 
   const navRef = useOutsideClick(() => openMenu(false))
+  const userMenuRef = useOutsideClick(() => setUserMenuOpen(false));
+
+  // useEffect(() => {
+  //   if (user && user.name && user.email) {
+  //     setUserData({ name: user.name, email: user.email });
+  //   } else if (isAuthenticated) {
+  //     // Try to get user data from localStorage if not in context
+  //     try {
+  //       const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+  //       if (storedUser && storedUser.name && storedUser.email) {
+  //         setUserData({ name: storedUser.name, email: storedUser.email });
+  //       }
+  //     } catch (e) {
+  //       console.error('Error parsing user data from localStorage:', e);
+  //     }
+  //   }
+  // }, [user, isAuthenticated]);
+
+  useEffect(() => {
+    if (user) {
+      setUserData({
+        name: user.name || 'User', 
+        email: user.email || 'No email'
+      });
+    }
+  }, [user, isAuthenticated]);
+  
 
   const handleCartClick = () => {
     setCartIsOpen(!cartIsOpen);
@@ -23,6 +55,16 @@ const Header = () => {
 
   const toggleMenu = () => {
     openMenu(!menu);
+  };
+
+  const handleUserIconClick = () => {
+    setUserMenuOpen(!userMenuOpen);
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    setUserMenuOpen(false);
+    navigate('/login');
   };
 
   return (
@@ -72,6 +114,44 @@ const Header = () => {
             )}
             {cartIsOpen && <CartSummary cartItems={cartItems} onClose={() => setCartIsOpen(false)} />}
           </div>
+
+            {/* User Icon - Conditionally render based on authentication */}
+          <div className={styles.userIconContainer}>
+            <FontAwesomeIcon 
+              icon={isAuthenticated ? faUser : faSignInAlt} 
+              className={`${styles.userIcon} ${menu ? styles.whiteIcon : ''}`}
+              onClick={handleUserIconClick}
+            />
+            
+            {/* User dropdown menu */}
+            {userMenuOpen && (
+              <div className={styles.userMenu} ref={userMenuRef}>
+                {isAuthenticated ? (
+                  <>
+                    <div className={styles.userInfo}>
+                      <p>Hello, {userData.name}</p>
+                      <span>{userData.email}</span>
+                    </div>
+                    <ul>
+                      <li onClick={() => { navigate('/profile'); setUserMenuOpen(false); }}>My Profile</li>
+                      <li onClick={() => { navigate('/orders'); setUserMenuOpen(false); }}>My Orders</li>
+                      <li onClick={handleLogout}>Logout</li>
+                    </ul>
+                  </>
+                ) : (
+                  <ul>
+                    <li onClick={() => { navigate('/login'); setUserMenuOpen(false); }}>Login</li>
+                    <li onClick={() => { navigate('/register'); setUserMenuOpen(false); }}>Register</li>
+                  </ul>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* <FontAwesomeIcon 
+            icon={faUser} 
+            className={`${styles.userIcon} ${isContactPage ? styles.whiteIcon : ''}`} 
+          /> */}
           <FontAwesomeIcon 
             className={`${styles.burgerIcon} ${menu ? styles.whiteIcon : ''}`} 
             onClick={toggleMenu} 

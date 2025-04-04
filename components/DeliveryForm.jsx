@@ -2,16 +2,30 @@ import { useState } from "react";
 import { countries } from "../src/utils/countries";
 import styles from "./DeliveryForm.module.css";
 
-
-const DeliveryForm = ({ onFormSubmit }) => {
-  const [deliveryDetails, setDeliveryDetails] = useState({
-    fullName: "",
-    address: "",
-    city: "",
-    postalCode: "",
-    country: "",
-    email: "",
-    phone: "",
+const DeliveryForm = ({ onFormSubmit, initialData = null }) => {
+  const [deliveryDetails, setDeliveryDetails] = useState(() => {
+    if (initialData) {
+      return initialData;
+    }
+    
+    try {
+      const savedData = localStorage.getItem('deliveryDetails');
+      if (savedData) {
+        return JSON.parse(savedData);
+      }
+    } catch (error) {
+      console.error('Error loading delivery details from localStorage:', error);
+    }
+    
+    return {
+      fullName: "",
+      address: "",
+      city: "",
+      postalCode: "",
+      country: "",
+      email: "",
+      phone: "",
+    };
   });
   
   const [errors, setErrors] = useState({});
@@ -81,6 +95,12 @@ const DeliveryForm = ({ onFormSubmit }) => {
     e.preventDefault();
     
     if (validateForm()) {
+      try {
+        localStorage.setItem('deliveryDetails', JSON.stringify(deliveryDetails));
+      } catch (error) {
+        console.error('Error saving delivery details to localStorage:', error);
+      }
+      
       onFormSubmit(deliveryDetails);
     }
   };

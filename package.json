@@ -22,6 +22,7 @@
     "axios": "^1.8.3",
     "crypto-js": "^4.2.0",
     "dotenv": "^16.4.5",
+    "jwt-decode": "^4.0.0",
     "mongoose": "^8.9.4",
     "oauth-1.0a": "^2.2.6",
     "react": "^18.2.0",

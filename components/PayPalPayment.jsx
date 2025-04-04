@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { PayPalButtons, PayPalScriptProvider, usePayPalScriptReducer } from '@paypal/react-paypal-js'
 import styles from './PayPalPayment.module.css'
 
-// Loading spinner component
+
 const LoadingSpinner = () => (
   <div className={styles.spinnerContainer}>
     <div className={styles.spinner}></div>
@@ -10,7 +10,7 @@ const LoadingSpinner = () => (
   </div>
 )
 
-// PayPal buttons wrapper component to handle loading state
+
 const PayPalButtonsWrapper = ({ createOrder, onApprove, onCancel, onError, disabled }) => {
   const [{ isPending }] = usePayPalScriptReducer();
   
@@ -44,20 +44,43 @@ const getApiUrl = () => {
   return baseUrl
 }
 
-function PayPalPayment({ cart = [], measurements, deliveryDetails, onSuccess, onCancel }) {
+function PayPalPayment({ 
+  cart = [], 
+  measurements, 
+  deliveryDetails, 
+  onSuccess, 
+  onCancel, 
+  onOrderCreated, 
+  existingOrderId = null,
+  clearOrderId // New prop to clear order ID
+}) {
   const [paymentStatus, setPaymentStatus] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState(null)
   const [isClientLoaded, setIsClientLoaded] = useState(false)
+  const [orderId, setOrderId] = useState(existingOrderId) 
 
-  // Set isClientLoaded to true after component mounts
+  // Check for pending order on component mount
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsClientLoaded(true)
-    }, 1000) // Add a small delay to ensure visibility of the spinner
+    const checkForPendingOrder = async () => {
+      // If existingOrderId is already provided, use it
+      if (existingOrderId) {
+        setOrderId(existingOrderId);
+        return;
+      }
+    };
 
-    return () => clearTimeout(timer)
-  }, [])
+
+    const timer = setTimeout(() => {
+      setIsClientLoaded(true);
+    }, 1000);
+
+
+    checkForPendingOrder();
+
+
+    return () => clearTimeout(timer);
+  }, [existingOrderId, cart, deliveryDetails, measurements, onOrderCreated]);
 
   const formatCartItems = (cartItems) => {
     return cartItems.map(item => ({
@@ -69,14 +92,55 @@ function PayPalPayment({ cart = [], measurements, deliveryDetails, onSuccess, on
     }));
   };
 
-  const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0).toFixed(2);
+
+const checkUserInteraction = async (orderId) => {
+  try {
+    // Wait a short time to allow PayPal popup interaction
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    const response = await fetch(
+      `${getApiUrl()}/api/payments/${orderId}/check-interaction`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
+    
+    if (!response.ok) {
+      console.error(`Failed to check interaction: ${response.status}`);
+      return false;
+    }
+    
+    const data = await response.json();
+
+    
+    // Return true if any sign of interaction
+    return data.exists || data.created || data.hasEmail || false;
+  } catch (error) {
+    console.error('Error checking user interaction:', error);
+    return false;
+  }
+};
+
+  // const total = cart.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0).toFixed(2);
 
   const createOrder = async () => {
     setIsProcessing(true)
     setError(null)
-    setPaymentStatus('Creating order...')
-
+    
     try {
+      // If we already have an order ID (either from props or state), use it
+      if (orderId) {
+        setPaymentStatus(`Using existing order: ${orderId}`);
+        
+        // Check if order needs to be persisted to database
+        await checkUserInteraction(orderId);
+        
+        return orderId;
+      }
+
+      setPaymentStatus('Creating order...')
+
       if (!measurements || !deliveryDetails) {
         throw new Error("Measurements and delivery details are required");
       }
@@ -104,6 +168,14 @@ function PayPalPayment({ cart = [], measurements, deliveryDetails, onSuccess, on
         throw new Error('No order ID returned from backend')
       }
 
+      // Store the new order ID
+      setOrderId(data.id)
+      
+      // Notify parent component about the created order ID
+      if (onOrderCreated && typeof onOrderCreated === 'function') {
+        onOrderCreated(data.id);
+      }
+
       setPaymentStatus("Order created successfully");
       return data.id;
 
@@ -122,6 +194,13 @@ function PayPalPayment({ cart = [], measurements, deliveryDetails, onSuccess, on
     setPaymentStatus('Processing payment...')
 
     try {
+      // Check for user interaction before capturing
+      // const hasInteraction = await checkUserInteraction(data.orderID);
+      
+      // if (!hasInteraction) {
+      //   console.log("Ensuring order exists before capture");
+      // }
+      
       const response = await fetch(
         `${getApiUrl()}/api/payments/${data.orderID}/capture`,
         {
@@ -141,7 +220,12 @@ function PayPalPayment({ cart = [], measurements, deliveryDetails, onSuccess, on
 
       if (paymentStatus === 'COMPLETED') {
         setPaymentStatus('Payment successful!')
-
+        
+        // Clear the pending order ID using the provided callback
+        if (clearOrderId && typeof clearOrderId === 'function') {
+          clearOrderId();
+        }
+        
         if (onSuccess && typeof onSuccess === 'function') {
           onSuccess(orderData);
         }
@@ -160,13 +244,78 @@ function PayPalPayment({ cart = [], measurements, deliveryDetails, onSuccess, on
     }
   }
 
-  const handleCancel = (data) => {
-    setPaymentStatus("Payment cancelled");
+
+// Updated handleCancel function for PayPalPayment.jsx
+const handleCancel = async (data) => {
+  setPaymentStatus("Payment cancelled");
+  
+  try {
+    // Always check for user interaction when cancel is triggered
+    const checkResponse = await fetch(
+      `${getApiUrl()}/api/payments/${data.orderID}/check-interaction`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
     
-    if (onCancel && typeof onCancel === 'function') {
-      onCancel(data);
+    if (checkResponse.ok) {
+      const checkData = await checkResponse.json();
+      
+      if (checkData.hasEmail || checkData.exists) {
+        
+        // Update order status to PAYER_ACTION_REQUIRED
+        try {
+          const response = await fetch(
+            `${getApiUrl()}/api/payments/${data.orderID}/update-canceled`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ status: 'PAYER_ACTION_REQUIRED' })
+            }
+          );
+          
+          // if (response.ok) {
+          //   // const result = await response.json();
+          //   // console.log("Order status updated:", result);
+          // } else {
+          //   console.error("Failed to update order status:", await response.text());
+          // }
+        } catch (updateError) {
+          console.error("Error updating order status:", updateError);
+        }
+        
+        // Clear cart and redirect to order status page
+        if (onCancel && typeof onCancel === 'function') {
+          onCancel(data, true); // Pass true to indicate redirect should happen
+        }
+        
+        // Redirect to order status page
+        window.location.href = `/order-status/${data.orderID}`;
+      } else {
+        
+        // Still redirect to order status if we have an order ID
+        if (onCancel && typeof onCancel === 'function') {
+          onCancel(data, true); // Pass true to indicate redirect should happen
+        }
+        
+        // Redirect to order status page
+        window.location.href = `/order-status/${data.orderID}`;
+      }
+    } else {
+      console.error("Failed to check interaction:", await checkResponse.text());
+      // For error cases, still cancel without redirect
+      if (onCancel && typeof onCancel === 'function') {
+        onCancel(data, false); // No redirect, show message
+      }
     }
-  };
+  } catch (error) {
+    console.error("Error in handleCancel:", error);
+    if (onCancel && typeof onCancel === 'function') {
+      onCancel(data, false); // No redirect, show message
+    }
+  }
+};
 
   const onError = (error) => {
     console.error('PayPal error:', error)
@@ -190,12 +339,24 @@ function PayPalPayment({ cart = [], measurements, deliveryDetails, onSuccess, on
     if (cart.length === 0) missingItems.push("cart items");
     if (!measurements) missingItems.push("measurements");
     if (!deliveryDetails) missingItems.push("delivery details");
+    else {
+      if (!deliveryDetails.fullName) missingItems.push("full name");
+      if (!deliveryDetails.address) missingItems.push("address");
+      if (!deliveryDetails.postalCode) missingItems.push("postal code");
+      if (!deliveryDetails.city) missingItems.push("city");
+      if (!deliveryDetails.country) missingItems.push("country");
+      if (!deliveryDetails.email) missingItems.push("email");
+      if (!deliveryDetails.phone) missingItems.push("phone");
+    }
     
     return (
       <div className={styles.payPalContainer}>
         <div className={styles.errorMessage}>
           Cannot proceed with payment. Missing: {missingItems.join(", ")}
         </div>
+        <pre style={{fontSize: '12px', background: '#f7f7f7', padding: '10px', borderRadius: '4px'}}>
+          {JSON.stringify({cart: cart.length > 0, measurements: !!measurements, deliveryDetails: !!deliveryDetails}, null, 2)}
+        </pre>
       </div>
     );
   }
@@ -217,8 +378,7 @@ function PayPalPayment({ cart = [], measurements, deliveryDetails, onSuccess, on
       }}
     >
       <div className={styles.payPalContainer}>
-      {error && <div className={styles.errorMessage}>{error}</div>}
-      {/* {paymentStatus && <div className={styles.statusMessage}>{paymentStatus}</div>} */}
+        {error && <div className={styles.errorMessage}>{error}</div>}
 
         <div className={styles.paypalButtonContainer}>
           <PayPalButtonsWrapper

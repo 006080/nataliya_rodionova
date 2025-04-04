@@ -80,6 +80,19 @@ const ShippingAddressSchema = new mongoose.Schema({
 }, { _id: false });
 
 const OrderSchema = new mongoose.Schema({
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  
+  // Add fulfillment status (separate from payment status)
+  fulfillmentStatus: {
+    type: String,
+    enum: ['Processing', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled'],
+    default: 'Processing'
+  },
+  
+  // Original fields
   paypalOrderId: {
     type: String,
     required: true,
@@ -87,7 +100,7 @@ const OrderSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['CREATED', 'SAVED', 'APPROVED', 'VOIDED', 'COMPLETED', 'PAYER_ACTION_REQUIRED'],
+    enum: ['CREATED', 'SAVED', 'APPROVED', 'VOIDED', 'COMPLETED', 'PAYER_ACTION_REQUIRED', 'CANCELED'],
     default: 'CREATED'
   },
   items: [OrderItemSchema],
@@ -112,11 +125,29 @@ const OrderSchema = new mongoose.Schema({
     default: false
   },
   emailSentAt: Date,
+  initialReminderSent: {
+    type: Boolean,
+    default: false
+  },
+  initialReminderSentAt: Date,
+  followupReminderSent: {
+    type: Boolean,
+    default: false
+  },
+  followupReminderSentAt: Date,
+  cancelReason: String,
+  cancelledAt: Date,
   createdAt: {
     type: Date,
     default: Date.now
   },
-  updatedAt: Date
+  updatedAt: Date,
+  
+  // Order fulfillment tracking fields
+  trackingNumber: String,
+  shippedAt: Date,
+  deliveredAt: Date,
+  estimatedDeliveryDate: Date
 });
 
 // Index for faster queries
@@ -124,20 +155,43 @@ OrderSchema.index({ paypalOrderId: 1 });
 OrderSchema.index({ 'customer.email': 1 });
 OrderSchema.index({ status: 1 });
 OrderSchema.index({ createdAt: 1 });
+OrderSchema.index({ user: 1 }); 
+OrderSchema.index({ fulfillmentStatus: 1 }); 
+
+// Virtual for formatted date
+OrderSchema.virtual('dateFormatted').get(function() {
+  return this.createdAt ? this.createdAt.toISOString().split('T')[0] : '';
+});
+
+OrderSchema.methods.getStatusText = function() {
+  if (this.status === 'PAYER_ACTION_REQUIRED') return 'Payment Pending';
+  if (this.status === 'CANCELED' || this.status === 'VOIDED') return 'Cancelled';
+  
+  if (this.status === 'Shipped' || this.status === 'SHIPPED') return 'Shipped';
+  if (this.status === 'Delivered' || this.status === 'DELIVERED') return 'Delivered';
+  
+  if (this.fulfillmentStatus === 'Shipped' || 
+      this.fulfillmentStatus === 'Delivered' || 
+      this.fulfillmentStatus === 'Cancelled') {
+    return this.fulfillmentStatus;
+  }
+  
+  if (this.fulfillmentStatus) {
+    return this.fulfillmentStatus;
+  }
+  
+  const statusMap = {
+    'CREATED': 'Processing',
+    'SAVED': 'Processing',
+    'APPROVED': 'Processing',
+    'COMPLETED': 'Processing'
+  };
+  
+  return statusMap[this.status] || 'Processing';
+};
 
 const Order = mongoose.model('Order', OrderSchema);
 
 export default Order;
-
-
-
-
-
-
-
-
-
-
-
 
 
