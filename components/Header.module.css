@@ -80,7 +80,7 @@
 }
 
 .icon {
-  font-size: 24px;
+  font-size: 22px;
   margin: 10px;
   color: #555; /* Default color */
   z-index: 3000;
@@ -88,13 +88,13 @@
 
 .cartCount {
   position: absolute;
-  top: -5px;
-  right: -10px;
+  top: -3px;
+  right: -5px;
   background-color: rgb(47, 249, 84);
   color: white;
   border-radius: 50%;
   padding: 5px 8px;
-  font-size: 10px;
+  font-size: 8px;
   font-weight: bold;
 }
 
@@ -108,7 +108,7 @@
 
 /* Burger Icon (for mobile view) */
 .burgerIcon {
-  font-size: 24px;
+  font-size: 22px;
   color: #555; /* Default color */
   margin-left: 15px;
   cursor: pointer;
@@ -216,6 +216,25 @@
   /* Hide navbar links in mobile view */
   .navLinks {
     display: none;
+  }
+
+  .cartCount {
+    position: absolute;
+    top: -3px;
+    right: -5px;
+    background-color: rgb(47, 249, 84);
+    color: white;
+    border-radius: 50%;
+    padding: 2px 5px;
+    font-size: 6px;
+    font-weight: bold;
+  }
+
+  .icon {
+    font-size: 18px;
+    margin: 5px;
+    color: #555; /* Default color */
+    z-index: 3000;
   }
 
   .logo {
