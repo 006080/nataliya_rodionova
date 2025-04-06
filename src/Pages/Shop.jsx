@@ -48,7 +48,7 @@ const Shop = () => {
 
   const addToCart = (product) => {
     const existingProductIndex = cartItems.findIndex(
-      (item) => item.name === product.name
+      (item) => item.id === product.id // Use id instead of name
     );
 
     if (existingProductIndex !== -1) {
@@ -61,8 +61,8 @@ const Shop = () => {
     setCartIsOpen(true);
   };
 
-  const removeFromCart = (productName) => {
-    setCartItems(cartItems.filter((item) => item.name !== productName));
+  const removeFromCart = (productId) => {
+    setCartItems(cartItems.filter((item) => item.id !== productId));
   };
 
   const handleCloseCart = () => {
@@ -78,6 +78,7 @@ const Shop = () => {
     <div className={styles.shop}>
       <CardProduct
         addToCart={addToCart}
+        id="collar-001"  // Unique ID for this product
         images={collarImages}
         onImageClick={() => handleImageClick(collarImages)}
         name="COLLAR"
@@ -89,6 +90,7 @@ const Shop = () => {
 
       <CardProduct
         addToCart={addToCart}
+        id="scarf-002"  // Unique ID for this product
         images={scarfImages}
         onImageClick={() => handleImageClick(scarfImages)}
         name="SCARF"
@@ -100,6 +102,7 @@ const Shop = () => {
 
       <CardProduct
         addToCart={addToCart}
+        id="trousers-003"  // Unique ID for this product
         images={trousersImages}
         onImageClick={() => handleImageClick(trousersImages)}
         name="TROUSERS"
@@ -111,6 +114,7 @@ const Shop = () => {
 
       <CardProduct
         addToCart={addToCart}
+        id="dress-004"  // Unique ID for this product
         images={dress}
         onImageClick={() => handleImageClick(dress)}
         name="MEN'S DRESS"

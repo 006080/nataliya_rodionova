@@ -8,7 +8,6 @@ import Shop from "./Pages/Shop";
 import Footer from "../components/Footer";
 import Terms from "./Pages/Terms"; 
 import { CartProvider } from '../components/CartContext';
-// import { position } from "@cloudinary/url-gen/qualifiers/timeline";
 import ReturnPolicy from "./Pages/ReturnPolicy";
 import Checkout from "./Pages/Checkout";
 import OrderStatus from "./Pages/OrderStatus";
@@ -23,6 +22,7 @@ import VerifyEmail from "../components/VerifyEmail";
 import ResetPasswordForm from "../components/ResetPasswordForm";
 import MyOrders from "./Pages/MyOrders";
 import OrderDetail from "./Pages/OrderDetail";
+import { FavoriteProvider } from "../components/FavoriteContext";
 import Collaboration from "./Pages/Collaboration";
 
 const Unauthorized = () => (
@@ -36,13 +36,11 @@ const Unauthorized = () => (
 const AppContent = () => {
   const location = useLocation();  
 
-
   return (
     <>
-     <AuthProvider>
-     <Header />
+      <Header />
       <Routes> 
-        <Route style={{ position: 'absolute' }} path="/" element={<Home />} />
+        <Route path="/" element={<Home />} />
         <Route path="/login" element={<LoginForm />} />
         <Route path="/register" element={<RegisterForm />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
@@ -50,91 +48,65 @@ const AppContent = () => {
         <Route path="/verify-email/:token" element={<VerifyEmail />} />
         <Route path="/reset-password/:token" element={<ResetPasswordForm />} />
 
-        <Route style={{ position: 'relative' }} path="/ourservice" element={<OurService />} />
-        <Route style={{ position: 'relative' }} path="/reviews" element={<Reviews />} />
-        <Route style={{ position: 'relative' }} path="/terms" element={<Terms />} />
-        <Route style={{ position: 'relative' }} path="/return" element={<ReturnPolicy />} />
-        <Route style={{ position: 'relative' }} path="/checkout" element={<Checkout />} />
-        <Route style={{ position: 'relative' }} path="/collaboration" element={<Collaboration />} />
+        <Route path="/ourservice" element={<OurService />} />
+        <Route path="/reviews" element={<Reviews />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/return" element={<ReturnPolicy />} />
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/collaboration" element={<Collaboration />} />
         <Route path="/contacts" element={<Contacts />} />
         <Route path="/shop" element={<Shop />} />
         <Route path="/order-status/:orderId" element={<OrderStatus />} />
-        <Route path="/" element={<Shop />} />
-         {/* Protected routes (require authentication) */}
-              <Route 
-                path="/profile" 
-                element={
-                  <ProtectedRoute>
-                    <Profile />
-                  </ProtectedRoute>
-                } 
-              />
 
-              <Route 
-                  path="/orders" 
-                  element={
-                    <ProtectedRoute>
-                      <MyOrders />
-                    </ProtectedRoute>
-                  } 
-                />
+        {/* Protected routes (require authentication) */}
+        <Route 
+          path="/profile" 
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          } 
+        />
 
-                <Route 
-                  path="/orders/:id" 
-                  element={
-                    <ProtectedRoute>
-                      <OrderDetail />
-                    </ProtectedRoute>
-                  } 
-                />
-              
-              {/* <Route 
-                path="/checkout"
-                style={{ position: 'relative' }} 
-                element={
-                  <ProtectedRoute>
-                    <Checkout />
-                  </ProtectedRoute>
-                } 
-              /> */}
-              
-              {/* <Route 
-                path="/orders/:orderId" 
-                element={
-                  <ProtectedRoute>
-                    <OrderStatus />
-                  </ProtectedRoute>
-                } 
-              /> */}
-              
-              {/* Admin routes (require admin role) */}
-              {/* <Route 
-                path="/admin" 
-                element={
-                  <ProtectedRoute roles={['admin']}>
-                    <AdminDashboard />
-                  </ProtectedRoute>
-                } 
-              /> */}
-              
-              <Route path="*" element={<NotFoundPage />} />
+        <Route 
+          path="/orders" 
+          element={
+            <ProtectedRoute>
+              <MyOrders />
+            </ProtectedRoute>
+          } 
+        />
+
+        <Route 
+          path="/orders/:id" 
+          element={
+            <ProtectedRoute>
+              <OrderDetail />
+            </ProtectedRoute>
+          } 
+        />
+        
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
 
       {location.pathname !== "/contacts" && <Footer />}
-      
-     </AuthProvider>  
     </>
   );
 };
 
 const App = () => {
   return (
-    <CartProvider>
-      <Router>
-        <AppContent />
-      </Router>
-    </CartProvider>
+    <Router>
+      <AuthProvider>
+        <CartProvider>
+          <FavoriteProvider>
+            <AppContent />
+          </FavoriteProvider>
+        </CartProvider>
+      </AuthProvider>
+    </Router>
   );
 };
 
 export default App;
+
