@@ -1,6 +1,6 @@
 import { useState } from "react";
 import PropTypes from "prop-types";
-import Slider from "react-slick"; // Import react-slick
+import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Button from "./Button";
@@ -9,7 +9,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar, faChevronLeft, faChevronRight, faHeart } from "@fortawesome/free-solid-svg-icons";
 import { useCart } from "./CartContext";
 
-// Custom Arrow Components (Centered on Image)
+// Custom Arrow Components
 const PrevArrow = ({ onClick }) => (
   <div className={styles.arrow} style={{ left: "10px" }} onClick={onClick}>
     <FontAwesomeIcon icon={faChevronLeft} />
@@ -22,33 +22,28 @@ const NextArrow = ({ onClick }) => (
   </div>
 );
 
-const CardProduct = ({ id, name, images, price, description, material, color }) => {
+const CardProduct = ({ id, name, images, price, description, material, color, onImageClick }) => {
   const [count, setCount] = useState(0);
   const { addToCart } = useCart();
   const [selectedStars, setSelectedStars] = useState(0);
-  const [isHeartSelected, setIsHeartSelected] = useState(false); // Manage heart selection state
+  const [isHeartSelected, setIsHeartSelected] = useState(false);
 
   const increment = () => setCount(count + 1);
   const decrement = () => count > 0 && setCount(count - 1);
 
   const itemAdd = () => {
     if (count > 0) {
-      const product = { id, name, image: images[0], price, quantity: count, material, color }; // Store first image as default
+      const product = { id, name, image: images[0], price, quantity: count, material, color };
       addToCart(product);
-      setCount(0); // Reset the count after adding to cart
+      setCount(0);
     }
   };
 
   const handleStarClick = (starIndex) => setSelectedStars(starIndex + 1);
+  const handleHeartClick = () => setIsHeartSelected((prev) => !prev);
 
-  // Toggle Heart Click
-  const handleHeartClick = () => {
-    setIsHeartSelected((prev) => !prev);
-  };
-
-  // Slick Carousel settings
   const settings = {
-    dots: true, // Enables dot navigation
+    dots: true,
     infinite: true,
     speed: 500,
     slidesToShow: 1,
@@ -64,7 +59,13 @@ const CardProduct = ({ id, name, images, price, description, material, color }) 
         <Slider {...settings}>
           {images.map((img, index) => (
             <div key={index} className={styles.imageContainer}>
-              <img src={img} alt={`${name} ${index + 1}`} className={styles.carouselImage} />
+              <img
+                src={img}
+                alt={`${name} ${index + 1}`}
+                className={styles.carouselImage}
+                onClick={() => onImageClick && onImageClick(images, index)}
+                style={{ cursor: "zoom-in" }}
+              />
             </div>
           ))}
         </Slider>
@@ -73,20 +74,18 @@ const CardProduct = ({ id, name, images, price, description, material, color }) 
       <div className={styles.info}>
         <div className={styles.titleLine}>
           <h3 style={{ textAlign: 'left' }}>{name}</h3>
-
-          {/* Heart Icon - Toggle Between Red & Grey */}
-          <FontAwesomeIcon 
+          <FontAwesomeIcon
             icon={faHeart}
             className={styles.heart}
-            style={{ color: isHeartSelected ? "" : "black", cursor: "pointer" }}
-            onClick={handleHeartClick} // Toggle heart selection
+            style={{ color: isHeartSelected ? "black" : "", cursor: "pointer" }}
+            onClick={handleHeartClick}
           />
         </div>
 
         <div className={styles.notes}>
           <p style={{ fontSize: '14px' }}>{description}</p>
-          <p style={{ fontSize: '14px' }}>Material:{material}</p>
-          <p style={{ fontSize: '14px' }}>Color:{color}</p>
+          <p style={{ fontSize: '14px' }}>Material: {material}</p>
+          <p style={{ fontSize: '14px' }}>Color: {color}</p>
         </div>
 
         <div className={styles.starPrice}>
@@ -117,10 +116,14 @@ const CardProduct = ({ id, name, images, price, description, material, color }) 
 };
 
 CardProduct.propTypes = {
+  id: PropTypes.string,
   name: PropTypes.string.isRequired,
-  images: PropTypes.arrayOf(PropTypes.string).isRequired, // Now accepts an array of images
+  images: PropTypes.arrayOf(PropTypes.string).isRequired,
   price: PropTypes.number.isRequired,
   description: PropTypes.string.isRequired,
+  material: PropTypes.string,
+  color: PropTypes.string,
+  onImageClick: PropTypes.func,
 };
 
 export default CardProduct;

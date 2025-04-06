@@ -78,8 +78,9 @@
   cursor: pointer;
 }
 
-.cartIcon {
-  font-size: 28px;
+.icon {
+  font-size: 24px;
+  margin: 10px;
   color: #555; /* Default color */
   z-index: 3000;
 }

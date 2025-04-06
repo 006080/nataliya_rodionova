@@ -4,7 +4,7 @@ import Nav from "./Nav";
 import logo from "../src/assets/Logo.webp";
 import styles from "./Header.module.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBars, faUser, faCartShopping, faSignInAlt } from "@fortawesome/free-solid-svg-icons";
+import { faBars, faUser, faCartShopping, faSignInAlt, faHeart } from "@fortawesome/free-solid-svg-icons";
 import CartSummary from "./CartSummary";
 import { useCart } from "./CartContext";
 import { useAuth } from "../src/contexts/AuthContext";
@@ -102,9 +102,14 @@ const Header = () => {
         
         <div className={styles.icons}>
           <div className={styles.cartIconContainer}>
+          <FontAwesomeIcon 
+              // onClick={handleCartClick} 
+              className={styles.icon} 
+              icon={faHeart} 
+            />
             <FontAwesomeIcon 
               onClick={handleCartClick} 
-              className={`${styles.cartIcon} ${menu ? styles.whiteIcon : ''}`} 
+              className={`${styles.icon} ${menu ? styles.whiteIcon : ''}`} 
               icon={faCartShopping} 
             />
             {cartItems.length > 0 && (
@@ -119,7 +124,7 @@ const Header = () => {
           <div className={styles.userIconContainer}>
             <FontAwesomeIcon 
               icon={isAuthenticated ? faUser : faSignInAlt} 
-              className={`${styles.userIcon} ${menu ? styles.whiteIcon : ''}`}
+              className={`${styles.icon} ${menu ? styles.whiteIcon : ''}`}
               onClick={handleUserIconClick}
             />
             

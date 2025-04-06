@@ -73,7 +73,7 @@ const CartSummary = ({ onClose }) => {
                   </p>
                   <div style={{ lineHeight: "1" }}>
                     {/* Quantity controls */}
-                    <div className={styles.quantityControls}>
+                    {/* <div className={styles.quantityControls}>
                       <button 
                         className={styles.quantityButton}
                         onClick={() => decreaseQuantity(item)}
@@ -101,7 +101,7 @@ const CartSummary = ({ onClose }) => {
                       }}
                     >
                       ${item.price}
-                    </p>
+                    </p> */}
                     
                   </div>
                   <button
