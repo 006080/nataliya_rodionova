@@ -17,14 +17,6 @@ const hardcodedReviews = [
   },
   {
     id: 5,
-    name: "Miki",
-    rating: 5,
-    message: "Complimenti per la sfilata, per i materiali e le fluidità dei tessuti.Parlavi già 10 anni fa di gender fluid e collezione unisex. Inoltre mi piace molto le vestibilità e le assimetrie.  Complimenti Natalia. Un grande baci ❤️",
-    image: "https://res.cloudinary.com/dwenvtwyx/image/upload/v1737314284/reviews/tqjcusg3f7nwj8dvpjr7.jpg",
-    date: "1/19/2025"
-  },
-  {
-    id: 5,
     name: "Louis",
     rating: 5,
     message: "I’m super happy to own a beautiful sweater from Varona.Perfect fit and amazing quality that lasts for life.I can only recommend!",
@@ -38,6 +30,14 @@ const hardcodedReviews = [
     message: "",
     image: "https://res.cloudinary.com/dwenvtwyx/image/upload/v1739534959/reviews/gsrlobxiixf7jzxonfld.jpg",
     date: "2/14/2025",
+  },
+  {
+    id: 5,
+    name: "Miki",
+    rating: 5,
+    message: "Complimenti per la sfilata, per i materiali e le fluidità dei tessuti.Parlavi già 10 anni fa di gender fluid e collezione unisex. Inoltre mi piace molto le vestibilità e le assimetrie.  Complimenti Natalia. Un grande baci ❤️",
+    image: "https://res.cloudinary.com/dwenvtwyx/image/upload/v1737314284/reviews/tqjcusg3f7nwj8dvpjr7.jpg",
+    date: "1/19/2025"
   },
   {
     id: 5,

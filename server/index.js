@@ -1,10 +1,9 @@
 import express from 'express';
 import mongoose from 'mongoose';
-import multer from 'multer';
+// import multer from 'multer';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
-import Review from './Models/Review.js';
 import Feedback from './Models/Feedback.js';
 import http from 'http';
 import sanitizeHtml from 'sanitize-html';
@@ -12,7 +11,7 @@ import helmet from 'helmet';
 import nodemailer from 'nodemailer';
 import Joi from 'joi';
 import { v2 as cloudinary } from 'cloudinary';
-import { CloudinaryStorage } from 'multer-storage-cloudinary';
+// import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import bodyParser from "body-parser";
 import paypalRoutes from './routes/paypal.js';
 import productRoutes from './routes/product.js';
@@ -21,6 +20,7 @@ import cookieParser from 'cookie-parser';
 import authRoutes from './routes/auth.js';
 import orderRoutes from './routes/order.js';
 import cartRoutes from './routes/cart.js';
+import reviewRoutes from './routes/review.js';
 
 
 dotenv.config({ path: './.env.local' });
@@ -80,27 +80,6 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const storage = new CloudinaryStorage({
-    cloudinary,
-    params: {
-        folder: "Ellements",
-        allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
-    },
-});
-
-const upload = multer({
-    storage,
-    limits: {
-        fileSize: 10 * 1024 * 1024 // 10MB limit
-    },
-    fileFilter: (req, file, cb) => {
-        if (!file.mimetype.startsWith('image/')) {
-            return cb(new Error('Please upload an image file'), false);
-        }
-        cb(null, true);
-    }
-});
-
 const { 
     MONGO_URI, 
     PORT, 
@@ -117,26 +96,13 @@ if (!MONGO_URI || !PORT || !FRONTEND_URL_LOCAL || !FRONTEND_URL_PROD || !EMAIL_U
     process.exit(1);
 }
 
-// Rate limiters for review and feedback routes
-const reviewLimiter = rateLimit({
-    windowMs: 60 * 60 * 1000, 
-    max: 30, 
-    message: 'Too many reviews submitted. Please try again later.'
-});
-
+// Rate limiters for feedback route
 const feedbackLimiter = rateLimit({
     windowMs: 30 * 60 * 1000,
     max: 100, 
     message: 'Too many feedbacks submitted. Please try again later.'
 });
 
-// Global rate limit for all routes
-// app.use(rateLimit({
-//     windowMs: 15 * 60 * 1000, // 15 minutes
-//     max: 100, // 100 requests per IP
-//     standardHeaders: true,
-//     legacyHeaders: false
-//   }));
   
   // Stronger limits specifically for auth routes
   const authLimiter = rateLimit({
@@ -291,77 +257,14 @@ app.get('/api/cloudinary-folders', async (req, res) => {
 });
 
 
-app.post('/api/reviews', upload.single('image'), async (req, res) => {
-    try {
-        const { name, message, rating } = req.body;
 
-        if (!name || !message || !rating) {
-            return res.status(400).json({ error: 'Name, message, and rating are required' });
-        }
-
-        const imageUrl = req.file ? req.file.path : null;
-
-        const newReview = new Review({
-            name,
-            message,
-            rating: Number(rating),
-            image: imageUrl,
-            approved: false,
-            createdAt: new Date()
-        });
-
-        await newReview.save();
-        res.status(201).json({ message: 'Review submitted successfully', review: newReview });
-    } catch (error) {
-        console.error('Error saving review:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
-});
-
-
-app.get('/api/reviews', async (req, res) => {
-    try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 5;
-        const skip = (page - 1) * limit;
-
-        const totalReviews = await Review.countDocuments({ approved: true });
-        
-        const reviews = await Review.find({ approved: true })
-            .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(limit);
-        
-        res.status(200).json({
-            reviews,
-            pagination: {
-                totalReviews,
-                currentPage: page,
-                totalPages: Math.ceil(totalReviews / limit),
-                hasMore: page < Math.ceil(totalReviews / limit)
-            }
-        });
-    } catch (error) {
-        console.error('Error fetching reviews:', error);
-        res.status(500).json({ error: 'Failed to fetch reviews' });
-    }
-});
-
-
-
-
-
-
-
-// Product and PayPal routes
 app.use(productRoutes);
 app.use(paypalRoutes);
 app.use(authRoutes);
 app.use(orderRoutes);
 app.use(cartRoutes);
+app.use(reviewRoutes);
   
-
-
 
 // Handle 404 errors
 app.use((req, res) => {
