@@ -49,9 +49,7 @@ const Footer = () => {
             <AdvancedImage
               style={{ filter: "invert(1)", marginTop: "10px", width: "75px" }}
               className={styles.paymentIcon}
-              cldImg={getImage(
-                "png-transparent-mollie-logo-tech-companies_u6ibbl"
-              )}
+              cldImg={getImage("png-transparent-mollie-logo-tech-companies_u6ibbl")}
             />
           </div>
           <div className={styles.iconWrapper}>
@@ -67,15 +65,14 @@ const Footer = () => {
               cldImg={getImage("paypal_ww2gpn")}
             />
           </div>
-          {/* Add more payment icons if necessary */}
         </div>
+
         <div className={styles.paymentIcons}>
-          <div className={styles.iconWrapper}></div>
           <div className={styles.iconWrapper}>
             <a
-              href="https://www.youtube.com/watch?app=desktop&v=YhKtUzEA-jU" // Replace with the desired URL
+              href="https://www.youtube.com/watch?app=desktop&v=YhKtUzEA-jU"
               target="_blank"
-              rel="noopener noreferrer" // Ensures security when opening in a new tab
+              rel="noopener noreferrer"
             >
               <AdvancedImage
                 className={styles.socialIcons}
@@ -86,34 +83,45 @@ const Footer = () => {
             </a>
           </div>
           <div className={styles.iconWrapper}>
-            <AdvancedImage
-              className={styles.paymentIcon}
-              style={{
-                filter: "invert(1)",
-                width: "22px",
-                margin: "5px",
-                opacity: 0.9,
-              }}
-              cldImg={getImage(
-                "5282541_fb_social_media_facebook_facebook_logo_social_network_icon_e8ixwq"
-              )}
-            />
+            <a
+              href="https://www.facebook.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <AdvancedImage
+                className={styles.socialIcons}
+                style={{
+                  filter: "invert(1)",
+                  width: "22px",
+                  margin: "5px",
+                  opacity: 0.9,
+                }}
+                cldImg={getImage(
+                  "5282541_fb_social_media_facebook_facebook_logo_social_network_icon_e8ixwq"
+                )}
+              />
+            </a>
           </div>
           <div className={styles.iconWrapper}>
-            <AdvancedImage
-              className={styles.paymentIcon}
-              style={{
-                filter: "invert(1)",
-                width: "22px",
-                margin: "5px",
-                opacity: 0.9,
-              }}
-              cldImg={getImage(
-                "5282544_camera_instagram_social_media_social_network_instagram_logo_icon_jycw7z"
-              )}
-            />
+            <a
+              href="https://www.instagram.com/varona_nataliyarodionova/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <AdvancedImage
+                className={styles.socialIcons}
+                style={{
+                  filter: "invert(1)",
+                  width: "22px",
+                  margin: "5px",
+                  opacity: 0.9,
+                }}
+                cldImg={getImage(
+                  "5282544_camera_instagram_social_media_social_network_instagram_logo_icon_jycw7z"
+                )}
+              />
+            </a>
           </div>
-          {/* Add more payment icons if necessary */}
         </div>
       </div>
 
