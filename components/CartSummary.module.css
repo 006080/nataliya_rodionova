@@ -15,6 +15,15 @@
   backdrop-filter: blur(7px);
 }
 
+.colorDisplay {
+ margin-bottom: 10px;
+ margin-top: 10px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 55px;
+}
+
 .removeButton {
   background-color: transparent;
   color: black;
@@ -32,7 +41,7 @@
 
 .productImage {
   border-radius: 13px;
-  width: 145px;
+  width: 140px;
   padding: 10px;
 
 }
