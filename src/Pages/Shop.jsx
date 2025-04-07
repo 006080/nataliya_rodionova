@@ -135,7 +135,7 @@ const Shop = () => {
         onImageClick={() => handleImageClick(gloves)}
         name="Gloves"
         price={120}
-        description="Designed for both comfort and style, this piece features a cozy wool-blend fabric in a classic checkerboard pattern. The deep V-neck and ribbed hem add a touch of elegance, while the relaxed fit allows for effortless layering. Pair it with combat boots and high socks for a trendy street-style look."
+        description="Elegant handmade gloves crafted from 100% cotton lace. Lightweight, breathable, and detailed with black buttons for a timeless vintage touch."
         material={"100% cotton"}
         color={"black"}
       />
