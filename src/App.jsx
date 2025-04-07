@@ -89,7 +89,8 @@ const AppContent = () => {
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
 
-      {location.pathname !== "/" && <Footer />}
+      {location.pathname !== "/" && location.pathname !== "/contacts" && <Footer />}
+
     </>
   );
 };

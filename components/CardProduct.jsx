@@ -99,7 +99,7 @@ const CardProduct = ({
                 key={index}
                 icon={faStar}
                 style={{
-                  color: index < selectedStars ? "grey" : "black",
+                  color: index < selectedStars ? "black" : "grey",
                   cursor: "pointer",
                 }}
                 onClick={() => handleStarClick(index)}
