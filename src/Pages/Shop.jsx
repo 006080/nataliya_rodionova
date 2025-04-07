@@ -29,6 +29,10 @@ const trousersImages = [
   cld.image("trousers_x3ryc0").toURL(),
 ];
 
+const gloves = [
+  cld.image("5E6EEA4C-C555-4329-9E4A-7895944041D0_r7vgpm").toURL()
+]
+
 const dress = [
   cld.image("0B9C10B5-B616-4D36-AE73-D48E03C60EB2_e3t2x7").toURL(),
   cld.image("IMG_6612_v48gkj").toURL(),
@@ -81,7 +85,7 @@ const Shop = () => {
         id="collar-001"  // Unique ID for this product
         images={collarImages}
         onImageClick={() => handleImageClick(collarImages)}
-        name="COLLAR"
+        name="Collar"
         price={120}
         description="Made entirely from 100% cotton, this collar ensures comfort and breathability. The ruffled style, adorned with delicate lace detailing, exudes vintage elegance. Convenient drawstrings at the front allow for easy closure or adjustment."
         material={'100% cotton'}
@@ -93,7 +97,7 @@ const Shop = () => {
         id="scarf-002"  // Unique ID for this product
         images={scarfImages}
         onImageClick={() => handleImageClick(scarfImages)}
-        name="SCARF"
+        name="Scarf"
         price={180}
         description="Made entirely from 100% cotton, this scarf ensures comfort and breathability. The ruffled style, adorned with delicate lace detailing, exudes vintage elegance. Convenient drawstrings at the front allow for easy closure or adjustment."
         material={'100% Wool'}
@@ -105,7 +109,7 @@ const Shop = () => {
         id="trousers-003"  // Unique ID for this product
         images={trousersImages}
         onImageClick={() => handleImageClick(trousersImages)}
-        name="TROUSERS"
+        name="Trousers"
         price={480}
         description="Made entirely from 100% cotton, these trousers ensure comfort and breathability. The ruffled style, adorned with delicate lace detailing, exudes vintage elegance. Convenient drawstrings at the front allow for easy closure or adjustment."
         material={'80% wool  20% cashmere'}
@@ -117,11 +121,23 @@ const Shop = () => {
         id="dress-004"  // Unique ID for this product
         images={dress}
         onImageClick={() => handleImageClick(dress)}
-        name="MEN'S DRESS"
+        name="Men's dress"
         price={680}
         description="Designed for both comfort and style, this piece features a cozy wool-blend fabric in a classic checkerboard pattern. The deep V-neck and ribbed hem add a touch of elegance, while the relaxed fit allows for effortless layering. Pair it with combat boots and high socks for a trendy street-style look."
         material={"100% sheep wool"}
-        color={""}
+        color={"brown, beige"}
+      />
+
+<CardProduct
+        addToCart={addToCart}
+        id="gloves-001"  // Unique ID for this product
+        images={gloves}
+        onImageClick={() => handleImageClick(gloves)}
+        name="Gloves"
+        price={120}
+        description="Designed for both comfort and style, this piece features a cozy wool-blend fabric in a classic checkerboard pattern. The deep V-neck and ribbed hem add a touch of elegance, while the relaxed fit allows for effortless layering. Pair it with combat boots and high socks for a trendy street-style look."
+        material={"100% cotton"}
+        color={"black"}
       />
 
       {cartIsOpen && (
