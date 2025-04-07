@@ -104,20 +104,14 @@ const CardProduct = ({
 
         {/* 🎨 Color Picker */}
         <label className={styles.colorLabel}>
-          <span style={{fontSize: "14px"}}>Pick your color:</span>
-          <div
-            className={styles.colorSwatchButton}
-            style={{ backgroundColor: selectedColor }}
-            onClick={() => document.getElementById("colorInput").click()}
-          />
-          <input
-            id="colorInput"
-            type="color"
-            value={selectedColor}
-            onChange={(e) => setSelectedColor(e.target.value)}
-            className={styles.hiddenColorInput}
-          />
-        </label>
+  <span style={{ fontSize: "14px" }}>Pick your color:</span>
+  <input
+    type="color"
+    value={selectedColor}
+    onChange={(e) => setSelectedColor(e.target.value)}
+    className={styles.colorSwatchButton}
+  />
+</label>
 
         <div
           className={styles.colorSwatch}

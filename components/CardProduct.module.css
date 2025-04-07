@@ -94,18 +94,26 @@
 }
 
 .colorSwatchButton {
-  width: 20px;
-  height: 20px;
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: transparent;
+  border: none;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
-  border: 2px solid #ccc;
+  padding: 0;
   cursor: pointer;
-  transition: transform 0.25s ease, box-shadow 0.3s ease;
-  box-shadow: 0 0 0 1px #e0e0e0;
+  box-shadow: 0 0 0 2px #e0e0e0;
+  overflow: hidden;
 }
 
-.colorSwatchButton:hover {
-  transform: scale(1.1);
-  animation: rainbowBorder 2s linear infinite;
+.colorSwatchButton::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.colorSwatchButton::-webkit-color-swatch {
+  border: none;
+  border-radius: 50%;
 }
 
 @keyframes rainbowBorder {
