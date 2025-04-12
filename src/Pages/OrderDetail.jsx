@@ -9,7 +9,6 @@ const OrderDetail = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  // Function to get API URL based on environment
   const getApiUrl = () => {
     return import.meta.env.VITE_NODE_ENV === "production"
       ? import.meta.env.VITE_API_BASE_URL_PROD
@@ -22,7 +21,6 @@ const OrderDetail = () => {
         setLoading(true);
         setError('');
         
-        // Use the correct API URL format for Vite
         const response = await authFetch(`${getApiUrl()}/api/orders/${id}`);
         
         if (!response.ok) {
@@ -34,7 +32,6 @@ const OrderDetail = () => {
         
         const data = await response.json();
         
-        // Make sure orderItems is an array
         if (!data.orderItems) {
           data.orderItems = [];
         }
@@ -70,6 +67,16 @@ const OrderDetail = () => {
       default:
         return '#6c757d'; // Gray
     }
+  };
+
+
+  const isPaymentPending = (order) => {
+    return order?.status === 'Payment Pending' || 
+           order?.paymentStatus === 'PAYER_ACTION_REQUIRED';
+  };
+
+  const handleCompletePayment = () => {
+    navigate(`/order-status/${order.paypalOrderId || order.id}`);
   };
 
   if (loading) {
@@ -151,6 +158,39 @@ const OrderDetail = () => {
         </button>
       </div>
       
+      {/* Payment Action Alert for Pending Payments */}
+      {isPaymentPending(order) && (
+        <div style={{
+          backgroundColor: '#fff3cd',
+          color: '#856404',
+          padding: '1rem',
+          borderRadius: '8px',
+          marginBottom: '2rem',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          borderLeft: '4px solid #ffc107'
+        }}>
+          <h3 style={{ marginTop: 0 }}>Payment Action Required</h3>
+          <p>This order requires your action to complete the payment process.</p>
+          <button
+            onClick={handleCompletePayment}
+            style={{
+              backgroundColor: '#fd7e14',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              padding: '0.75rem 1.5rem',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              marginTop: '0.5rem'
+            }}
+          >
+            Complete Payment Now
+          </button>
+        </div>
+      )}
+      
       <div className="order-overview" style={{ 
         backgroundColor: '#f9f9f9', 
         borderRadius: '8px', 
@@ -177,6 +217,25 @@ const OrderDetail = () => {
             }}>
               {order.status || 'Processing'}
             </span>
+            
+            {/* Complete Payment Button next to status if payment is pending */}
+            {isPaymentPending(order) && (
+              <button
+                onClick={handleCompletePayment}
+                style={{
+                  backgroundColor: '#fd7e14',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  padding: '0.25rem 0.5rem',
+                  fontSize: '0.75rem',
+                  marginLeft: '0.5rem',
+                  cursor: 'pointer'
+                }}
+              >
+                Complete Payment
+              </button>
+            )}
           </p>
           {order.trackingNumber && (
             <p><strong>Tracking Number:</strong> {order.trackingNumber}</p>
@@ -333,7 +392,6 @@ const OrderDetail = () => {
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', width: '300px', marginBottom: '0.5rem' }}>
             <span>Subtotal:</span>
-            {/* <span>${(order.totalPrice - tax - shipping || 0).toFixed(2)}</span> */}
             <span>${(order.totalPrice || 0).toFixed(2)}</span>
           </div>
           <div style={{ 
@@ -366,19 +424,37 @@ const OrderDetail = () => {
           Back to My Orders
         </button>
         
-        <button 
-          onClick={() => navigate('/shop')}
-          style={{ 
-            backgroundColor: '#28a745', 
-            color: 'white', 
-            border: 'none', 
-            borderRadius: '4px', 
-            padding: '0.75rem 1.5rem',
-            cursor: 'pointer' 
-          }}
-        >
-          Continue Shopping
-        </button>
+        {/* Add Complete Payment button if payment is pending */}
+        {isPaymentPending(order) ? (
+          <button 
+            onClick={handleCompletePayment}
+            style={{ 
+              backgroundColor: '#fd7e14', 
+              color: 'white', 
+              border: 'none', 
+              borderRadius: '4px', 
+              padding: '0.75rem 1.5rem',
+              cursor: 'pointer',
+              fontWeight: 'bold'
+            }}
+          >
+            Complete Payment
+          </button>
+        ) : (
+          <button 
+            onClick={() => navigate('/shop')}
+            style={{ 
+              backgroundColor: '#28a745', 
+              color: 'white', 
+              border: 'none', 
+              borderRadius: '4px', 
+              padding: '0.75rem 1.5rem',
+              cursor: 'pointer' 
+            }}
+          >
+            Continue Shopping
+          </button>
+        )}
       </div>
     </div>
   );
