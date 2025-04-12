@@ -52,7 +52,7 @@ const CardProduct = ({
   const handleStarClick = (starIndex) => setSelectedStars(starIndex + 1);
 
   const handleHeartClick = () => {
-    const product = { id, name, image: images[0], price };
+    const product = { id, name, image: images[0], price, description, material, color: selectedColor };
     toggleFavorite(product);
   };
 
