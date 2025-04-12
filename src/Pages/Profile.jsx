@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { authFetch } from '../services/authService';
+import styles from './Profile.module.css';
 
 const Profile = () => {
   const { user, logout } = useAuth();
@@ -24,7 +25,6 @@ const Profile = () => {
         setError('');
 
         const response = await authFetch(`${getApiUrl()}/api/orders`);
-        
         
         if (!response.ok) {
           throw new Error('Failed to fetch orders');
@@ -50,176 +50,120 @@ const Profile = () => {
     navigate('/login');
   };
 
-  // Get color based on order status
-  const getStatusColor = (status) => {
+  // Get status badge class based on order status
+  const getStatusBadgeClass = (status) => {
     switch (status) {
       case 'Delivered':
-        return '#28a745'; // Green
+        return styles.badgeSuccess;
       case 'Shipped':
-        return '#17a2b8'; // Teal
+        return styles.badgeInfo;
       case 'Processing':
-        return '#ffc107'; // Yellow
+        return styles.badgeWarning;
       case 'Confirmed':
-        return '#007bff'; // Blue
+        return styles.badgePrimary;
       case 'Cancelled':
-        return '#dc3545'; // Red
+        return styles.badgeDanger;
       case 'Payment Pending':
-        return '#6c757d'; // Gray
+        return styles.badgeSecondary;
       default:
-        return '#6c757d'; // Gray
+        return styles.badgeSecondary;
     }
   };
 
-  const getStatusTextColor = (status) => {
-    return ['Delivered', 'Shipped', 'Confirmed'].includes(status) ? 'white' : 'black';
-  };
-
   if (!user) {
-    return <div className="loading-container">Loading user information...</div>;
+    return <div className={styles.loadingContainer}>Loading user information...</div>;
   }
 
   return (
-    <div className="profile-container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
-      <h1 style={{ marginBottom: '2rem' }}>Your Profile</h1>
+    <div className={styles.container}>
+      <h1 className={styles.pageTitle}>Your Profile</h1>
       
-      <div className="profile-card" style={{ 
-        backgroundColor: '#f9f9f9', 
-        borderRadius: '8px', 
-        padding: '2rem', 
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-        marginBottom: '2rem'
-      }}>
-        <h2>Account Information</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1rem' }}>
+      <div className={styles.card}>
+        <h2 className={styles.cardTitle}>Account Information</h2>
+        <div className={styles.profileGrid}>
           <div>
-            <p><strong>Name:</strong></p>
-            <p><strong>Email:</strong></p>
-            <p><strong>Role:</strong></p>
+            <p className={styles.profileLabel}>Name:</p>
+            <p className={styles.profileLabel}>Email:</p>
+            <p className={styles.profileLabel}>Role:</p>
           </div>
           <div>
-            <p>{user.name || 'Not provided'}</p>
-            <p>{user.email || 'Not provided'}</p>
-            <p>{user.role || 'Customer'}</p>
+            <p className={styles.profileValue}>{user.name || 'Not provided'}</p>
+            <p className={styles.profileValue}>{user.email || 'Not provided'}</p>
+            <p className={styles.profileValue}>{user.role || 'Customer'}</p>
           </div>
         </div>
         
         <button 
           onClick={handleLogout}
-          style={{ 
-            backgroundColor: '#dc3545', 
-            color: 'white', 
-            border: 'none', 
-            borderRadius: '4px', 
-            padding: '0.5rem 1rem', 
-            marginTop: '1rem',
-            cursor: 'pointer' 
-          }}
+          className={`${styles.button} ${styles.buttonDanger} ${styles.buttonMarginTop}`}
         >
           Logout
         </button>
       </div>
       
-      <div className="orders-section" style={{ 
-        backgroundColor: '#f9f9f9', 
-        borderRadius: '8px', 
-        padding: '2rem', 
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)' 
-      }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2>Recent Orders</h2>
+      <div className={styles.card}>
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.cardTitle}>Recent Orders</h2>
           <button 
             onClick={() => navigate('/orders')}
-            style={{ 
-              backgroundColor: '#007bff', 
-              color: 'white', 
-              border: 'none', 
-              borderRadius: '4px', 
-              padding: '0.5rem 1rem',
-              cursor: 'pointer' 
-            }}
+            className={`${styles.button} ${styles.buttonPrimary}`}
           >
             View All Orders
           </button>
         </div>
         
         {error && (
-          <div style={{ 
-            backgroundColor: '#f8d7da', 
-            color: '#721c24', 
-            padding: '0.75rem', 
-            borderRadius: '4px', 
-            marginTop: '1rem' 
-          }}>
+          <div className={styles.errorMessage}>
             {error}
           </div>
         )}
         
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '2rem' }}>
+          <div className={styles.loadingContainer}>
             <p>Loading your orders...</p>
           </div>
         ) : orders.length > 0 ? (
-          <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '1rem' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid #ddd' }}>
-                <th style={{ textAlign: 'left', padding: '0.5rem' }}>Order ID</th>
-                <th style={{ textAlign: 'left', padding: '0.5rem' }}>Date</th>
-                <th style={{ textAlign: 'left', padding: '0.5rem' }}>Status</th>
-                <th style={{ textAlign: 'right', padding: '0.5rem' }}>Total</th>
-                <th style={{ textAlign: 'center', padding: '0.5rem' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {orders.slice(0, 5).map(order => (
-                <tr key={order.id} style={{ borderBottom: '1px solid #ddd' }}>
-                  <td style={{ padding: '0.5rem' }}>{order.id.substring(0, 8)}...</td>
-                  <td style={{ padding: '0.5rem' }}>{order.date}</td>
-                  <td style={{ padding: '0.5rem' }}>
-                    <span style={{ 
-                      backgroundColor: getStatusColor(order.status),
-                      color: getStatusTextColor(order.status),
-                      padding: '0.25rem 0.5rem',
-                      borderRadius: '4px',
-                      fontSize: '0.875rem'
-                    }}>
-                      {order.status}
-                    </span>
-                  </td>
-                  <td style={{ textAlign: 'right', padding: '0.5rem' }}>${order.total.toFixed(2)}</td>
-                  <td style={{ textAlign: 'center', padding: '0.5rem' }}>
-                    <button 
-                      onClick={() => navigate(`/orders/${order.id}`)}
-                      style={{ 
-                        backgroundColor: '#007bff', 
-                        color: 'white', 
-                        border: 'none', 
-                        borderRadius: '4px', 
-                        padding: '0.25rem 0.5rem',
-                        cursor: 'pointer',
-                        fontSize: '0.875rem'
-                      }}
-                    >
-                      View Details
-                    </button>
-                  </td>
+          <div className={styles.tableContainer}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                  <th>Total</th>
+                  <th>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {orders.slice(0, 5).map(order => (
+                  <tr key={order.id}>
+                    <td data-label="Order ID">{order.id.substring(0, 8)}...</td>
+                    <td data-label="Date">{order.date}</td>
+                    <td data-label="Status">
+                      <span className={`${styles.badge} ${getStatusBadgeClass(order.status)}`}>
+                        {order.status}
+                      </span>
+                    </td>
+                    <td data-label="Total">${order.total.toFixed(2)}</td>
+                    <td data-label="Actions">
+                      <button 
+                        onClick={() => navigate(`/orders/${order.id}`)}
+                        className={`${styles.button} ${styles.buttonPrimary} ${styles.buttonSmall}`}
+                      >
+                        View Details
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         ) : (
-          <div style={{ textAlign: 'center', padding: '2rem' }}>
+          <div className={styles.emptyState}>
             <p>You haven&apos;t placed any orders yet.</p>
             <button 
               onClick={() => navigate('/shop')}
-              style={{ 
-                backgroundColor: '#28a745', 
-                color: 'white', 
-                border: 'none', 
-                borderRadius: '4px', 
-                padding: '0.5rem 1rem', 
-                marginTop: '1rem',
-                cursor: 'pointer' 
-              }}
+              className={`${styles.button} ${styles.buttonSuccess} ${styles.buttonMarginTop}`}
             >
               Browse Products
             </button>

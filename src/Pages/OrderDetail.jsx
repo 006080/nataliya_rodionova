@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { authFetch } from '../services/authService';
+import styles from './OrderDetail.module.css';
 
 const OrderDetail = () => {
   const { id } = useParams();
@@ -53,22 +54,22 @@ const OrderDetail = () => {
     }
   }, [id]);
 
-  const getStatusColor = (status) => {
+  const getStatusBadgeClass = (status) => {
     switch (status) {
       case 'Delivered':
-        return '#28a745'; // Green
+        return styles.badgeSuccess;
       case 'Shipped':
-        return '#17a2b8'; // Teal
+        return styles.badgeInfo;
       case 'Processing':
-        return '#ffc107'; // Yellow
+        return styles.badgeWarning;
       case 'Confirmed':
-        return '#007bff'; // Blue
+        return styles.badgePrimary;
       case 'Cancelled':
-        return '#dc3545'; // Red
+        return styles.badgeDanger;
       case 'Payment Pending':
-        return '#6c757d'; // Gray
+        return styles.badgeSecondary;
       default:
-        return '#6c757d'; // Gray
+        return styles.badgeSecondary;
     }
   };
 
@@ -86,35 +87,24 @@ const OrderDetail = () => {
 
   if (loading) {
     return (
-      <div className="order-detail-container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem', textAlign: 'center' }}>
-        <h2>Loading order details...</h2>
+      <div className={styles.container}>
+        <div className={styles.loading}>
+          <h2>Loading order details...</h2>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="order-detail-container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
-        <div style={{ 
-          backgroundColor: '#f8d7da', 
-          color: '#721c24', 
-          padding: '1rem', 
-          borderRadius: '8px', 
-          marginBottom: '1rem' 
-        }}>
+      <div className={styles.container}>
+        <div className={styles.errorAlert}>
           <h2>Error</h2>
           <p>{error}</p>
         </div>
         <button 
           onClick={() => navigate('/orders')}
-          style={{ 
-            backgroundColor: '#6c757d', 
-            color: 'white', 
-            border: 'none', 
-            borderRadius: '4px', 
-            padding: '0.5rem 1rem',
-            cursor: 'pointer' 
-          }}
+          className={`${styles.button} ${styles.secondaryButton}`}
         >
           Back to My Orders
         </button>
@@ -124,40 +114,27 @@ const OrderDetail = () => {
 
   if (!order) {
     return (
-      <div className="order-detail-container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem', textAlign: 'center' }}>
-        <h2>Order not found</h2>
-        <button 
-          onClick={() => navigate('/orders')}
-          style={{ 
-            backgroundColor: '#6c757d', 
-            color: 'white', 
-            border: 'none', 
-            borderRadius: '4px', 
-            padding: '0.5rem 1rem',
-            marginTop: '1rem',
-            cursor: 'pointer' 
-          }}
-        >
-          Back to My Orders
-        </button>
+      <div className={styles.container}>
+        <div className={styles.notFound}>
+          <h2>Order not found</h2>
+          <button 
+            onClick={() => navigate('/orders')}
+            className={`${styles.button} ${styles.secondaryButton} ${styles.buttonLarge}`}
+          >
+            Back to My Orders
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="order-detail-container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+    <div className={styles.container}>
+      <div className={styles.header}>
         <h1>Order Details</h1>
         <button 
           onClick={() => navigate('/orders')}
-          style={{ 
-            backgroundColor: '#6c757d', 
-            color: 'white', 
-            border: 'none', 
-            borderRadius: '4px', 
-            padding: '0.5rem 1rem',
-            cursor: 'pointer' 
-          }}
+          className={`${styles.button} ${styles.secondaryButton}`}
         >
           Back to My Orders
         </button>
@@ -165,61 +142,26 @@ const OrderDetail = () => {
       
       {/* Payment Action Alert for Pending Payments */}
       {isPaymentPending(order) && (
-        <div style={{
-          backgroundColor: '#fff3cd',
-          color: '#856404',
-          padding: '1rem',
-          borderRadius: '8px',
-          marginBottom: '2rem',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          borderLeft: '4px solid #ffc107'
-        }}>
-          <h3 style={{ marginTop: 0 }}>Payment Action Required</h3>
+        <div className={styles.paymentAlert}>
+          <h3>Payment Action Required</h3>
           <p>This order requires your action to complete the payment process.</p>
           <button
             onClick={handleCompletePayment}
-            style={{
-              backgroundColor: '#fd7e14',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              padding: '0.75rem 1.5rem',
-              fontWeight: 'bold',
-              cursor: 'pointer',
-              marginTop: '0.5rem'
-            }}
+            className={`${styles.button} ${styles.warningButton} ${styles.buttonLarge}`}
           >
             Complete Payment Now
           </button>
         </div>
       )}
       
-      <div className="order-overview" style={{ 
-        backgroundColor: '#f9f9f9', 
-        borderRadius: '8px', 
-        padding: '1.5rem', 
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-        marginBottom: '2rem',
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap: '1.5rem'
-      }}>
-        <div className="order-info">
-          <h3 style={{ marginTop: 0, marginBottom: '0.5rem' }}>Order Information</h3>
+      <div className={`${styles.card} ${styles.orderOverview}`}>
+        <div>
+          <h3 className={styles.cardTitle}>Order Information</h3>
           <p><strong>Order ID:</strong> {order.id || 'N/A'}</p>
           <p><strong>Date Placed:</strong> {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}</p>
           <p>
             <strong>Status:</strong> 
-            <span style={{ 
-              backgroundColor: getStatusColor(order.status),
-              color: 'white',
-              padding: '0.25rem 0.5rem',
-              borderRadius: '4px',
-              marginLeft: '0.5rem',
-              fontSize: '0.875rem'
-            }}>
+            <span className={`${styles.badge} ${getStatusBadgeClass(order.status)}`}>
               {order.status || 'Processing'}
             </span>
             
@@ -227,16 +169,7 @@ const OrderDetail = () => {
             {isPaymentPending(order) && (
               <button
                 onClick={handleCompletePayment}
-                style={{
-                  backgroundColor: '#fd7e14',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  padding: '0.25rem 0.5rem',
-                  fontSize: '0.75rem',
-                  marginLeft: '0.5rem',
-                  cursor: 'pointer'
-                }}
+                className={`${styles.button} ${styles.warningButton} ${styles.buttonSmall}`}
               >
                 Complete Payment
               </button>
@@ -247,19 +180,12 @@ const OrderDetail = () => {
           )}
         </div>
         
-        <div className="payment-info">
-          <h3 style={{ marginTop: 0, marginBottom: '0.5rem' }}>Payment Information</h3>
+        <div>
+          <h3 className={styles.cardTitle}>Payment Information</h3>
           <p><strong>Method:</strong> {order.paymentMethod || 'PayPal'}</p>
           <p>
             <strong>Status:</strong> 
-            <span style={{ 
-              backgroundColor: order.isPaid ? '#28a745' : '#ffc107',
-              color: order.isPaid ? 'white' : 'black',
-              padding: '0.25rem 0.5rem',
-              borderRadius: '4px',
-              marginLeft: '0.5rem',
-              fontSize: '0.875rem'
-            }}>
+            <span className={`${styles.badge} ${order.isPaid ? styles.badgeSuccess : styles.badgeWarning}`}>
               {order.isPaid ? 'Paid' : 'Pending'}
             </span>
           </p>
@@ -268,18 +194,11 @@ const OrderDetail = () => {
           )}
         </div>
         
-        <div className="shipping-info">
-          <h3 style={{ marginTop: 0, marginBottom: '0.5rem' }}>Shipping Information</h3>
+        <div>
+          <h3 className={styles.cardTitle}>Shipping Information</h3>
           <p>
             <strong>Status:</strong> 
-            <span style={{ 
-              backgroundColor: order.isDelivered ? '#28a745' : '#ffc107',
-              color: order.isDelivered ? 'white' : 'black',
-              padding: '0.25rem 0.5rem',
-              borderRadius: '4px',
-              marginLeft: '0.5rem',
-              fontSize: '0.875rem'
-            }}>
+            <span className={`${styles.badge} ${order.isDelivered ? styles.badgeSuccess : styles.badgeWarning}`}>
               {order.isDelivered ? 'Delivered' : 'Pending'}
             </span>
           </p>
@@ -290,14 +209,8 @@ const OrderDetail = () => {
       </div>
 
       {order.shippingAddress && (
-        <div className="shipping-address" style={{ 
-          backgroundColor: '#f9f9f9', 
-          borderRadius: '8px', 
-          padding: '1.5rem', 
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-          marginBottom: '2rem'
-        }}>
-          <h3 style={{ marginTop: 0, marginBottom: '1rem' }}>Shipping Address</h3>
+        <div className={`${styles.card} ${styles.addressSection}`}>
+          <h3 className={styles.cardTitle}>Shipping Address</h3>
           <p><strong>{order.shippingAddress.fullName || 'N/A'}</strong></p>
           <p>{order.shippingAddress.address || 'N/A'}</p>
           {order.shippingAddress.addressLine2 && <p>{order.shippingAddress.addressLine2}</p>}
@@ -309,62 +222,43 @@ const OrderDetail = () => {
         </div>
       )}
       
-      <div className="order-items" style={{ 
-        backgroundColor: '#f9f9f9', 
-        borderRadius: '8px', 
-        padding: '1.5rem', 
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-        marginBottom: '2rem'
-      }}>
-        <h3 style={{ marginTop: 0, marginBottom: '1rem' }}>Order Items</h3>
+      <div className={styles.card}>
+        <h3 className={styles.cardTitle}>Order Items</h3>
         
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <div className={styles.tableContainer}>
+          <table className={styles.table}>
             <thead>
-              <tr style={{ borderBottom: '2px solid #ddd' }}>
-                <th style={{ textAlign: 'left', padding: '0.75rem' }}>Item</th>
-                <th style={{ textAlign: 'right', padding: '0.75rem' }}>Price</th>
-                <th style={{ textAlign: 'center', padding: '0.75rem' }}>Quantity</th>
-                <th style={{ textAlign: 'center', padding: '0.75rem' }}>Color</th>
-                <th style={{ textAlign: 'right', padding: '0.75rem' }}>Subtotal</th>
+              <tr>
+                <th>Item</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Color</th>
+                <th>Subtotal</th>
               </tr>
             </thead>
             <tbody>
               {(order.orderItems || []).map((item, index) => (
-                <tr key={index} style={{ borderBottom: '1px solid #ddd' }}>
-                  <td style={{ padding: '1rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                <tr key={index}>
+                  <td>
+                    <div className={styles.productCell}>
                       {item.image && (
                         <img 
                           src={item.image} 
                           alt={item.name} 
-                          style={{ 
-                            width: '50px', 
-                            height: '50px', 
-                            objectFit: 'cover', 
-                            marginRight: '1rem',
-                            borderRadius: '4px'
-                          }} 
+                          className={styles.productImage}
                         />
                       )}
                       <span>{item.name || 'Product'}</span>
                     </div>
                   </td>
-                  <td style={{ textAlign: 'right', padding: '1rem' }}>${(item.price || 0).toFixed(2)}</td>
-                  <td style={{ textAlign: 'center', padding: '1rem' }}>{item.quantity || 0}</td>
-                  <td style={{ textAlign: 'center', padding: '1rem' }}>
+                  <td>${(item.price || 0).toFixed(2)}</td>
+                  <td>{item.quantity || 0}</td>
+                  <td>
                     {item.color ? (
-                      <div style={{ 
-                        width: '20px', 
-                        height: '20px', 
-                        backgroundColor: item.color,
-                        border: '1px solid #ddd',
-                        borderRadius: '50%',
-                        display: 'inline-block'
-                      }}></div>
+                      <div className={styles.colorSwatch} style={{ backgroundColor: item.color }}></div>
                     ) : 'N/A'}
                   </td>
-                  <td style={{ textAlign: 'right', padding: '1rem' }}>${((item.price || 0) * (item.quantity || 0)).toFixed(2)}</td>
+                  <td>${((item.price || 0) * (item.quantity || 0)).toFixed(2)}</td>
                 </tr>
               ))}
             </tbody>
@@ -373,15 +267,9 @@ const OrderDetail = () => {
       </div>
 
       {order.measurements && (
-        <div className="measurements" style={{ 
-          backgroundColor: '#f9f9f9', 
-          borderRadius: '8px', 
-          padding: '1.5rem', 
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-          marginBottom: '2rem'
-        }}>
-          <h3 style={{ marginTop: 0, marginBottom: '1rem' }}>Measurements</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem' }}>
+        <div className={styles.card}>
+          <h3 className={styles.cardTitle}>Measurements</h3>
+          <div className={styles.measurementsGrid}>
             <div>
               <p><strong>Height:</strong> {order.measurements.height || 'N/A'} cm</p>
             </div>
@@ -400,77 +288,46 @@ const OrderDetail = () => {
       
       {/* Add Color Preference Section */}
       {order.colorPreference && (
-        <div className="color-preference" style={{ 
-          backgroundColor: '#f9f9f9', 
-          borderRadius: '8px', 
-          padding: '1.5rem', 
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-          marginBottom: '2rem'
-        }}>
-          <h3 style={{ marginTop: 0, marginBottom: '1rem' }}>Color Preference</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <strong style={{ marginRight: '1rem' }}>Primary Color:</strong>
-              <div style={{ 
-                width: '30px', 
-                height: '30px', 
-                backgroundColor: order.colorPreference.primaryColor || '#000000',
-                borderRadius: '50%',
-                border: '1px solid #ddd',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-              }}></div>
+        <div className={styles.card}>
+          <h3 className={styles.cardTitle}>Color Preference</h3>
+          <div className={styles.colorPreference}>
+            <div className={styles.colorItem}>
+              <strong>Primary Color:</strong>
+              <div 
+                className={`${styles.colorSwatch} ${styles.large}`} 
+                style={{ backgroundColor: order.colorPreference.primaryColor || '#000000' }}
+              ></div>
             </div>
             
             {order.colorPreference.description && (
               <div>
                 <strong>Notes:</strong>
-                <p style={{ marginTop: '0.5rem' }}>{order.colorPreference.description}</p>
+                <p>{order.colorPreference.description}</p>
               </div>
             )}
           </div>
         </div>
       )}
       
-      <div className="order-summary" style={{ 
-        backgroundColor: '#f9f9f9', 
-        borderRadius: '8px', 
-        padding: '1.5rem', 
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-        marginBottom: '2rem'
-      }}>
-        <h3 style={{ marginTop: 0, marginBottom: '1rem' }}>Order Summary</h3>
+      <div className={styles.card}>
+        <h3 className={styles.cardTitle}>Order Summary</h3>
         
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', width: '300px', marginBottom: '0.5rem' }}>
+        <div className={styles.orderSummary}>
+          <div className={styles.summaryRow}>
             <span>Subtotal:</span>
             <span>${(order.totalPrice || 0).toFixed(2)}</span>
           </div>
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            width: '300px', 
-            borderTop: '1px solid #ddd',
-            paddingTop: '0.5rem',
-            marginTop: '0.5rem',
-            fontWeight: 'bold'
-          }}>
+          <div className={styles.summaryTotal}>
             <span>Total:</span>
             <span>${(order.totalPrice || 0).toFixed(2)}</span>
           </div>
         </div>
       </div>
       
-      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+      <div className={styles.actionButtons}>
         <button 
           onClick={() => navigate('/orders')}
-          style={{ 
-            backgroundColor: '#6c757d', 
-            color: 'white', 
-            border: 'none', 
-            borderRadius: '4px', 
-            padding: '0.75rem 1.5rem',
-            cursor: 'pointer' 
-          }}
+          className={`${styles.button} ${styles.secondaryButton} ${styles.buttonLarge}`}
         >
           Back to My Orders
         </button>
@@ -479,29 +336,14 @@ const OrderDetail = () => {
         {isPaymentPending(order) ? (
           <button 
             onClick={handleCompletePayment}
-            style={{ 
-              backgroundColor: '#fd7e14', 
-              color: 'white', 
-              border: 'none', 
-              borderRadius: '4px', 
-              padding: '0.75rem 1.5rem',
-              cursor: 'pointer',
-              fontWeight: 'bold'
-            }}
+            className={`${styles.button} ${styles.warningButton} ${styles.buttonLarge}`}
           >
             Complete Payment
           </button>
         ) : (
           <button 
             onClick={() => navigate('/shop')}
-            style={{ 
-              backgroundColor: '#28a745', 
-              color: 'white', 
-              border: 'none', 
-              borderRadius: '4px', 
-              padding: '0.75rem 1.5rem',
-              cursor: 'pointer' 
-            }}
+            className={`${styles.button} ${styles.primaryButton} ${styles.buttonLarge}`}
           >
             Continue Shopping
           </button>
