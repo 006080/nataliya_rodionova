@@ -113,7 +113,8 @@ router.get('/api/orders/:id', authenticate, async (req, res) => {
         description: item.description,
         price: item.price,
         quantity: item.quantity,
-        image: '' // Add image URL if available
+        image: '',
+        color: item.color
       })),
       shippingAddress: formattedShippingAddress,
       paymentMethod: 'PayPal', // Default to PayPal

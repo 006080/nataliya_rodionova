@@ -13,7 +13,6 @@ const Checkout = () => {
     cartItems, 
     removeFromCart, 
     updateQuantity,  
-    // setPendingOrder, 
     clearPendingOrder 
   } = useCart()
   
@@ -23,9 +22,7 @@ const Checkout = () => {
   const [orderStatus, setOrderStatus] = useState(null)
   const [pendingOrderId, setPendingOrderState] = useState(null)
 
-  // Form state
   const [measurements, setMeasurements] = useState(() => {
-    // Initialize from localStorage if available
     try {
       const savedMeasurements = localStorage.getItem('measurements');
       return savedMeasurements ? JSON.parse(savedMeasurements) : null;
@@ -36,7 +33,6 @@ const Checkout = () => {
   });
   
   const [deliveryDetails, setDeliveryDetails] = useState(() => {
-    // Initialize from localStorage if available
     try {
       const savedDeliveryDetails = localStorage.getItem('deliveryDetails');
       return savedDeliveryDetails ? JSON.parse(savedDeliveryDetails) : null;
@@ -47,11 +43,10 @@ const Checkout = () => {
   });
   
   const [formStep, setFormStep] = useState(() => {
-    // Determine initial form step based on saved data
-    if (measurements && deliveryDetails) return 3; // Payment step
-    if (measurements) return 2; // Delivery form
-    return 1; // Measurement form
-  });
+        if (measurements && deliveryDetails) return 3; // Payment step
+        if (measurements) return 2; // Delivery form
+        return 1; // Measurement form
+      });
 
   // Function to increase item quantity
   const increaseQuantity = (item) => {
@@ -133,6 +128,13 @@ const Checkout = () => {
       localStorage.setItem('deliveryDetails', JSON.stringify(deliveryDetails));
     }
   }, [deliveryDetails]);
+  
+  // Save colorSelection to localStorage when it changes
+  // useEffect(() => {
+  //   if (colorSelection) {
+  //     localStorage.setItem('colorSelection', JSON.stringify(colorSelection));
+  //   }
+  // }, [colorSelection]);
 
   const totalPrice =
     cartItems?.reduce((total, item) => total + item.price * item.quantity, 0) ||
@@ -140,61 +142,55 @@ const Checkout = () => {
 
   const handleMeasureFormSubmit = (measureData) => {
     setMeasurements(measureData)
-    setFormStep(2) // Move to delivery form
+    setFormStep(2) 
   }
 
   const handleDeliveryFormSubmit = (deliveryData) => {
     setDeliveryDetails(deliveryData)
-    setFormStep(3) // Move to payment
+    setFormStep(3) 
   }
 
   const handleStartPayment = (orderId) => {
     if (orderId) {
-      // setPendingOrder(orderId);
       setPendingOrderState(orderId);
     }
   };
   
-const handlePaymentSuccess = (data) => {
-  
-  const completedOrderItems = [...cartItems]; 
-  const completedOrderTotal = totalPrice;
-  
-  // Then set the saved data alongside the order data
-  setOrderData({
-    ...data,
-    items: completedOrderItems,
-    total: completedOrderTotal
-  });
-  
-  // Set order complete first (important for state tracking)
-  setOrderComplete(true);
-  
-  // Clear pending order and cart AFTER saving the data
-  clearPendingOrder(true);
-  setPendingOrderState(null);
-};
-
-// Updated handlePaymentCancel function in Checkout.jsx
-const handlePaymentCancel = (data, shouldRedirect = false) => {
-  
-  if (shouldRedirect) {
-    // Clear cart and context when redirecting
+  const handlePaymentSuccess = (data) => {
+    const completedOrderItems = [...cartItems]; 
+    const completedOrderTotal = totalPrice;
+    
+    // Then set the saved data alongside the order data
+    setOrderData({
+      ...data,
+      items: completedOrderItems,
+      total: completedOrderTotal
+    });
+    
+    // Set order complete first (important for state tracking)
+    setOrderComplete(true);
+    
+    // Clear pending order and cart AFTER saving the data
     clearPendingOrder(true);
-    
-  } else {
-    // For cases where we don't redirect (e.g., API errors)
-    setPaymentCancelled(true);
-    
-    setTimeout(() => {
-      setPaymentCancelled(false);
-    }, 10000);
-  }
-};
+    setPendingOrderState(null);
+  };
+
+  const handlePaymentCancel = (data, shouldRedirect = false) => {
+    if (shouldRedirect) {
+      // Clear cart and context when redirecting
+      clearPendingOrder(true);
+    } else {
+      // For cases where we don't redirect (e.g., API errors)
+      setPaymentCancelled(true);
+      
+      setTimeout(() => {
+        setPaymentCancelled(false);
+      }, 10000);
+    }
+  };
   
   // Add a new function to completely reset the checkout process
   const resetCheckout = () => {
-    
     // Clear all checkout data
     setMeasurements(null);
     setDeliveryDetails(null);
@@ -217,7 +213,8 @@ const handlePaymentCancel = (data, shouldRedirect = false) => {
     quantity: Number(item.quantity),
     description: item.description || `${item.name} product`,
     image: item.image,
-  }))
+    color: item.color 
+  }));
   
 if (orderComplete) {
   return (
@@ -234,6 +231,18 @@ if (orderComplete) {
             <li key={item.id || item.name}>
               {item.name} x {item.quantity} - €
               {(item.price * item.quantity).toFixed(2)}
+              {item.color && (
+                <span className={styles.colorSwatch} 
+                  style={{ 
+                    display: 'inline-block',
+                    width: '12px', 
+                    height: '12px', 
+                    backgroundColor: item.color,
+                    borderRadius: '50%',
+                    marginLeft: '5px',
+                    border: '1px solid #ddd'
+                  }}></span>
+              )}
             </li>
           ))}
         </ul>
@@ -307,6 +316,24 @@ if (orderComplete) {
 
                 <p>Price: €{item.price.toFixed(2)}</p>
                 <p>Total: €{(item.price * item.quantity).toFixed(2)}</p>
+                
+                {/* Display color if available */}
+                {item.color && (
+                  <p style={{ display: 'flex', alignItems: 'center' }}>
+                    Color: 
+                    <span 
+                      style={{ 
+                        display: 'inline-block',
+                        width: '15px', 
+                        height: '15px', 
+                        backgroundColor: item.color,
+                        borderRadius: '50%',
+                        marginLeft: '5px',
+                        border: '1px solid #ddd'
+                      }}
+                    ></span>
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -315,7 +342,7 @@ if (orderComplete) {
       </div>
 
       {/* Order Status Messages */}
-      {orderStatus && orderStatus.type === 'canceled' && (
+       {orderStatus && orderStatus.type === 'canceled' && (
         <div className={styles.cancelMessage || styles.errorMessage}>
           <h3>Order Canceled</h3>
           <p>{orderStatus.message}</p>
@@ -418,11 +445,12 @@ if (orderComplete) {
             </div>
           )}
 
-          {/* Pass pendingOrderId directly from state */}
+          {/* Add colorSelection to PayPalPayment props */}
           <PayPalPayment
             cart={formattedCartItems}
             measurements={measurements}
             deliveryDetails={deliveryDetails}
+            // colorPreference={colorSelection} 
             onSuccess={handlePaymentSuccess}
             onCancel={handlePaymentCancel}
             onOrderCreated={handleStartPayment}

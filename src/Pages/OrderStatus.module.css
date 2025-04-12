@@ -186,6 +186,11 @@
   margin: 1rem 0;
 }
 
+.itemList span {
+  display: flex;
+  align-items: center;
+}
+
 .item {
   display: flex;
   justify-content: space-between;

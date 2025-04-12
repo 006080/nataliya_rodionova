@@ -195,116 +195,141 @@ useEffect(() => {
     }
   }, [])
 
-  // Cart manipulation functions remain the same
-  const addToCart = (product) => {
-    setCartItems((prevItems) => {
-      const existingItemById = product.id
-        ? prevItems.find((item) => item.id === product.id)
-        : null
-      const existingItem =
-        existingItemById || prevItems.find((item) => item.name === product.name)
-      const quantityToAdd = product.quantity || 1
 
-      if (existingItem) {
-        return prevItems.map((item) => {
-          if (
-            (product.id && item.id === product.id) ||
-            (!product.id && item.name === product.name)
-          ) {
-            return { ...item, quantity: item.quantity + quantityToAdd }
-          }
-          return item
-        })
-      } else {
-        return [
-          ...prevItems,
-          {
-            ...product,
-            quantity: quantityToAdd,
-          },
-        ]
-      }
-    })
-  }
 
-  const updateQuantity = (itemIdentifier, quantity) => {
-    setCartItems((prevItems) => {
-      if (typeof itemIdentifier === 'object' && itemIdentifier !== null) {
-        const { id, name } = itemIdentifier
-
-        return prevItems.map((item) => {
-          if ((id && item.id === id) || (name && item.name === name)) {
-            return { ...item, quantity }
-          }
-          return item
-        })
-      }
-
-      if (typeof itemIdentifier === 'string') {
-        const matchById = prevItems.some((item) => item.id === itemIdentifier)
-
-        if (matchById) {
-          return prevItems.map((item) =>
-            item.id === itemIdentifier ? { ...item, quantity } : item
-          )
-        } else {
-          return prevItems.map((item) =>
-            item.name === itemIdentifier ? { ...item, quantity } : item
-          )
-        }
-      }
-
-      return prevItems
-    })
-  }
-
-  const removeFromCart = async (itemIdentifier) => {
-    let updatedCartItems = [];
+// UPDATED: Modified to treat items with the same product but different colors as distinct
+const addToCart = (product) => {
+  setCartItems((prevItems) => {
+    // Create a composite identifier that includes product ID (or name) and color
+    const productColor = product.color || '';
     
-    if (!itemIdentifier) {
-      setCartItems([]);
-      localStorage.removeItem('cartItems');
+    // First try to find by ID and color
+    const existingItemById = product.id
+      ? prevItems.find((item) => item.id === product.id && (item.color || '') === productColor)
+      : null;
       
-      if (isUserAuthenticated) {
-        try {
-          await clearDatabaseCart();
-        } catch (error) {
-          console.error('Error clearing database cart:', error);
+    // If not found by ID and color, try by name and color
+    const existingItem = existingItemById || 
+      prevItems.find((item) => item.name === product.name && (item.color || '') === productColor);
+      
+    const quantityToAdd = product.quantity || 1;
+
+    if (existingItem) {
+      // Update existing item with same ID/name AND color
+      return prevItems.map((item) => {
+        if (
+          ((product.id && item.id === product.id) || 
+           (!product.id && item.name === product.name)) && 
+          (item.color || '') === productColor
+        ) {
+          return { ...item, quantity: item.quantity + quantityToAdd };
         }
-      }
-      return;
+        return item;
+      });
+    } else {
+      return [
+        ...prevItems,
+        {
+          ...product,
+          quantity: quantityToAdd,
+        },
+      ];
     }
-  
-    // Remove specific item
+  });
+};
+
+// UPDATED: Modified to include color in the item identification
+const updateQuantity = (itemIdentifier, quantity) => {
+  setCartItems((prevItems) => {
+    if (typeof itemIdentifier === 'object' && itemIdentifier !== null) {
+      const { id, name, color } = itemIdentifier;
+      const itemColor = color || '';
+
+      return prevItems.map((item) => {
+        const matchesId = id && item.id === id;
+        const matchesName = name && item.name === name;
+        const matchesColor = (item.color || '') === itemColor;
+        
+        if ((matchesId || matchesName) && matchesColor) {
+          return { ...item, quantity };
+        }
+        return item;
+      });
+    }
+
     if (typeof itemIdentifier === 'string') {
-      const matchById = cartItems.some((item) => item.id === itemIdentifier);
-  
+      const matchById = prevItems.some((item) => item.id === itemIdentifier);
+
       if (matchById) {
-        updatedCartItems = cartItems.filter((item) => item.id !== itemIdentifier);
+        return prevItems.map((item) =>
+          item.id === itemIdentifier ? { ...item, quantity } : item
+        );
       } else {
-        updatedCartItems = cartItems.filter((item) => item.name !== itemIdentifier);
-      }
-    } else if (typeof itemIdentifier === 'object' && itemIdentifier !== null) {
-      const { id, name } = itemIdentifier;
-  
-      if (id) {
-        updatedCartItems = cartItems.filter((item) => item.id !== id);
-      } else if (name) {
-        updatedCartItems = cartItems.filter((item) => item.name !== name);
+        return prevItems.map((item) =>
+          item.name === itemIdentifier ? { ...item, quantity } : item
+        );
       }
     }
+
+    return prevItems;
+  });
+};
+
+// UPDATED: Modified to include color in item identification
+const removeFromCart = async (itemIdentifier) => {
+  let updatedCartItems = [];
+  
+  if (!itemIdentifier) {
+    setCartItems([]);
+    localStorage.removeItem('cartItems');
     
-    setCartItems(updatedCartItems);
-    localStorage.setItem('cartItems', JSON.stringify(updatedCartItems));
-    
-    if (isUserAuthenticated && initialSyncDone) {
+    if (isUserAuthenticated) {
       try {
-        await saveCartToDatabase(updatedCartItems);
+        await clearDatabaseCart();
       } catch (error) {
-        console.error('Error saving updated cart to database:', error);
+        console.error('Error clearing database cart:', error);
       }
+    }
+    return;
+  }
+
+  // Remove specific item
+  if (typeof itemIdentifier === 'string') {
+
+    const matchById = cartItems.some((item) => item.id === itemIdentifier);
+
+    if (matchById) {
+      updatedCartItems = cartItems.filter((item) => item.id !== itemIdentifier);
+    } else {
+      updatedCartItems = cartItems.filter((item) => item.name !== itemIdentifier);
+    }
+  } else if (typeof itemIdentifier === 'object' && itemIdentifier !== null) {
+    const { id, name, color } = itemIdentifier;
+    const itemColor = color || '';
+
+    if (id) {
+      updatedCartItems = cartItems.filter(
+        (item) => item.id !== id || (item.color || '') !== itemColor
+      );
+    } else if (name) {
+      updatedCartItems = cartItems.filter(
+        (item) => item.name !== name || (item.color || '') !== itemColor
+      );
     }
   }
+  
+  setCartItems(updatedCartItems);
+  localStorage.setItem('cartItems', JSON.stringify(updatedCartItems));
+  
+  if (isUserAuthenticated && initialSyncDone) {
+    try {
+      await saveCartToDatabase(updatedCartItems);
+    } catch (error) {
+      console.error('Error saving updated cart to database:', error);
+    }
+  }
+};
+
 
   const clearPendingOrder = async () => {
     setCartItems([]);

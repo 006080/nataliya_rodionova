@@ -48,6 +48,7 @@ function PayPalPayment({
   cart = [], 
   measurements, 
   deliveryDetails, 
+  // colorPreference,
   onSuccess, 
   onCancel, 
   onOrderCreated, 
@@ -88,7 +89,9 @@ function PayPalPayment({
       name: item.name,
       price: Number(item.price),
       quantity: Number(item.quantity),
-      description: item.description || `${item.name} product`
+      description: item.description || `${item.name} product`,
+      image: item.image,  // ???
+      color: item.color || ''
     }));
   };
 

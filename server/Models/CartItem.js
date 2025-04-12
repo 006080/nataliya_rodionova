@@ -30,6 +30,10 @@ const CartItemSchema = new mongoose.Schema({
   description: {
     type: String
   },
+  color: {  
+    type: String,
+    default: ''
+  },
   createdAt: {
     type: Date,
     default: Date.now
@@ -40,8 +44,8 @@ const CartItemSchema = new mongoose.Schema({
   }
 }, { timestamps: false });
 
-// Combined index on userId and productId for efficient lookups
-CartItemSchema.index({ userId: 1, productId: 1 }, { unique: true });
+
+CartItemSchema.index({ userId: 1, productId: 1, color: 1 }, { unique: true });
 
 const CartItem = mongoose.model('CartItem', CartItemSchema);
 

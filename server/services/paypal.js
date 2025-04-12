@@ -1,4 +1,3 @@
-// 22.03.2025 - 12:25 PM With issue when closing PayPal popup
 import Order from '../Models/Order.js';
 import { Buffer } from "node:buffer";
 import { sendOrderStatusEmail } from '../services/emailNotification.js';
@@ -63,6 +62,7 @@ const formatPrice = (price) => {
  * @param {Array} cartItems - Array of cart items
  * @param {Object} measurements - Measurements data
  * @param {Object} deliveryDetails - Delivery details
+ * @param {Object} colorPreference - Color preference data (added parameter)
  * @returns {Object} Created PayPal order data
  */
 const createPayPalOrder = async (cartItems, measurements, deliveryDetails) => {
@@ -143,7 +143,8 @@ const createPayPalOrder = async (cartItems, measurements, deliveryDetails) => {
         name: item.name,
         description: item.description || '',
         quantity: item.quantity,
-        price: Number(item.price)
+        price: Number(item.price),
+        color: item.color || ''
       })),
       totalAmount,
       currency: 'EUR',
@@ -152,6 +153,7 @@ const createPayPalOrder = async (cartItems, measurements, deliveryDetails) => {
       createdAt: new Date(),
       timestamp: Date.now()
     };
+
     
     // Store in temporary cache
     tempOrderCache.set(data.id, orderInfo);
@@ -319,6 +321,7 @@ const persistOrderToDatabase = async (orderId) => {
       deliveryDetails.country = getCountryName(deliveryDetails.country);
     }
     
+
     // User has interacted, create in database
     const newOrder = new Order({
       paypalOrderId: orderId,
@@ -328,7 +331,7 @@ const persistOrderToDatabase = async (orderId) => {
       currency: tempOrderData.currency || 'EUR',
       createdAt: new Date(),
       measurements: tempOrderData.measurements,
-      deliveryDetails: deliveryDetails,
+      deliveryDetails: deliveryDetails, 
       fulfillmentStatus: 'Processing',
       customer: Object.keys(customer).length > 0 ? customer : undefined
     });
