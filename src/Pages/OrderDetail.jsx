@@ -9,6 +9,7 @@ const OrderDetail = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  // Function to get API URL based on environment
   const getApiUrl = () => {
     return import.meta.env.VITE_NODE_ENV === "production"
       ? import.meta.env.VITE_API_BASE_URL_PROD
@@ -21,6 +22,7 @@ const OrderDetail = () => {
         setLoading(true);
         setError('');
         
+        // Use the correct API URL format for Vite
         const response = await authFetch(`${getApiUrl()}/api/orders/${id}`);
         
         if (!response.ok) {
@@ -32,6 +34,7 @@ const OrderDetail = () => {
         
         const data = await response.json();
         
+        // Make sure orderItems is an array
         if (!data.orderItems) {
           data.orderItems = [];
         }
@@ -69,13 +72,15 @@ const OrderDetail = () => {
     }
   };
 
-
+  // Determine if order requires payment action
   const isPaymentPending = (order) => {
     return order?.status === 'Payment Pending' || 
            order?.paymentStatus === 'PAYER_ACTION_REQUIRED';
   };
 
+  // Handle complete payment button click
   const handleCompletePayment = () => {
+    // Navigate to order status page where payment can be completed
     navigate(`/order-status/${order.paypalOrderId || order.id}`);
   };
 
@@ -320,6 +325,7 @@ const OrderDetail = () => {
                 <th style={{ textAlign: 'left', padding: '0.75rem' }}>Item</th>
                 <th style={{ textAlign: 'right', padding: '0.75rem' }}>Price</th>
                 <th style={{ textAlign: 'center', padding: '0.75rem' }}>Quantity</th>
+                <th style={{ textAlign: 'center', padding: '0.75rem' }}>Color</th>
                 <th style={{ textAlign: 'right', padding: '0.75rem' }}>Subtotal</th>
               </tr>
             </thead>
@@ -346,6 +352,18 @@ const OrderDetail = () => {
                   </td>
                   <td style={{ textAlign: 'right', padding: '1rem' }}>${(item.price || 0).toFixed(2)}</td>
                   <td style={{ textAlign: 'center', padding: '1rem' }}>{item.quantity || 0}</td>
+                  <td style={{ textAlign: 'center', padding: '1rem' }}>
+                    {item.color ? (
+                      <div style={{ 
+                        width: '20px', 
+                        height: '20px', 
+                        backgroundColor: item.color,
+                        border: '1px solid #ddd',
+                        borderRadius: '50%',
+                        display: 'inline-block'
+                      }}></div>
+                    ) : 'N/A'}
+                  </td>
                   <td style={{ textAlign: 'right', padding: '1rem' }}>${((item.price || 0) * (item.quantity || 0)).toFixed(2)}</td>
                 </tr>
               ))}
@@ -376,6 +394,39 @@ const OrderDetail = () => {
             <div>
               <p><strong>Hips:</strong> {order.measurements.hips || 'N/A'} cm</p>
             </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Add Color Preference Section */}
+      {order.colorPreference && (
+        <div className="color-preference" style={{ 
+          backgroundColor: '#f9f9f9', 
+          borderRadius: '8px', 
+          padding: '1.5rem', 
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+          marginBottom: '2rem'
+        }}>
+          <h3 style={{ marginTop: 0, marginBottom: '1rem' }}>Color Preference</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <strong style={{ marginRight: '1rem' }}>Primary Color:</strong>
+              <div style={{ 
+                width: '30px', 
+                height: '30px', 
+                backgroundColor: order.colorPreference.primaryColor || '#000000',
+                borderRadius: '50%',
+                border: '1px solid #ddd',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+              }}></div>
+            </div>
+            
+            {order.colorPreference.description && (
+              <div>
+                <strong>Notes:</strong>
+                <p style={{ marginTop: '0.5rem' }}>{order.colorPreference.description}</p>
+              </div>
+            )}
           </div>
         </div>
       )}

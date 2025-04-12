@@ -18,7 +18,8 @@ router.get('/api/cart', authenticate, async (req, res) => {
         price: item.price,
         quantity: item.quantity,
         image: item.image,
-        description: item.description
+        description: item.description,
+        color: item.color 
       }))
     });
   } catch (error) {
@@ -27,7 +28,7 @@ router.get('/api/cart', authenticate, async (req, res) => {
   }
 });
 
-// Save cart items for authenticated user
+
 router.post('/api/cart', authenticate, async (req, res) => {
   try {
     const { items } = req.body;
@@ -36,20 +37,19 @@ router.post('/api/cart', authenticate, async (req, res) => {
     if (!Array.isArray(items)) {
       return res.status(400).json({ error: 'Items must be an array' });
     }
-    
-    // Clear existing cart items for this user
+
     await CartItem.deleteMany({ userId });
     
-    // Insert new cart items
     if (items.length > 0) {
       const cartItems = items.map(item => ({
         userId,
-        productId: item.id || `product-${item.name.toLowerCase().replace(/\s+/g, '-')}`, // Use ID or generate one
+        productId: item.id || `product-${item.name.toLowerCase().replace(/\s+/g, '-')}`, 
         name: item.name,
         price: Number(item.price),
         quantity: Number(item.quantity),
         image: item.image || '',
         description: item.description || `${item.name} product`,
+        color: item.color || '',
         createdAt: new Date(),
         updatedAt: new Date()
       }));
@@ -67,12 +67,10 @@ router.post('/api/cart', authenticate, async (req, res) => {
   }
 });
 
-// Delete cart for authenticated user
 router.delete('/api/cart', authenticate, async (req, res) => {
   try {
     const userId = req.user._id;
     
-    // Delete all cart items for this user
     await CartItem.deleteMany({ userId });
     
     res.json({
@@ -85,7 +83,6 @@ router.delete('/api/cart', authenticate, async (req, res) => {
   }
 });
 
-// Merge guest cart with user cart
 router.post('/api/cart/merge', authenticate, async (req, res) => {
   try {
     const { items } = req.body;
@@ -95,35 +92,34 @@ router.post('/api/cart/merge', authenticate, async (req, res) => {
       return res.status(400).json({ error: 'Items must be an array' });
     }
     
-    // Get existing cart items
     const existingItems = await CartItem.find({ userId });
     
-    // Create a map of existing items by productId/name for easy lookup
     const existingItemsMap = new Map();
     existingItems.forEach(item => {
-      // First index by productId
-      existingItemsMap.set(item.productId, item);
-      // Also index by name for fallback matching
-      existingItemsMap.set(item.name, item);
+      const compositeKey = `${item.productId}|${item.color || ''}`;
+      existingItemsMap.set(compositeKey, item);
+      
+      const nameColorKey = `name:${item.name}|${item.color || ''}`;
+      existingItemsMap.set(nameColorKey, item);
     });
     
-    // Process items to merge
     const itemsToUpdate = [];
     const itemsToInsert = [];
     
     items.forEach(item => {
       const productId = item.id || `product-${item.name.toLowerCase().replace(/\s+/g, '-')}`;
+      const itemColor = item.color || '';
       
-      // Look for existing item by id or name
-      const existingItem = existingItemsMap.get(productId) || existingItemsMap.get(item.name);
+      const compositeKey = `${productId}|${itemColor}`;
+      const nameColorKey = `name:${item.name}|${itemColor}`;
+      
+      const existingItem = existingItemsMap.get(compositeKey) || existingItemsMap.get(nameColorKey);
       
       if (existingItem) {
-        // Update quantity for existing item
         existingItem.quantity += Number(item.quantity);
         existingItem.updatedAt = new Date();
         itemsToUpdate.push(existingItem);
       } else {
-        // Create new cart item
         itemsToInsert.push({
           userId,
           productId,
@@ -132,13 +128,13 @@ router.post('/api/cart/merge', authenticate, async (req, res) => {
           quantity: Number(item.quantity),
           image: item.image || '',
           description: item.description || `${item.name} product`,
+          color: itemColor,
           createdAt: new Date(),
           updatedAt: new Date()
         });
       }
     });
     
-    // Perform bulk operations
     const updatePromises = itemsToUpdate.map(item => 
       CartItem.updateOne(
         { _id: item._id }, 
@@ -152,7 +148,6 @@ router.post('/api/cart/merge', authenticate, async (req, res) => {
       await CartItem.insertMany(itemsToInsert);
     }
     
-    // Fetch updated cart to return
     const updatedCart = await CartItem.find({ userId });
     
     res.json({
@@ -164,7 +159,8 @@ router.post('/api/cart/merge', authenticate, async (req, res) => {
         price: item.price,
         quantity: item.quantity,
         image: item.image,
-        description: item.description
+        description: item.description,
+        color: item.color 
       }))
     });
   } catch (error) {

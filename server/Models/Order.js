@@ -22,6 +22,10 @@ const OrderItemSchema = new mongoose.Schema({
     type: Number,
     required: true,
     min: 0
+  },
+  color: {
+    type: String,
+    default: ''
   }
 });
 
@@ -31,6 +35,7 @@ const MeasurementSchema = new mongoose.Schema({
   hips: Number,
   height: Number
 }, { _id: false });
+
 
 const DeliveryDetailsSchema = new mongoose.Schema({
   fullName: {

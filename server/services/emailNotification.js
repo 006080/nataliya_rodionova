@@ -138,8 +138,8 @@ export const sendPayerActionRequiredEmail = async (orderId, orderUrl = null, rem
     // Create an array of recipient emails (removing duplicates)
     const recipientEmails = [...new Set([
       paypalEmail, 
-      deliveryEmail // FIXED: Changed from deliveryDetails to deliveryEmail
-    ].filter(email => email))]; // filter out undefined/null values
+      deliveryEmail
+    ].filter(email => email))]; 
 
 
     // Generate order URL if not provided
@@ -243,6 +243,144 @@ export const sendPayerActionRequiredEmail = async (orderId, orderUrl = null, rem
   }
 };
 
+// Helper functions for formatting order items with color
+
+/**
+ * Format order items for HTML emails with color display
+ */
+const formatOrderItemsWithColor = (order) => {
+  return order.items.map(item => {
+    const hasColor = item.color && item.color !== '';
+    const colorDisplay = hasColor 
+      ? `<div style="display: inline-block; width: 12px; height: 12px; margin-left: 5px; border-radius: 50%; border: 1px solid #ccc; background-color: ${item.color};"></div>`
+      : '';
+      
+    return `<tr>
+      <td style="padding: 12px 8px; border-bottom: 1px solid #eaeaea;">
+        ${item.name} ${colorDisplay}
+      </td>
+      <td style="padding: 12px 8px; border-bottom: 1px solid #eaeaea; text-align: center;">${item.quantity}</td>
+      <td style="padding: 12px 8px; border-bottom: 1px solid #eaeaea; text-align: right;">€${item.price.toFixed(2)}</td>
+      <td style="padding: 12px 8px; border-bottom: 1px solid #eaeaea; text-align: right;">€${(item.quantity * item.price).toFixed(2)}</td>
+    </tr>`;
+  }).join('');
+};
+
+/**
+ * Format order items for plain text emails with color info
+ */
+const formatPlainTextItemsWithColor = (order) => {
+  return order.items.map(item => {
+    const colorInfo = item.color && item.color !== '' ? ` (Color: ${item.color})` : '';
+    return `${item.name}${colorInfo} - ${item.quantity} x €${item.price.toFixed(2)} = €${(item.quantity * item.price).toFixed(2)}`;
+  }).join('\n');
+};
+
+/**
+ * Format the color preference section for HTML email
+ */
+const formatColorPreferenceSection = (order) => {
+  if (!order.colorPreference || !order.colorPreference.primaryColor) {
+    return '';
+  }
+  
+  return `
+  <tr>
+    <td colspan="4" style="padding: 15px 8px; background-color: #f9f9f9;">
+      <h3 style="margin: 0 0 10px 0; color: #333; font-size: 16px;">COLOR PREFERENCE</h3>
+      <div style="display: flex; align-items: center;">
+        <strong style="margin-right: 10px;">Primary Color:</strong>
+        <div style="width: 20px; height: 20px; border-radius: 50%; border: 1px solid #ddd; background-color: ${order.colorPreference.primaryColor};"></div>
+      </div>
+      ${order.colorPreference.description ? `<p style="margin: 10px 0 0 0;"><strong>Notes:</strong> ${order.colorPreference.description}</p>` : ''}
+    </td>
+  </tr>`;
+};
+
+/**
+ * Format the color preference section for plain text email
+ */
+const formatPlainTextColorPreference = (order) => {
+  if (!order.colorPreference || !order.colorPreference.primaryColor) {
+    return '';
+  }
+  
+  return `
+COLOR PREFERENCE:
+Primary Color: ${order.colorPreference.primaryColor}
+${order.colorPreference.description ? `Notes: ${order.colorPreference.description}` : ''}`;
+};
+
+/**
+ * Format admin items list with color
+ */
+const formatAdminItemsWithColor = (order) => {
+  return order.items.map(item => {
+    const hasColor = item.color && item.color !== '';
+    const colorCell = hasColor 
+      ? `<td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">
+          <div style="display: inline-block; width: 15px; height: 15px; border-radius: 50%; border: 1px solid #ddd; background-color: ${item.color};"></div>
+        </td>`
+      : `<td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">-</td>`;
+      
+    return `<tr>
+      <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.name}</td>
+      <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">${item.quantity}</td>
+      ${colorCell}
+      <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">€${item.price.toFixed(2)}</td>
+      <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">€${(item.quantity * item.price).toFixed(2)}</td>
+    </tr>`;
+  }).join('');
+};
+
+/**
+ * Format admin plain text items with color
+ */
+const formatAdminPlainTextItemsWithColor = (order) => {
+  return order.items.map(item => {
+    const colorInfo = item.color && item.color !== '' ? ` (Color: ${item.color})` : '';
+    return `${item.name}${colorInfo} - ${item.quantity} x €${item.price.toFixed(2)} = €${(item.quantity * item.price).toFixed(2)}`;
+  }).join('\n');
+};
+
+/**
+ * Format color preference section for admin HTML email
+ */
+const formatAdminColorPreference = (order) => {
+  if (!order.colorPreference || !order.colorPreference.primaryColor) {
+    return '';
+  }
+  
+  return `
+  <div style="padding: 15px; background-color: #f8f9fa; border-radius: 6px; margin-bottom: 20px;">
+    <h3 style="margin: 0 0 10px 0; color: #333; font-size: 16px;">COLOR PREFERENCE</h3>
+    <div style="display: flex; align-items: center; margin-bottom: 5px;">
+      <strong style="width: 120px;">Primary Color:</strong>
+      <div style="width: 20px; height: 20px; border-radius: 50%; border: 1px solid #ddd; background-color: ${order.colorPreference.primaryColor};"></div>
+      <span style="margin-left: 8px;">${order.colorPreference.primaryColor}</span>
+    </div>
+    ${order.colorPreference.description ? `
+    <div style="margin-top: 8px;">
+      <strong>Notes:</strong> 
+      <p style="margin: 5px 0 0 0;">${order.colorPreference.description}</p>
+    </div>` : ''}
+  </div>`;
+};
+
+/**
+ * Format color preference section for admin plain text email
+ */
+const formatAdminPlainTextColorPreference = (order) => {
+  if (!order.colorPreference || !order.colorPreference.primaryColor) {
+    return '';
+  }
+  
+  return `
+COLOR PREFERENCE:
+Primary Color: ${order.colorPreference.primaryColor}
+${order.colorPreference.description ? `Notes: ${order.colorPreference.description}` : ''}`;
+};
+
 /**
  * Format an admin-specific email for payment reminders
  * @param {Object} order - The order object
@@ -256,15 +394,8 @@ const formatAdminPaymentReminderEmail = (order, adminOrderUrl, reminderType) => 
   const customerEmail = order.customer?.email || order.deliveryDetails?.email || 'N/A';
   const customerPhone = order.customer?.phone || order.deliveryDetails?.phone || 'N/A';
   
-  // Format order items for display
-  const itemsList = order.items.map(item => 
-    `<tr>
-      <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.name}</td>
-      <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">${item.quantity}</td>
-      <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">€${item.price.toFixed(2)}</td>
-      <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">€${(item.quantity * item.price).toFixed(2)}</td>
-    </tr>`
-  ).join('');
+  // Format order items for display with color
+  const itemsList = formatAdminItemsWithColor(order);
   
   // Get reminder-specific information
   let reminderTypeText = 'Payment reminder';
@@ -285,6 +416,9 @@ const formatAdminPaymentReminderEmail = (order, adminOrderUrl, reminderType) => 
   const orderCreatedAt = new Date(order.createdAt);
   const now = new Date();
   const hoursElapsed = Math.round((now - orderCreatedAt) / (1000 * 60 * 60) * 10) / 10;
+  
+  // Format color preference section if available
+  const colorPreferenceHtml = formatAdminColorPreference(order);
   
   // Determine next steps based on reminder type
   let nextStepsHtml = '';
@@ -373,6 +507,9 @@ const formatAdminPaymentReminderEmail = (order, adminOrderUrl, reminderType) => 
         </table>
       </div>
       
+      <!-- Color Preference Section -->
+      ${colorPreferenceHtml}
+      
       <!-- Quick Links -->
       <div style="text-align: center; margin-bottom: 20px;">
         <a href="${adminOrderUrl}" style="background-color: #0056b3; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block; margin: 0 10px;">View Order in Admin Panel</a>
@@ -385,6 +522,7 @@ const formatAdminPaymentReminderEmail = (order, adminOrderUrl, reminderType) => 
           <tr style="background-color: #f3f3f3;">
             <th style="padding: 8px; text-align: left; border-bottom: 2px solid #ddd;">Item</th>
             <th style="padding: 8px; text-align: center; border-bottom: 2px solid #ddd;">Qty</th>
+            <th style="padding: 8px; text-align: center; border-bottom: 2px solid #ddd;">Color</th>
             <th style="padding: 8px; text-align: right; border-bottom: 2px solid #ddd;">Price</th>
             <th style="padding: 8px; text-align: right; border-bottom: 2px solid #ddd;">Total</th>
           </tr>
@@ -392,7 +530,7 @@ const formatAdminPaymentReminderEmail = (order, adminOrderUrl, reminderType) => 
         <tbody>
           ${itemsList}
           <tr>
-            <td colspan="3" style="padding: 8px; text-align: right; font-weight: bold; border-top: 2px solid #ddd;">Total:</td>
+            <td colspan="4" style="padding: 8px; text-align: right; font-weight: bold; border-top: 2px solid #ddd;">Total:</td>
             <td style="padding: 8px; text-align: right; font-weight: bold; border-top: 2px solid #ddd;">€${order.totalAmount.toFixed(2)}</td>
           </tr>
         </tbody>
@@ -415,7 +553,7 @@ const formatAdminPaymentReminderEmail = (order, adminOrderUrl, reminderType) => 
             <td style="padding: 5px 0;">
               ${order.followupReminderSent ? 
                 `Sent at ${new Date(order.followupReminderSentAt || new Date()).toLocaleString()}` : 
-                reminderType === 'followup' ? 'Sending now' : 'Scheduled for ${new Date(new Date(order.createdAt).getTime() + 24 * 60 * 60 * 1000).toLocaleString()}'}
+                reminderType === 'followup' ? 'Sending now' : `Scheduled for ${new Date(new Date(order.createdAt).getTime() + 24 * 60 * 60 * 1000).toLocaleString()}`}
             </td>
           </tr>
         </table>
@@ -449,10 +587,11 @@ const formatAdminPaymentReminderPlainText = (order, adminOrderUrl, reminderType)
   const customerEmail = order.customer?.email || order.deliveryDetails?.email || 'N/A';
   const customerPhone = order.customer?.phone || order.deliveryDetails?.phone || 'N/A';
   
-  // Format order items for display
-  const itemsList = order.items.map(item => 
-    `${item.name} - ${item.quantity} x €${item.price.toFixed(2)} = €${(item.quantity * item.price).toFixed(2)}`
-  ).join('\n');
+  // Format order items for display with color
+  const itemsList = formatAdminPlainTextItemsWithColor(order);
+  
+  // Format color preference section if available
+  const colorPreferenceText = formatAdminPlainTextColorPreference(order);
   
   // Get reminder-specific information
   let reminderTypeText = 'Payment reminder';
@@ -504,6 +643,8 @@ Name: ${customerName}
 Email: ${customerEmail}
 Phone: ${customerPhone}
 
+${colorPreferenceText}
+
 View Order in Admin Panel: ${adminOrderUrl}
 
 ORDER ITEMS:
@@ -535,15 +676,11 @@ const formatAdminOrderEmail = (order, previousStatus) => {
   // Get status-specific styling
   const statusInfo = getStatusInfo(order.status);
   
-  // Format items list
-  const itemsList = order.items.map(item => 
-    `<tr>
-      <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.name}</td>
-      <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">${item.quantity}</td>
-      <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">€${item.price.toFixed(2)}</td>
-      <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">€${(item.quantity * item.price).toFixed(2)}</td>
-    </tr>`
-  ).join('');
+  // Format items list with color
+  const itemsList = formatAdminItemsWithColor(order);
+  
+  // Format color preference section
+  const colorPreferenceHtml = formatAdminColorPreference(order);
   
   // Get status change information
   let statusChangeHtml = '';
@@ -650,6 +787,9 @@ const formatAdminOrderEmail = (order, previousStatus) => {
         </table>
       </div>
       
+      <!-- Color Preference Section -->
+      ${colorPreferenceHtml}
+      
       <!-- Quick Links -->
       <div style="text-align: center; margin-bottom: 20px;">
         <a href="${adminOrderUrl}" style="background-color: #0056b3; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block; margin: 0 10px;">View Order in Admin Panel</a>
@@ -662,6 +802,7 @@ const formatAdminOrderEmail = (order, previousStatus) => {
           <tr style="background-color: #f3f3f3;">
             <th style="padding: 8px; text-align: left; border-bottom: 2px solid #ddd;">Item</th>
             <th style="padding: 8px; text-align: center; border-bottom: 2px solid #ddd;">Qty</th>
+            <th style="padding: 8px; text-align: center; border-bottom: 2px solid #ddd;">Color</th>
             <th style="padding: 8px; text-align: right; border-bottom: 2px solid #ddd;">Price</th>
             <th style="padding: 8px; text-align: right; border-bottom: 2px solid #ddd;">Total</th>
           </tr>
@@ -669,7 +810,7 @@ const formatAdminOrderEmail = (order, previousStatus) => {
         <tbody>
           ${itemsList}
           <tr>
-            <td colspan="3" style="padding: 8px; text-align: right; font-weight: bold; border-top: 2px solid #ddd;">Total:</td>
+            <td colspan="4" style="padding: 8px; text-align: right; font-weight: bold; border-top: 2px solid #ddd;">Total:</td>
             <td style="padding: 8px; text-align: right; font-weight: bold; border-top: 2px solid #ddd;">€${order.totalAmount.toFixed(2)}</td>
           </tr>
         </tbody>
@@ -699,10 +840,11 @@ const formatAdminPlainTextEmail = (order, previousStatus) => {
   // Get status-specific styling
   const statusInfo = getStatusInfo(order.status);
   
-  // Format items list
-  const itemsList = order.items.map(item => 
-    `${item.name} - ${item.quantity} x €${item.price.toFixed(2)} = €${(item.quantity * item.price).toFixed(2)}`
-  ).join('\n');
+  // Format items list with color
+  const itemsList = formatAdminPlainTextItemsWithColor(order);
+  
+  // Format color preference section
+  const colorPreferenceText = formatAdminPlainTextColorPreference(order);
   
   // Get status change information
   let statusChangeText = '';
@@ -753,6 +895,8 @@ CUSTOMER INFORMATION:
 Name: ${customerName}
 Email: ${customerEmail}
 Phone: ${customerPhone}
+
+${colorPreferenceText}
 
 View Order in Admin Panel: ${adminOrderUrl}
 
@@ -954,15 +1098,8 @@ const getStatusInfo = (status, orderUrl = null, reminderType = null) => {
  * @returns {String} - Formatted HTML email content
  */
 const formatOrderEmail = (order, orderUrl = null, reminderType = null) => {
-  // Format items for the email with styling
-  const itemsList = order.items.map(item => 
-    `<tr>
-      <td style="padding: 12px 8px; border-bottom: 1px solid #eaeaea;">${item.name}</td>
-      <td style="padding: 12px 8px; border-bottom: 1px solid #eaeaea; text-align: center;">${item.quantity}</td>
-      <td style="padding: 12px 8px; border-bottom: 1px solid #eaeaea; text-align: right;">€${item.price.toFixed(2)}</td>
-      <td style="padding: 12px 8px; border-bottom: 1px solid #eaeaea; text-align: right;">€${(item.quantity * item.price).toFixed(2)}</td>
-    </tr>`
-  ).join('');
+  // Format items for the email with styling (with color)
+  const itemsList = formatOrderItemsWithColor(order);
 
   // Format measurements - only include the values
   let measurementsSection = '';
@@ -988,6 +1125,9 @@ const formatOrderEmail = (order, orderUrl = null, reminderType = null) => {
       </td>
     </tr>`;
   }
+
+  // Format color preference section
+  const colorPreferenceSection = formatColorPreferenceSection(order);
 
   // Format delivery details
   let deliverySection = '';
@@ -1084,6 +1224,7 @@ const formatOrderEmail = (order, orderUrl = null, reminderType = null) => {
         <tbody>
           ${deliverySection}
           ${measurementsSection}
+          ${colorPreferenceSection}
           ${shippingSection}
         </tbody>
       </table>
@@ -1116,10 +1257,11 @@ const formatOrderEmail = (order, orderUrl = null, reminderType = null) => {
  * @returns {String} - Plain text email content
  */
 const formatPlainTextEmail = (order, orderUrl = null, reminderType = null) => {
-  // Format items for the email
-  const itemsList = order.items.map(item => 
-    `${item.name} - ${item.quantity} x €${item.price.toFixed(2)} = €${(item.quantity * item.price).toFixed(2)}`
-  ).join('\n');
+  // Format items for the email with color
+  const itemsList = formatPlainTextItemsWithColor(order);
+
+  // Format color preference section
+  const colorPreferenceSection = formatPlainTextColorPreference(order);
 
   // Get status-specific messaging
   const statusInfo = getStatusInfo(order.status, orderUrl, reminderType);
@@ -1150,6 +1292,8 @@ ${itemsList}
 
 TOTAL: €${order.totalAmount.toFixed(2)}
 
+${colorPreferenceSection}
+
 ${reminderType === 'followup' ? 'URGENT: This is our final reminder. Please complete your payment to avoid order cancellation.' : ''}
 ${reminderType === 'initial' ? 'Please complete your payment to finalize your order. A link has been provided above.' : ''}
 
@@ -1167,3 +1311,24 @@ export const sendOrderConfirmationEmail = async (orderId) => {
 };
 
 export default { sendOrderStatusEmail, sendOrderConfirmationEmail, sendPayerActionRequiredEmail };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
