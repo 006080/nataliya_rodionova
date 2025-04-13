@@ -5,7 +5,8 @@ import {
   saveFavoritesToDatabase, 
   toggleFavoriteInDatabase,
   clearFavoritesInDatabase,
-  mergeFavoritesWithDatabase
+  mergeFavoritesWithDatabase,
+  syncFavoritesWithDatabase
 } from '../src/services/favoritesService';
 
 const FavoriteContext = createContext();
@@ -131,14 +132,104 @@ export const FavoriteProvider = ({ children }) => {
     }
   }, [favorites, isUserAuthenticated, initialSyncDone]);
 
+
+  // Handle favorites-cleared event
+useEffect(() => {
+  const handleFavoritesCleared = () => {
+    localStorage.removeItem('favorites');
+    setFavorites([]);
+    setIsUserAuthenticated(false);
+    setInitialSyncDone(false);
+  };
+  
+  window.addEventListener('favorites-cleared', handleFavoritesCleared);
+  
+  return () => {
+    window.removeEventListener('favorites-cleared', handleFavoritesCleared);
+  };
+}, []);
+
+// Handle load-user-favorites event
+// Updated load-user-favorites event handler
+useEffect(() => {
+  const handleLoadUserFavorites = async () => {
+    if (isAuthenticated()) {
+      try {
+        // Force a refresh from the database
+        const favorites = await syncFavoritesWithDatabase(true);
+        
+        if (favorites && Array.isArray(favorites)) {
+          setFavorites(favorites);
+          setInitialSyncDone(true);
+          setIsUserAuthenticated(true);
+        } else {
+          // If no favorites or error, clear state
+          setFavorites([]);
+        }
+      } catch (error) {
+        console.error('Error loading user favorites:', error);
+        setFavorites([]);
+      }
+    }
+  };
+  
+  window.addEventListener('load-user-favorites', handleLoadUserFavorites);
+  
+  // Also listen for favorites-updated events
+  const handleFavoritesUpdated = (event) => {
+    if (event.detail && Array.isArray(event.detail)) {
+      setFavorites(event.detail);
+    }
+  };
+  
+  window.addEventListener('favorites-updated', handleFavoritesUpdated);
+  
+  return () => {
+    window.removeEventListener('load-user-favorites', handleLoadUserFavorites);
+    window.removeEventListener('favorites-updated', handleFavoritesUpdated);
+  };
+}, []);
+
   // Toggle a product in favorites (add if not exists, remove if exists)
+  // const toggleFavorite = async (product) => {
+  //   // For authenticated users, use the API
+  //   if (isUserAuthenticated && initialSyncDone) {
+  //     try {
+  //       const result = await toggleFavoriteInDatabase(product);
+  //       if (result.success) {
+  //         setFavorites(result.items);
+  //         return;
+  //       }
+  //     } catch (error) {
+  //       console.error('Error toggling favorite via API:', error);
+  //       // Fall back to local toggle
+  //     }
+  //   }
+    
+  //   // Local toggle logic (still used for unauthenticated or as fallback)
+  //   setFavorites(prevFavorites => {
+  //     const exists = prevFavorites.some(item => item.id === product.id);
+      
+  //     if (exists) {
+  //       // Remove from favorites
+  //       return prevFavorites.filter(item => item.id !== product.id);
+  //     } else {
+  //       // Add to favorites
+  //       return [...prevFavorites, {...product, addedAt: new Date().toISOString()}];
+  //     }
+  //   });
+  // };
+
   const toggleFavorite = async (product) => {
     // For authenticated users, use the API
     if (isUserAuthenticated && initialSyncDone) {
       try {
         const result = await toggleFavoriteInDatabase(product);
         if (result.success) {
+          // Update local state
           setFavorites(result.items);
+          // Also update localStorage to keep them in sync
+          localStorage.setItem('favorites', JSON.stringify(result.items));
           return;
         }
       } catch (error) {
@@ -148,17 +239,13 @@ export const FavoriteProvider = ({ children }) => {
     }
     
     // Local toggle logic (still used for unauthenticated or as fallback)
-    setFavorites(prevFavorites => {
-      const exists = prevFavorites.some(item => item.id === product.id);
-      
-      if (exists) {
-        // Remove from favorites
-        return prevFavorites.filter(item => item.id !== product.id);
-      } else {
-        // Add to favorites
-        return [...prevFavorites, {...product, addedAt: new Date().toISOString()}];
-      }
-    });
+    const updatedFavorites = favorites.some(item => item.id === product.id)
+      ? favorites.filter(item => item.id !== product.id)
+      : [...favorites, {...product, addedAt: new Date().toISOString()}];
+    
+    // Update state and localStorage
+    setFavorites(updatedFavorites);
+    localStorage.setItem('favorites', JSON.stringify(updatedFavorites));
   };
 
   // Check if a product is in favorites
@@ -167,12 +254,31 @@ export const FavoriteProvider = ({ children }) => {
   };
 
   // Clear all favorites
+  // const clearFavorites = async () => {
+  //   if (isUserAuthenticated && initialSyncDone) {
+  //     try {
+  //       const success = await clearFavoritesInDatabase();
+  //       if (success) {
+  //         setFavorites([]);
+  //         return;
+  //       }
+  //     } catch (error) {
+  //       console.error('Error clearing favorites from database:', error);
+  //       // Fall back to local clear
+  //     }
+  //   }
+    
+  //   setFavorites([]);
+  // };
+
   const clearFavorites = async () => {
     if (isUserAuthenticated && initialSyncDone) {
       try {
         const success = await clearFavoritesInDatabase();
         if (success) {
+          // Clear state and localStorage
           setFavorites([]);
+          localStorage.removeItem('favorites');
           return;
         }
       } catch (error) {
@@ -181,7 +287,9 @@ export const FavoriteProvider = ({ children }) => {
       }
     }
     
+    // Clear state and localStorage
     setFavorites([]);
+    localStorage.removeItem('favorites');
   };
 
   return (
