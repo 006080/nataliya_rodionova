@@ -11,6 +11,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useCart } from "./CartContext";
 import { useFavorites } from "./FavoriteContext";
+import { hexToColorName } from '../src/utils/colorConvertion';
 
 const CardProduct = ({
   id,
@@ -52,7 +53,7 @@ const CardProduct = ({
   const handleStarClick = (starIndex) => setSelectedStars(starIndex + 1);
 
   const handleHeartClick = () => {
-    const product = { id, name, image: images[0], price };
+    const product = { id, name, image: images[0], price, description, material, color: selectedColor };
     toggleFavorite(product);
   };
 
@@ -99,7 +100,7 @@ const CardProduct = ({
         <div className={styles.notes}>
           <p style={{ fontSize: "14px" }}>{description}</p>
           <p style={{ fontSize: "14px" }}>Material: {material}</p>
-          <p style={{ fontSize: "14px" }}>Default Color: {color}</p>
+          <p style={{ fontSize: "14px" }}>Default Color: {hexToColorName(color)}</p>
         </div>
 
         {/* 🎨 Color Picker */}

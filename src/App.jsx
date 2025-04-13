@@ -24,6 +24,8 @@ import MyOrders from "./Pages/MyOrders";
 import OrderDetail from "./Pages/OrderDetail";
 import { FavoriteProvider } from "../components/FavoriteContext";
 import Collaboration from "./Pages/Collaboration";
+import FavoritesPage from "./Pages/FavoritesPage";
+
 
 const Unauthorized = () => (
   <div style={{ padding: '2rem', textAlign: 'center' }}>
@@ -43,6 +45,7 @@ const AppContent = () => {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<LoginForm />} />
         <Route path="/register" element={<RegisterForm />} />
+        <Route path="/favorites" element={<FavoritesPage />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="/forgot-password" element={<ForgotPasswordForm />} />
         <Route path="/verify-email/:token" element={<VerifyEmail />} />
