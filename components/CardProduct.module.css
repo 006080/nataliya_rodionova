@@ -171,6 +171,13 @@
   user-select: none;
 }
 
+.deactivatedIncr {
+  color: grey;
+  padding: 0 10px;
+  font-size: 14px;
+  user-select: none;
+}
+
 .quantity {
   display: flex;
   flex-direction: row;
