@@ -1,0 +1,196 @@
+.accountManagementContent {
+  padding: 1rem 0;
+}
+
+.subheading {
+  font-size: 1.2rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.sectionDivider {
+  margin-bottom: 1.5rem;
+}
+
+.warningBox {
+  display: flex;
+  background-color: rgba(220, 53, 69, 0.08);
+  border-radius: 8px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.warningIcon {
+  flex-shrink: 0;
+  margin-right: 1rem;
+  color: #dc3545;
+  width: 24px;
+  height: 24px;
+}
+
+.warningContent {
+  flex-grow: 1;
+}
+
+.warningList {
+  margin: 0.5rem 0 0.5rem 1.5rem;
+  padding: 0;
+}
+
+.warningList li {
+  margin-bottom: 0.5rem;
+}
+
+.recoveryNote {
+  font-size: 0.9rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  padding-top: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+/* Modal Styles */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
+
+.deleteModal {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 550px;
+  position: relative;
+  padding: 0;
+  overflow: hidden;
+  animation: modalAppear 0.3s ease-out;
+}
+
+@keyframes modalAppear {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modalClose {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  font-size: 1.5rem;
+  line-height: 1;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6c757d;
+  transition: color 0.2s;
+  z-index: 1;
+}
+
+.modalClose:hover {
+  color: #343a40;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  padding: 1.5rem;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.modalIcon {
+  width: 24px;
+  height: 24px;
+  color: #dc3545;
+  margin-right: 0.75rem;
+}
+
+.modalHeader h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #343a40;
+}
+
+.modalBody {
+  padding: 1.5rem;
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1.25rem 1.5rem;
+  background-color: #f8f9fa;
+  border-top: 1px solid #dee2e6;
+}
+
+.consequencesList {
+  margin: 1.5rem 0;
+}
+
+.consequenceItem {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+}
+
+.consequenceIcon {
+  font-size: 1.25rem;
+  margin-right: 0.75rem;
+}
+
+.finalWarning {
+  font-weight: 500;
+  color: #dc3545;
+  margin-top: 1rem;
+}
+
+.confirmInput {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 1rem;
+  margin-top: 1rem;
+}
+
+.errorText {
+  color: #dc3545;
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+  font-size: 0.9rem;
+}
+
+/* Button customizations */
+.buttonSecondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+.buttonSecondary:hover {
+  background-color: #5a6268;
+}
+
+.button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
