@@ -1,0 +1,154 @@
+.goodbyeContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  padding: 2rem;
+  background-color: #f8f9fa;
+}
+
+.goodbyeCard {
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 3rem;
+  max-width: 700px;
+  width: 100%;
+  text-align: center;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.goodbyeIcon {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+  animation: bounce 1s ease infinite alternate;
+}
+
+@keyframes bounce {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-10px);
+  }
+}
+
+.goodbyeTitle {
+  font-size: 2rem;
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+}
+
+.goodbyeMessage {
+  font-size: 1.1rem;
+  color: #5a6268;
+  margin-bottom: 2rem;
+}
+
+.deletionInfo {
+  margin-bottom: 2rem;
+  line-height: 1.6;
+  color: #5a6268;
+  font-size: 1.1rem;
+  text-align: left;
+}
+
+.restoreBox {
+  background-color: #e8f4f8;
+  border-left: 4px solid #17a2b8;
+  border-radius: 4px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+}
+
+.restoreBox h3 {
+  margin-top: 0;
+  color: #17a2b8;
+  font-size: 1.2rem;
+}
+
+.moreInfo {
+  font-size: 0.95rem;
+  color: #6c757d;
+  margin-top: 1.5rem;
+  font-style: italic;
+}
+
+.countdown {
+  margin: 1.5rem 0;
+  padding: 0.75rem;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  color: #6c757d;
+}
+
+.navigationButtons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.homeButton, .loginButton, .restoreButton {
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.homeButton {
+  background-color: #6c757d;
+  color: white;
+}
+
+.homeButton:hover {
+  background-color: #5a6268;
+}
+
+.loginButton {
+  background-color: #007bff;
+  color: white;
+}
+
+.loginButton:hover {
+  background-color: #0069d9;
+}
+
+.restoreButton {
+  background-color: #17a2b8;
+  color: white;
+  font-weight: bold;
+}
+
+.restoreButton:hover {
+  background-color: #138496;
+}
+
+@media (max-width: 576px) {
+  .goodbyeCard {
+    padding: 2rem 1.5rem;
+  }
+  
+  .goodbyeTitle {
+    font-size: 1.75rem;
+  }
+  
+  .navigationButtons {
+    flex-direction: column;
+  }
+}
