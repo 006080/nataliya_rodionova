@@ -34,6 +34,7 @@ function AuthProviderComponent({ children }) {
   });
   const [loading, setLoading] = useState(true);
   const [authError, setAuthError] = useState('');
+  const [accountRestored, setAccountRestored] = useState(false);
 
   useEffect(() => {
     const initAuth = async () => {
@@ -119,10 +120,10 @@ function AuthProviderComponent({ children }) {
   }, []);
 
 
-
   const login = async (email, password) => {
     try {
       setAuthError('');
+      setAccountRestored(false);
       
       const result = await loginUser(email, password);
       
@@ -132,6 +133,11 @@ function AuthProviderComponent({ children }) {
         return result;
       }
       
+      // Check if account was restored
+      if (result.accountRestored) {
+        setAccountRestored(true);
+        sessionStorage.setItem('accountRestored', 'true');
+      }
 
       if (result.user && !result.reloading) {
         setUser(result.user);
@@ -207,10 +213,13 @@ function AuthProviderComponent({ children }) {
     }
   };
 
-  // Logout handler
+
   const logout = async () => {
     try {
       setLoading(true);
+      
+      // Check if we're in the account deletion flow
+      const isAccountDeletionFlow = sessionStorage.getItem('accountDeletionFlow') === 'true';
       
       // Clear authentication data
       const success = await clearAllAuthData();
@@ -240,12 +249,15 @@ function AuthProviderComponent({ children }) {
         }
       }
       
-      // Reload page and redirect to login
-      window.location.reload(true);
-      window.location.href = '/login';
+      if (!isAccountDeletionFlow) {
+        // Only for normal logout: reload page and redirect to login
+        window.location.reload(true);
+        window.location.href = '/login';
+      }
       
       return true;
     } catch (error) {
+      console.error('Logout error:', error);
       return false;
     } finally {
       setLoading(false);
@@ -258,17 +270,19 @@ function AuthProviderComponent({ children }) {
     isAuthenticated: !!user?.id && isAuthenticated(),
     loading,
     authError,
+    accountRestored,
     login,
     register,
     logout,
     resendVerificationEmail,
     clearAuthError: () => setAuthError(''),
+    clearAccountRestored: () => setAccountRestored(false),
     authFetch,
     setUser: (newUserData) => {
       window.currentUser = newUserData;
       setUser(newUserData);
     },
-  }), [user, loading, authError]);
+  }), [user, loading, authError, accountRestored]);
 
   return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
 }

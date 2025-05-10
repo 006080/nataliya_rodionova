@@ -564,13 +564,14 @@ export const clearAllAuthData = async () => {
 
 
 
+// Modified login function in authService.js with improved account restoration handling
 export const loginUser = async (email, password) => {
   try {
-    // Important: Reset logout flag - use the correct flag name "isUserLogout"
+    console.log('Login attempt for:', email);
+    
+    // Important: Reset logout flag
     window.hasLoggedOut = false;
     sessionStorage.removeItem('isUserLogout');
-
-    // Also remove the old flag name for compatibility
     sessionStorage.removeItem('hasLoggedOut');
 
     // Broadcast login to all tabs
@@ -593,6 +594,7 @@ export const loginUser = async (email, password) => {
     });
 
     const data = await response.json();
+    console.log('Login response data:', data);
 
     // Handle email verification error
     if (response.status === 403 && data.needsVerification) {
@@ -602,32 +604,6 @@ export const loginUser = async (email, password) => {
         verificationDetails: data.verificationDetails || { email },
       };
     }
-    
-    // Handle account marked for deletion
-    if (response.status === 200 && data.accountMarkedForDeletion) {
-      const restorationResponse = await fetch(`${apiUrl}/api/users/restore`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${data.accessToken}`
-        },
-        credentials: 'include',
-      });
-      
-      const restorationData = await restorationResponse.json();
-      
-      if (restorationResponse.ok) {
-        // Set tokens and proceed with login after restoration
-        setTokens(data.accessToken, data.refreshToken, restorationData.user);
-        
-        return {
-          success: true,
-          user: restorationData.user,
-          accountRestored: true,
-          message: 'Your account has been successfully restored.'
-        };
-      }
-    }
 
     if (!response.ok) {
       return {
@@ -635,11 +611,52 @@ export const loginUser = async (email, password) => {
         error: data.error || 'Login failed',
       };
     }
-
+    
+    // Set tokens and update memory
     setTokens(data.accessToken, data.refreshToken, data.user);
+    
+    // Check if user's account was marked for deletion (needs restoration)
+    const needsRestoration = data.user && data.user.markedForDeletion === true;
+    console.log('Account needs restoration:', needsRestoration);
+    
+    if (needsRestoration) {
+      console.log('Attempting to restore account for user:', data.user.email);
+      try {
+        // Call the restore endpoint
+        const restorationResponse = await fetch(`${apiUrl}/api/users/restore`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${data.accessToken}`
+          },
+          credentials: 'include',
+        });
+        
+        const restorationData = await restorationResponse.json();
+        console.log('Restoration response:', restorationData);
+        
+        if (restorationResponse.ok && restorationData.success) {
+          // Explicitly set the restoration flag
+          sessionStorage.setItem('accountRestored', 'true');
+          localStorage.setItem('accountRestored', 'true'); // Backup in local storage too
+          
+          console.log('Account was successfully restored - flags set');
+          
+          return {
+            success: true,
+            user: restorationData.user || data.user,
+            accountRestored: true,
+            message: 'Your account has been successfully restored.'
+          };
+        }
+      } catch (restoreError) {
+        console.error('Error restoring account:', restoreError);
+        // Continue with login even if restoration fails
+      }
+    }
 
+    // Regular login flow for cart/favorites merging
     const localCartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
-
     if (localCartItems.length > 0) {
       try {
         await fetch(`${apiUrl}/api/cart/merge`, {
@@ -653,6 +670,7 @@ export const loginUser = async (email, password) => {
         });
       } catch (error) {
         // Continue despite cart error
+        console.error('Error merging cart:', error);
       }
     }
 
@@ -668,8 +686,6 @@ export const loginUser = async (email, password) => {
           body: JSON.stringify({ items: localFavorites }),
           credentials: 'include',
         });
-
-        // After successful merge, clear local favorites
         localStorage.removeItem('favorites');
       } catch (error) {
         console.error('Error merging favorites:', error);
@@ -700,6 +716,7 @@ export const loginUser = async (email, password) => {
       reloading: true,
     };
   } catch (error) {
+    console.error('Login error:', error);
     return {
       success: false,
       error: error.message || 'An unexpected error occurred',

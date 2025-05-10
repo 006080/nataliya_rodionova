@@ -1,4 +1,4 @@
-.notificationContainer {
+.welcomeBackContainer {
   position: fixed;
   top: 2rem;
   right: 2rem;
@@ -19,12 +19,12 @@
   transform: translateY(-20px);
 }
 
-.notificationContent {
-  background-color: #d4edda;
-  border-left: 5px solid #28a745;
+.welcomeBackContent {
+  background-color: #d1e7dd;
+  border-left: 5px solid #198754;
   border-radius: 4px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  padding: 1rem;
+  padding: 1.25rem;
   display: flex;
   align-items: center;
   animation: slideIn 0.5s forwards;
@@ -39,28 +39,30 @@
   }
 }
 
-.notificationIcon {
+.welcomeBackIcon {
   flex-shrink: 0;
   width: 32px;
   height: 32px;
-  color: #28a745;
+  color: #198754;
   margin-right: 1rem;
 }
 
-.notificationMessage {
+.welcomeBackMessage {
   flex-grow: 1;
 }
 
-.notificationMessage h4 {
+.welcomeBackMessage h4 {
   margin: 0 0 0.5rem 0;
-  color: #155724;
-  font-size: 1rem;
+  color: #0f5132;
+  font-size: 1.1rem;
+  font-weight: 600;
 }
 
-.notificationMessage p {
+.welcomeBackMessage p {
   margin: 0;
-  color: #155724;
+  color: #0f5132;
   font-size: 0.9rem;
+  line-height: 1.5;
 }
 
 .closeButton {
@@ -68,7 +70,7 @@
   border: none;
   font-size: 1.5rem;
   line-height: 1;
-  color: #155724;
+  color: #0f5132;
   cursor: pointer;
   padding: 0;
   margin-left: 0.5rem;
@@ -81,7 +83,7 @@
 }
 
 @media (max-width: 576px) {
-  .notificationContainer {
+  .welcomeBackContainer {
     right: 1rem;
     left: 1rem;
     max-width: none;

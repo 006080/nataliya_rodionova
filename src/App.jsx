@@ -25,6 +25,8 @@ import OrderDetail from "./Pages/OrderDetail";
 import { FavoriteProvider } from "../components/FavoriteContext";
 import Collaboration from "./Pages/Collaboration";
 import FavoritesPage from "./Pages/FavoritesPage";
+import GoodbyePage from "./Pages/GoodbyePage";
+import WelcomeBackPage from "./Pages/WelcomeBackPage";
 
 
 const Unauthorized = () => (
@@ -61,33 +63,14 @@ const AppContent = () => {
         <Route path="/shop" element={<Shop />} />
         <Route path="/order-status/:orderId" element={<OrderStatus />} />
 
+        <Route path="/goodbye" element={<GoodbyePage />} />
+
+
         {/* Protected routes (require authentication) */}
-        <Route 
-          path="/profile" 
-          element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          } 
-        />
-
-        <Route 
-          path="/orders" 
-          element={
-            <ProtectedRoute>
-              <MyOrders />
-            </ProtectedRoute>
-          } 
-        />
-
-        <Route 
-          path="/orders/:id" 
-          element={
-            <ProtectedRoute>
-              <OrderDetail />
-            </ProtectedRoute>
-          } 
-        />
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
+        <Route path="/orders/:id" element={<ProtectedRoute><OrderDetail /></ProtectedRoute>} />
+        <Route path="/welcome-back" element={<ProtectedRoute><WelcomeBackPage /></ProtectedRoute>} />
         
         <Route path="*" element={<NotFoundPage />} />
       </Routes>

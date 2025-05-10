@@ -1,11 +1,9 @@
-import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styles from './GoodbyePage.module.css';
 
 const GoodbyePage = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [countdown, setCountdown] = useState(5);
   
   const accountDeleted = location.state?.accountDeleted || false;
   const restorationDate = location.state?.restorationDate ? new Date(location.state.restorationDate) : null;
@@ -20,28 +18,13 @@ const GoodbyePage = () => {
     });
   };
   
-  useEffect(() => {
-    // Redirect to home page after countdown
-    const timer = setTimeout(() => {
-      navigate('/');
-    }, countdown * 1000);
-    
-    // Countdown effect
-    const interval = setInterval(() => {
-      setCountdown(prev => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    
-    return () => {
-      clearTimeout(timer);
-      clearInterval(interval);
-    };
-  }, [navigate]);
+  const handleRestore = () => {
+    navigate('/login', { 
+      state: { 
+        attemptingRestore: true
+      } 
+    });
+  };
   
   return (
     <div className={styles.goodbyeContainer}>
@@ -61,6 +44,16 @@ const GoodbyePage = () => {
               will be removed from our systems on <strong>{formatDate(restorationDate)}</strong>.
             </p>
             
+            <div className={styles.dataInfo}>
+              <h3>What happens to your data:</h3>
+              <ul className={styles.dataList}>
+                <li>Your profile information will be permanently deleted</li>
+                <li>Your cart items and favorites will be removed</li>
+                <li>Your order history will be kept for business records but anonymized</li>
+                <li>Your reviews and feedback will remain visible but will be anonymized</li>
+              </ul>
+            </div>
+            
             <div className={styles.restoreBox}>
               <h3>Changed your mind?</h3>
               <p>
@@ -68,7 +61,7 @@ const GoodbyePage = () => {
                 logging in with your current credentials.
               </p>
               <button 
-                onClick={() => navigate('/login')}
+                onClick={handleRestore}
                 className={styles.restoreButton}
               >
                 Restore My Account
@@ -85,10 +78,6 @@ const GoodbyePage = () => {
             Thank you for visiting our store. We hope to see you again soon!
           </p>
         )}
-        
-        <div className={styles.countdown}>
-          Redirecting to home page in {countdown} seconds...
-        </div>
         
         <div className={styles.navigationButtons}>
           <button 

@@ -108,6 +108,7 @@ router.delete('/api/users/me', authenticate, async (req, res) => {
 });
 
 // Account restoration route - when user logs in within 30 days
+// Fixed Account Restoration Route
 router.post('/api/users/restore', authenticate, async (req, res) => {
   try {
     // Find user by ID
@@ -122,12 +123,34 @@ router.post('/api/users/restore', authenticate, async (req, res) => {
       return res.status(400).json({ error: 'Account is not marked for deletion' });
     }
     
-    // Restore account
-    user.markedForDeletion = false;
-    user.deletionDate = undefined;
-    user.deletionReason = undefined;
+    console.log('Restoring account for user:', user._id, user.email);
+    console.log('Before restoration:', {
+      markedForDeletion: user.markedForDeletion,
+      deletionDate: user.deletionDate,
+      deletionReason: user.deletionReason
+    });
     
-    await user.save();
+    // Restore account - explicitly set fields to ensure they're updated
+    const updateResult = await User.updateOne(
+      { _id: user._id },
+      { 
+        $set: { markedForDeletion: false },
+        $unset: { 
+          deletionDate: "", 
+          deletionReason: "" 
+        }
+      }
+    );
+    
+    console.log('Update result:', updateResult);
+    
+    // Reload user to verify changes
+    const updatedUser = await User.findById(user._id);
+    console.log('After restoration:', {
+      markedForDeletion: updatedUser.markedForDeletion,
+      deletionDate: updatedUser.deletionDate,
+      deletionReason: updatedUser.deletionReason
+    });
     
     // Also restore associated data marked for anonymization/deletion
     
@@ -164,12 +187,13 @@ router.post('/api/users/restore', authenticate, async (req, res) => {
     res.json({ 
       success: true, 
       message: 'Account restored successfully',
+      accountRestored: true,
       user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        emailVerified: user.emailVerified
+        id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        role: updatedUser.role,
+        emailVerified: updatedUser.emailVerified
       }
     });
   } catch (error) {

@@ -173,6 +173,27 @@
   margin-top: 1rem;
 }
 
+.reasonContainer {
+  margin-top: 1.5rem;
+}
+
+.reasonContainer label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: #495057;
+}
+
+.reasonInput {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  resize: vertical;
+  min-height: 80px;
+}
+
 .errorText {
   color: #dc3545;
   margin-top: 0.75rem;
@@ -193,4 +214,20 @@
 .button:disabled {
   opacity: 0.65;
   cursor: not-allowed;
+}
+
+.finalWarning {
+  font-weight: 500;
+  color: #dc3545;
+  margin-top: 1rem;
+}
+
+.infoNote {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background-color: #e7f5ff;
+  border-left: 4px solid #1890ff;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  line-height: 1.5;
 }

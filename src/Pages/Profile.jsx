@@ -2,14 +2,16 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import { authFetch } from '../services/authService'
-import styles from './Profile.module.css'
 import DeleteAccountModule from '../../components/DeleteAccountModule'
+import WelcomeBackNotification from '../../components/WelcomeBackNotification'
+import styles from './Profile.module.css'
 
 const Profile = () => {
   const { user, logout } = useAuth()
   const [loading, setLoading] = useState(false)
   const [orders, setOrders] = useState([])
   const [error, setError] = useState('')
+  const [showRestorationNotice, setShowRestorationNotice] = useState(false)
   const navigate = useNavigate()
 
   const getApiUrl = () => {
@@ -19,6 +21,24 @@ const Profile = () => {
   }
 
   useEffect(() => {
+    console.log('Profile component mounted');
+    
+    // Check all possible places for account restoration flag
+    const wasRestored = 
+      sessionStorage.getItem('accountRestored') === 'true' || 
+      localStorage.getItem('accountRestored') === 'true';
+    
+    console.log('Account restoration detected:', wasRestored);
+    
+    if (wasRestored) {
+      console.log('Showing restoration notice');
+      setShowRestorationNotice(true);
+      
+      // Clear all flags
+      sessionStorage.removeItem('accountRestored');
+      localStorage.removeItem('accountRestored');
+    }
+    
     // Fetch real user orders from the server
     const fetchOrders = async () => {
       try {
@@ -79,6 +99,10 @@ const Profile = () => {
 
   return (
     <div className={styles.container}>
+      {showRestorationNotice && (
+        <WelcomeBackNotification onClose={() => setShowRestorationNotice(false)} />
+      )}
+      
       <h1 className={styles.pageTitle}>Your Profile</h1>
 
       <div className={styles.card}>
@@ -175,6 +199,7 @@ const Profile = () => {
           </div>
         )}
       </div>
+      
       <DeleteAccountModule />
     </div>
   )

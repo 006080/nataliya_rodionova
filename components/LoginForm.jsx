@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../src/contexts/AuthContext'; 
+import { useAuth } from '../src/contexts/AuthContext';
 import styles from './LoginForm.module.css';
 
 const LoginForm = () => {
@@ -10,7 +10,7 @@ const LoginForm = () => {
   const [formError, setFormError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [needsVerification, setNeedsVerification] = useState(false);
-  const [verificationDetails, setVerificationDetails] = useState(null);
+  // const [verificationDetails, setVerificationDetails] = useState(null);
   const [infoMessage, setInfoMessage] = useState('');
   
   const { login, resendVerificationEmail } = useAuth();
@@ -45,6 +45,7 @@ const LoginForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    console.log('Login form submission');
 
     if (!email.trim()) {
       setFormError('Email is required');
@@ -60,13 +61,12 @@ const LoginForm = () => {
       setIsSubmitting(true);
       setFormError('');
       setNeedsVerification(false);
-      setVerificationDetails(null);
+      // setVerificationDetails(null);
       
-  
+      console.log('Attempting login with email:', email);  
       const result = await login(email, password);
+      console.log('Login result:', result);
       
-      
-  
       if (result.success) {
         if (remember) {
           localStorage.setItem('rememberedEmail', email);
@@ -74,15 +74,24 @@ const LoginForm = () => {
           localStorage.removeItem('rememberedEmail');
         }
         
+        // Check if account was restored
+        if (result.accountRestored) {
+          console.log('Account was restored, redirecting to welcome-back page');
+          sessionStorage.setItem('accountRestored', 'true');
+          localStorage.setItem('accountRestored', 'true');
+          navigate('/welcome-back', { replace: true, state: { from } });
+          return;
+        }
+        
+        console.log('Login successful, navigating to:', from);
         setTimeout(() => {
           window.location.reload();
         }, 200);
         navigate(from, { replace: true });
       } 
-
       else if (result.needsVerification) {
         setNeedsVerification(true);
-        setVerificationDetails(result.verificationDetails);
+        // setVerificationDetails(result.verificationDetails);
         setInfoMessage('');
       }
       else {
@@ -121,7 +130,6 @@ const LoginForm = () => {
       setIsSubmitting(false);
     }
   };
-  
 
   return (
     <div className={styles.loginContainer}>

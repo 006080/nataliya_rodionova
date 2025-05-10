@@ -11,8 +11,8 @@ const DeleteAccountModule = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [confirmEmail, setConfirmEmail] = useState('');
-  const [accountDeletedUntil, setAccountDeletedUntil] = useState(null);
-  const [step, setStep] = useState(1); // 1: Warning, 2: Email confirmation
+  const [deleteReason, setDeleteReason] = useState('');
+  const [step, setStep] = useState(1);
 
   const getApiUrl = () => {
     return import.meta.env.VITE_NODE_ENV === 'production'
@@ -44,6 +44,12 @@ const DeleteAccountModule = () => {
       // Call the API to soft-delete the account
       const response = await authFetch(`${getApiUrl()}/api/users/me`, {
         method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          reason: deleteReason 
+        })
       });
 
       if (!response.ok) throw new Error('Failed to delete account');
@@ -51,18 +57,28 @@ const DeleteAccountModule = () => {
       // Calculate the restoration date (30 days from now)
       const restorationDate = new Date();
       restorationDate.setDate(restorationDate.getDate() + 30);
-      setAccountDeletedUntil(restorationDate.toISOString());
-
-      // Log the user out after successful deletion
-      await logout();
       
-      // Navigate to goodbye page with restoration information
+      // Store a flag in sessionStorage to indicate account deletion flow
+      // This will be used by the logout function to prevent redirect
+      sessionStorage.setItem('accountDeletionFlow', 'true');
+      
+      // Navigate to goodbye page first with restoration information
       navigate('/goodbye', { 
         state: { 
           accountDeleted: true, 
           restorationDate: restorationDate.toISOString() 
         } 
       });
+      
+      // Then perform logout with a slight delay to ensure navigation completes
+      setTimeout(async () => {
+        await logout();
+        // Clear the flag after logout is complete
+        setTimeout(() => {
+          sessionStorage.removeItem('accountDeletionFlow');
+        }, 500);
+      }, 300);
+
     } catch (error) {
       console.error('Delete account error:', error);
       setError('Failed to delete your account. Please try again later.');
@@ -145,9 +161,19 @@ const DeleteAccountModule = () => {
                       <span>Your order history will be anonymized</span>
                     </div>
                     <div className={styles.consequenceItem}>
+                      <span className={styles.consequenceIcon}>💬</span>
+                      <span>Your feedback and reviews will be anonymized but remain visible</span>
+                    </div>
+                    <div className={styles.consequenceItem}>
                       <span className={styles.consequenceIcon}>📅</span>
                       <span>You have 30 days to restore your account before permanent deletion</span>
                     </div>
+                  </div>
+                  
+                  <div className={styles.infoNote}>
+                    <strong>Note about your content:</strong> Any reviews or feedback you've provided 
+                    will remain on our platform, but will be anonymized to protect your privacy.
+                    Your contributions are valuable to our community.
                   </div>
                   
                   <p className={styles.finalWarning}>
@@ -195,6 +221,20 @@ const DeleteAccountModule = () => {
                     onChange={(e) => setConfirmEmail(e.target.value)}
                   />
                   
+                  <div className={styles.reasonContainer}>
+                    <label htmlFor="deleteReason">
+                      Help us improve - why are you deleting your account? (optional)
+                    </label>
+                    <textarea
+                      id="deleteReason"
+                      className={styles.reasonInput}
+                      placeholder="Please share your feedback..."
+                      value={deleteReason}
+                      onChange={(e) => setDeleteReason(e.target.value)}
+                      rows={3}
+                    ></textarea>
+                  </div>
+
                   {error && <p className={styles.errorText}>{error}</p>}
                 </div>
                 

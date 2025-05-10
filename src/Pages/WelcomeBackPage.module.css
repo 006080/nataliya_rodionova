@@ -1,0 +1,147 @@
+.welcomeBackContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 90vh;
+  padding: 2rem;
+  background-color: #f8f9fa;
+}
+
+.welcomeBackCard {
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  padding: 3rem;
+  max-width: 700px;
+  width: 100%;
+  text-align: center;
+  animation: fadeInUp 0.8s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.welcomeBackIcon {
+  font-size: 5rem;
+  margin-bottom: 1.5rem;
+  animation: bounce 1.5s ease infinite alternate;
+  display: inline-block;
+}
+
+@keyframes bounce {
+  from {
+    transform: translateY(0) scale(1);
+  }
+  to {
+    transform: translateY(-15px) scale(1.1);
+  }
+}
+
+.welcomeBackTitle {
+  font-size: 2.5rem;
+  color: #198754;
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+}
+
+.messageBox {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  text-align: left;
+}
+
+.welcomeBackMessage {
+  font-size: 1.2rem;
+  color: #212529;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.restoredItemsList {
+  list-style-type: none;
+  padding: 0;
+  margin: 0 0 1.5rem 0;
+}
+
+.restoredItemsList li {
+  position: relative;
+  padding-left: 1.5rem;
+  margin-bottom: 0.75rem;
+  line-height: 1.6;
+}
+
+.restoredItemsList li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: #198754;
+  font-weight: bold;
+}
+
+.continueBrowsing {
+  font-size: 0.95rem;
+  color: #6c757d;
+  margin-top: 1.5rem;
+  font-style: italic;
+}
+
+.navigationButtons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.profileButton, .homeButton {
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  font-weight: 500;
+}
+
+.profileButton {
+  background-color: #198754;
+  color: white;
+}
+
+.profileButton:hover {
+  background-color: #146c43;
+}
+
+.homeButton {
+  background-color: #6c757d;
+  color: white;
+}
+
+.homeButton:hover {
+  background-color: #5c636a;
+}
+
+@media (max-width: 576px) {
+  .welcomeBackCard {
+    padding: 2rem 1.5rem;
+  }
+  
+  .welcomeBackTitle {
+    font-size: 2rem;
+  }
+  
+  .navigationButtons {
+    flex-direction: column;
+  }
+}
