@@ -4,6 +4,8 @@ import CartItem from '../Models/CartItem.js';
 import FavoriteItem from '../Models/FavoriteItem.js';
 import Order from '../Models/Order.js';
 import { authenticate } from '../middleware/auth.js';
+import Review from '../Models/Review.js';
+import Feedback from '../Models/Feedback.js';
 
 const router = express.Router();
 
@@ -47,11 +49,51 @@ router.delete('/api/users/me', authenticate, async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
     
+    // Get deletion reason if provided
+    const { reason } = req.body;
+    
     // Mark user for deletion
     user.markedForDeletion = true;
     user.deletionDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days from now
     
+    // Store deletion reason if provided
+    if (reason) {
+      user.deletionReason = reason;
+    }
+    
     await user.save();
+    
+    // Also mark associated data as pending anonymization
+    // This helps to identify records that will be anonymized when deletion is finalized
+    
+    // Mark cart items (optional - these will be deleted anyway)
+    await CartItem.updateMany(
+      { userId: user._id },
+      { $set: { pendingDeletion: true } }
+    );
+    
+    // Mark favorite items (optional - these will be deleted anyway)
+    await FavoriteItem.updateMany(
+      { userId: user._id },
+      { $set: { pendingDeletion: true } }
+    );
+    
+    // Mark feedback from this user for anonymization
+    await Feedback.updateMany(
+      { email: user.email },
+      { $set: { pendingAnonymization: true, anonymizationDate: user.deletionDate } }
+    );
+    
+    // Mark reviews from this user for anonymization
+    await Review.updateMany(
+      { 
+        $or: [
+          { email: user.email },  // If review has email field
+          { name: user.name }     // Try to match by name as fallback
+        ]
+      },
+      { $set: { pendingAnonymization: true, anonymizationDate: user.deletionDate } }
+    );
     
     // Return success response
     res.json({ 
@@ -83,8 +125,40 @@ router.post('/api/users/restore', authenticate, async (req, res) => {
     // Restore account
     user.markedForDeletion = false;
     user.deletionDate = undefined;
+    user.deletionReason = undefined;
     
     await user.save();
+    
+    // Also restore associated data marked for anonymization/deletion
+    
+    // Restore cart items
+    await CartItem.updateMany(
+      { userId: user._id },
+      { $unset: { pendingDeletion: "" } }
+    );
+    
+    // Restore favorite items
+    await FavoriteItem.updateMany(
+      { userId: user._id },
+      { $unset: { pendingDeletion: "" } }
+    );
+    
+    // Restore feedback from this user
+    await Feedback.updateMany(
+      { email: user.email },
+      { $unset: { pendingAnonymization: "", anonymizationDate: "" } }
+    );
+    
+    // Restore reviews from this user
+    await Review.updateMany(
+      { 
+        $or: [
+          { email: user.email },  // If review has email field
+          { name: user.name }     // Try to match by name as fallback
+        ]
+      },
+      { $unset: { pendingAnonymization: "", anonymizationDate: "" } }
+    );
     
     // Return success response
     res.json({ 
@@ -114,7 +188,7 @@ router.post('/api/admin/cleanup-deleted-users', async (req, res) => {
       deletionDate: { $lt: new Date() }
     });
     
-    // For each user, delete their associated data
+    // For each user, delete or anonymize their associated data
     for (const user of usersToDelete) {
       // Delete cart items
       await CartItem.deleteMany({ userId: user._id });
@@ -125,7 +199,48 @@ router.post('/api/admin/cleanup-deleted-users', async (req, res) => {
       // Anonymize orders (don't delete them, as they're part of business records)
       await Order.updateMany(
         { user: user._id },
-        { $unset: { user: "" }, anonymized: true }
+        { 
+          $unset: { user: "" }, 
+          $set: { 
+            anonymized: true,
+            anonymizedAt: new Date()
+          } 
+        }
+      );
+      
+      // Anonymize feedback submissions
+      await Feedback.updateMany(
+        { email: user.email },
+        {
+          $set: {
+            name: "Anonymous User",
+            surname: "",
+            email: "anonymous@deleted.user",
+            phone: "",
+            anonymized: true,
+            anonymizedAt: new Date()
+          }
+        }
+      );
+      
+      // Anonymize reviews
+      await Review.updateMany(
+        { 
+          $or: [
+            { email: user.email }, // If review has email field
+            { name: user.name }    // Try to match by name as fallback
+          ]
+        },
+        {
+          $set: {
+            name: "Anonymous User",
+            email: "anonymous@deleted.user",
+            ipAddress: "0.0.0.0",
+            userAgent: "",
+            anonymized: true,
+            anonymizedAt: new Date()
+          }
+        }
       );
       
       // Finally delete the user
