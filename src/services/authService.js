@@ -442,35 +442,157 @@ export const clearAllAuthData = async () => {
   }
 }
 
+// export const loginUser = async (email, password) => {
+//   try {
+//     // Important: Reset logout flag - use the correct flag name "isUserLogout"
+//     window.hasLoggedOut = false
+//     sessionStorage.removeItem('isUserLogout')
+
+//     // Also remove the old flag name for compatibility
+//     sessionStorage.removeItem('hasLoggedOut')
+
+//     // Broadcast login to all tabs
+//     if (window.authChannel) {
+//       window.authChannel.postMessage({
+//         type: 'USER_LOGIN',
+//       })
+//     }
+
+//     localStorage.removeItem('cartItems')
+//     localStorage.removeItem('favorites')
+
+//     const apiUrl = getApiUrl()
+
+//     const response = await fetch(`${apiUrl}/api/auth/login`, {
+//       method: 'POST',
+//       headers: { 'Content-Type': 'application/json' },
+//       body: JSON.stringify({ email, password }),
+//       credentials: 'include',
+//     })
+
+//     const data = await response.json()
+
+//     // Handle email verification error
+//     if (response.status === 403 && data.needsVerification) {
+//       return {
+//         success: false,
+//         needsVerification: true,
+//         verificationDetails: data.verificationDetails || { email },
+//       }
+//     }
+
+//     if (!response.ok) {
+//       return {
+//         success: false,
+//         error: data.error || 'Login failed',
+//       }
+//     }
+
+//     setTokens(data.accessToken, data.refreshToken, data.user)
+
+//     const localCartItems = JSON.parse(localStorage.getItem('cartItems') || '[]')
+
+//     if (localCartItems.length > 0) {
+//       try {
+//         await fetch(`${apiUrl}/api/cart/merge`, {
+//           method: 'POST',
+//           headers: {
+//             'Content-Type': 'application/json',
+//             Authorization: `Bearer ${data.accessToken}`,
+//           },
+//           body: JSON.stringify({ items: localCartItems }),
+//           credentials: 'include',
+//         })
+//       } catch (error) {
+//         // Continue despite cart error
+//       }
+//     }
+
+//     const localFavorites = JSON.parse(localStorage.getItem('favorites') || '[]')
+//     if (localFavorites.length > 0) {
+//       try {
+//         await fetch(`${apiUrl}/api/favorites/merge`, {
+//           method: 'POST',
+//           headers: {
+//             'Content-Type': 'application/json',
+//             Authorization: `Bearer ${data.accessToken}`,
+//           },
+//           body: JSON.stringify({ items: localFavorites }),
+//           credentials: 'include',
+//         })
+
+//         // After successful merge, clear local favorites
+//         localStorage.removeItem('favorites')
+//       } catch (error) {
+//         console.error('Error merging favorites:', error)
+//       }
+//     }
+
+//     const authStateChangedEvent = new CustomEvent('auth-state-changed')
+//     window.dispatchEvent(authStateChangedEvent)
+
+//     try {
+//       const cartLoadEvent = new CustomEvent('load-user-cart')
+//       window.dispatchEvent(cartLoadEvent)
+
+//       const favoritesLoadEvent = new CustomEvent('load-user-favorites');
+//       window.dispatchEvent(favoritesLoadEvent);
+//     } catch (cartError) {
+//       console.error('Error triggering cart load:', cartError)
+//     }
+
+//     // Force page reload after allowing time for cart load
+//     setTimeout(() => {
+//       window.location.reload()
+//     }, 300)
+
+//     return {
+//       success: true,
+//       user: data.user,
+//       reloading: true,
+//     }
+//   } catch (error) {
+//     return {
+//       success: false,
+//       error: error.message || 'An unexpected error occurred',
+//     }
+//   }
+// }
+
+// // Make refreshAccessToken available globally
+// window.refreshAccessToken = refreshAccessToken
+
+
+
 export const loginUser = async (email, password) => {
   try {
     // Important: Reset logout flag - use the correct flag name "isUserLogout"
-    window.hasLoggedOut = false
-    sessionStorage.removeItem('isUserLogout')
+    window.hasLoggedOut = false;
+    sessionStorage.removeItem('isUserLogout');
 
     // Also remove the old flag name for compatibility
-    sessionStorage.removeItem('hasLoggedOut')
+    sessionStorage.removeItem('hasLoggedOut');
 
     // Broadcast login to all tabs
     if (window.authChannel) {
       window.authChannel.postMessage({
         type: 'USER_LOGIN',
-      })
+      });
     }
 
-    localStorage.removeItem('cartItems')
-    localStorage.removeItem('favorites')
+    localStorage.removeItem('cartItems');
+    localStorage.removeItem('favorites');
 
-    const apiUrl = getApiUrl()
+    const apiUrl = getApiUrl();
 
     const response = await fetch(`${apiUrl}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
       credentials: 'include',
-    })
+    });
 
-    const data = await response.json()
+    const data = await response.json();
 
     // Handle email verification error
     if (response.status === 403 && data.needsVerification) {
@@ -478,6 +600,32 @@ export const loginUser = async (email, password) => {
         success: false,
         needsVerification: true,
         verificationDetails: data.verificationDetails || { email },
+      };
+    }
+    
+    // Handle account marked for deletion
+    if (response.status === 200 && data.accountMarkedForDeletion) {
+      const restorationResponse = await fetch(`${apiUrl}/api/users/restore`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${data.accessToken}`
+        },
+        credentials: 'include',
+      });
+      
+      const restorationData = await restorationResponse.json();
+      
+      if (restorationResponse.ok) {
+        // Set tokens and proceed with login after restoration
+        setTokens(data.accessToken, data.refreshToken, restorationData.user);
+        
+        return {
+          success: true,
+          user: restorationData.user,
+          accountRestored: true,
+          message: 'Your account has been successfully restored.'
+        };
       }
     }
 
@@ -485,12 +633,12 @@ export const loginUser = async (email, password) => {
       return {
         success: false,
         error: data.error || 'Login failed',
-      }
+      };
     }
 
-    setTokens(data.accessToken, data.refreshToken, data.user)
+    setTokens(data.accessToken, data.refreshToken, data.user);
 
-    const localCartItems = JSON.parse(localStorage.getItem('cartItems') || '[]')
+    const localCartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
 
     if (localCartItems.length > 0) {
       try {
@@ -502,13 +650,13 @@ export const loginUser = async (email, password) => {
           },
           body: JSON.stringify({ items: localCartItems }),
           credentials: 'include',
-        })
+        });
       } catch (error) {
         // Continue despite cart error
       }
     }
 
-    const localFavorites = JSON.parse(localStorage.getItem('favorites') || '[]')
+    const localFavorites = JSON.parse(localStorage.getItem('favorites') || '[]');
     if (localFavorites.length > 0) {
       try {
         await fetch(`${apiUrl}/api/favorites/merge`, {
@@ -519,45 +667,42 @@ export const loginUser = async (email, password) => {
           },
           body: JSON.stringify({ items: localFavorites }),
           credentials: 'include',
-        })
+        });
 
         // After successful merge, clear local favorites
-        localStorage.removeItem('favorites')
+        localStorage.removeItem('favorites');
       } catch (error) {
-        console.error('Error merging favorites:', error)
+        console.error('Error merging favorites:', error);
       }
     }
 
-    const authStateChangedEvent = new CustomEvent('auth-state-changed')
-    window.dispatchEvent(authStateChangedEvent)
+    const authStateChangedEvent = new CustomEvent('auth-state-changed');
+    window.dispatchEvent(authStateChangedEvent);
 
     try {
-      const cartLoadEvent = new CustomEvent('load-user-cart')
-      window.dispatchEvent(cartLoadEvent)
+      const cartLoadEvent = new CustomEvent('load-user-cart');
+      window.dispatchEvent(cartLoadEvent);
 
       const favoritesLoadEvent = new CustomEvent('load-user-favorites');
       window.dispatchEvent(favoritesLoadEvent);
     } catch (cartError) {
-      console.error('Error triggering cart load:', cartError)
+      console.error('Error triggering cart load:', cartError);
     }
 
     // Force page reload after allowing time for cart load
     setTimeout(() => {
-      window.location.reload()
-    }, 300)
+      window.location.reload();
+    }, 300);
 
     return {
       success: true,
       user: data.user,
       reloading: true,
-    }
+    };
   } catch (error) {
     return {
       success: false,
       error: error.message || 'An unexpected error occurred',
-    }
+    };
   }
-}
-
-// Make refreshAccessToken available globally
-window.refreshAccessToken = refreshAccessToken
+};

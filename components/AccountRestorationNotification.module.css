@@ -1,0 +1,89 @@
+.notificationContainer {
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  max-width: 400px;
+  z-index: 1100;
+  transition: all 0.4s ease;
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.hidden {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+.notificationContent {
+  background-color: #d4edda;
+  border-left: 5px solid #28a745;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  animation: slideIn 0.5s forwards;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.notificationIcon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  color: #28a745;
+  margin-right: 1rem;
+}
+
+.notificationMessage {
+  flex-grow: 1;
+}
+
+.notificationMessage h4 {
+  margin: 0 0 0.5rem 0;
+  color: #155724;
+  font-size: 1rem;
+}
+
+.notificationMessage p {
+  margin: 0;
+  color: #155724;
+  font-size: 0.9rem;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: #155724;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 0.5rem;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.closeButton:hover {
+  opacity: 1;
+}
+
+@media (max-width: 576px) {
+  .notificationContainer {
+    right: 1rem;
+    left: 1rem;
+    max-width: none;
+  }
+}
