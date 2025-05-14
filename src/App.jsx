@@ -72,6 +72,7 @@ const AppContent = () => {
         <Route path="/orders/:id" element={<ProtectedRoute><OrderDetail /></ProtectedRoute>} />
         <Route path="/welcome-back" element={<ProtectedRoute><WelcomeBackPage /></ProtectedRoute>} />
         
+
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
 

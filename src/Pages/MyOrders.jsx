@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { authFetch } from '../services/authService';
+import WelcomeBackNotification from '../../components/WelcomeBackNotification';
 
 const MyOrders = () => {
   const { user } = useAuth();
@@ -9,7 +10,9 @@ const MyOrders = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [filter, setFilter] = useState('all');
+  const [showRestorationNotice, setShowRestorationNotice] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const getApiUrl = () => {
     return import.meta.env.VITE_NODE_ENV === "production"
@@ -18,6 +21,51 @@ const MyOrders = () => {
   };
 
   useEffect(() => {
+    console.log('MyOrders component mounted');
+    
+    // Check for account restoration using multiple methods (same as Profile component)
+    
+    // 1. Check for window-level flag (new method)
+    const windowFlagRestoration = !!window.accountWasJustRestored;
+    
+    // 2. Check for location state coming from welcome-back page
+    const locationStateRestoration = location.state?.fromWelcomeBack === true;
+    
+    // 3. Check document referrer (existing method)
+    const referrerRestoration = document.referrer && document.referrer.includes('/welcome-back');
+    
+    // 4. Legacy storage method (as fallback)
+    const storageFlagRestoration = 
+      sessionStorage.getItem('accountRestored') === 'true' || 
+      localStorage.getItem('accountRestored') === 'true';
+    
+    // Combine all methods
+    const wasRestored = windowFlagRestoration || locationStateRestoration || 
+                        referrerRestoration || storageFlagRestoration;
+    
+    console.log('Account restoration detection in MyOrders:', {
+      windowFlag: windowFlagRestoration,
+      locationState: locationStateRestoration,
+      referrer: referrerRestoration,
+      storageFlag: storageFlagRestoration,
+      combined: wasRestored
+    });
+    
+    if (wasRestored) {
+      console.log('MyOrders: Showing restoration notice');
+      setShowRestorationNotice(true);
+      
+      // Clear all restoration flags
+      window.accountWasJustRestored = false;
+      sessionStorage.removeItem('accountRestored');
+      localStorage.removeItem('accountRestored');
+      
+      // Clear location state if needed
+      if (location.state?.fromWelcomeBack) {
+        window.history.replaceState({}, document.title);
+      }
+    }
+
     const fetchOrders = async () => {
       try {
         setLoading(true);
@@ -42,7 +90,7 @@ const MyOrders = () => {
     if (user?.id) {
       fetchOrders();
     }
-  }, [user]);
+  }, [user, location]);
 
   // Filter orders based on selected filter
   const filteredOrders = () => {
@@ -97,6 +145,11 @@ const MyOrders = () => {
 
   return (
     <div className="my-orders-container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
+      {/* Add WelcomeBackNotification at the top of the component */}
+      {showRestorationNotice && (
+        <WelcomeBackNotification onClose={() => setShowRestorationNotice(false)} />
+      )}
+      
       <h1>My Orders</h1>
       
       <div className="filter-section" style={{ 

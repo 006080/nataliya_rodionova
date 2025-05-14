@@ -10,7 +10,7 @@ const WelcomeBackNotification = ({ onClose }) => {
       setTimeout(() => {
         onClose && onClose();
       }, 500); 
-    }, 10000);
+    }, 12000);
     
     return () => clearTimeout(timer);
   }, [onClose]);

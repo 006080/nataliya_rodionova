@@ -163,7 +163,9 @@ router.post('/api/auth/login', loginLimiter, trackLoginAttempts, async (req, res
         name: user.name,
         email: user.email,
         role: user.role,
-        emailVerified: user.emailVerified
+        emailVerified: user.emailVerified,
+        markedForDeletion: user.markedForDeletion || false,  // Include deletion status
+        deletionDate: user.deletionDate || null  
       },
     });
   } catch (error) {

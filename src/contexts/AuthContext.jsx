@@ -125,26 +125,37 @@ function AuthProviderComponent({ children }) {
       setAuthError('');
       setAccountRestored(false);
       
+      console.log('AuthContext: Starting login process');
+      
       const result = await loginUser(email, password);
       
-
+      console.log('AuthContext: Login result:', {
+        success: result.success,
+        hasUser: !!result.user,
+        accountRestored: !!result.accountRestored,
+        preventReload: !!result.preventReload
+      });
+      
       if (!result.success) {
         setAuthError(result.error || 'Login failed');
         return result;
       }
       
-      // Check if account was restored
-      if (result.accountRestored) {
-        setAccountRestored(true);
-        sessionStorage.setItem('accountRestored', 'true');
-      }
-
-      if (result.user && !result.reloading) {
+      // Update user state with login result if we have a user object
+      if (result.user) {
         setUser(result.user);
+        sessionStorage.setItem('sessionActive', 'true');
+      }
+      
+      // CRITICAL FIX: Handle account restoration
+      if (result.accountRestored) {
+        console.log('AuthContext: Account restoration detected');
+        setAccountRestored(true);
       }
       
       return result;
     } catch (error) {
+      console.error('AuthContext login error:', error);
       setAuthError(error.message || 'An unexpected error occurred');
       return {
         success: false,
@@ -152,7 +163,6 @@ function AuthProviderComponent({ children }) {
       };
     }
   };
-
 
 
   const register = async (name, email, password) => {

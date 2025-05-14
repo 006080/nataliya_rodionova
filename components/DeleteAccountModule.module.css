@@ -21,14 +21,6 @@
   margin-bottom: 1rem;
 }
 
-.warningIcon {
-  flex-shrink: 0;
-  margin-right: 1rem;
-  color: #dc3545;
-  width: 24px;
-  height: 24px;
-}
-
 .warningContent {
   flex-grow: 1;
 }
@@ -113,12 +105,6 @@
   border-bottom: 1px solid #dee2e6;
 }
 
-.modalIcon {
-  width: 24px;
-  height: 24px;
-  color: #dc3545;
-  margin-right: 0.75rem;
-}
 
 .modalHeader h3 {
   margin: 0;
@@ -214,6 +200,10 @@
 .button:disabled {
   opacity: 0.65;
   cursor: not-allowed;
+}
+
+.buttonClose {
+  margin-top: 3rem;
 }
 
 .finalWarning {

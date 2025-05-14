@@ -1,6 +1,7 @@
+
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { authFetch } from '../services/authService'
 import DeleteAccountModule from '../../components/DeleteAccountModule'
 import WelcomeBackNotification from '../../components/WelcomeBackNotification'
@@ -13,6 +14,7 @@ const Profile = () => {
   const [error, setError] = useState('')
   const [showRestorationNotice, setShowRestorationNotice] = useState(false)
   const navigate = useNavigate()
+  const location = useLocation()
 
   const getApiUrl = () => {
     return import.meta.env.VITE_NODE_ENV === 'production'
@@ -23,20 +25,45 @@ const Profile = () => {
   useEffect(() => {
     console.log('Profile component mounted');
     
-    // Check all possible places for account restoration flag
-    const wasRestored = 
+    // 1. Check for window-level flag (new method)
+    const windowFlagRestoration = !!window.accountWasJustRestored;
+    
+    // 2. Check for location state coming from welcome-back page
+    const locationStateRestoration = location.state?.fromWelcomeBack === true;
+    
+    // 3. Check document referrer (existing method)
+    const referrerRestoration = document.referrer && document.referrer.includes('/welcome-back');
+    
+    // 4. Legacy storage method (as fallback)
+    const storageFlagRestoration = 
       sessionStorage.getItem('accountRestored') === 'true' || 
       localStorage.getItem('accountRestored') === 'true';
     
-    console.log('Account restoration detected:', wasRestored);
+    // Combine all methods
+    const wasRestored = windowFlagRestoration || locationStateRestoration || 
+                        referrerRestoration || storageFlagRestoration;
+    
+    console.log('Account restoration detection:', {
+      windowFlag: windowFlagRestoration,
+      locationState: locationStateRestoration,
+      referrer: referrerRestoration,
+      storageFlag: storageFlagRestoration,
+      combined: wasRestored
+    });
     
     if (wasRestored) {
       console.log('Showing restoration notice');
       setShowRestorationNotice(true);
       
-      // Clear all flags
+      // Clear all restoration flags
+      window.accountWasJustRestored = false;
       sessionStorage.removeItem('accountRestored');
       localStorage.removeItem('accountRestored');
+      
+      // Clear location state if needed
+      if (location.state?.fromWelcomeBack) {
+        window.history.replaceState({}, document.title);
+      }
     }
     
     // Fetch real user orders from the server
@@ -64,7 +91,7 @@ const Profile = () => {
     if (user?.id) {
       fetchOrders()
     }
-  }, [user])
+  }, [user, location])
 
   const handleLogout = async () => {
     await logout()

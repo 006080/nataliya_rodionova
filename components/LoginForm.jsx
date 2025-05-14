@@ -10,16 +10,19 @@ const LoginForm = () => {
   const [formError, setFormError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [needsVerification, setNeedsVerification] = useState(false);
-  // const [verificationDetails, setVerificationDetails] = useState(null);
   const [infoMessage, setInfoMessage] = useState('');
   
   const { login, resendVerificationEmail } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
+  // Default to home page if no 'from' is provided
   const from = location.state?.from || '/';
   
   useEffect(() => {
+    console.log('LoginForm mounted');
+    
+    // Load remembered email
     const rememberedEmail = localStorage.getItem('rememberedEmail');
     if (rememberedEmail) {
       setEmail(rememberedEmail);
@@ -38,6 +41,7 @@ const LoginForm = () => {
         setInfoMessage(location.state.message || 'Your email has been verified! You can now log in.');
       }
 
+      // Clear the location state to avoid persisting messages
       window.history.replaceState({}, document.title);
     }
   }, [location, email]);
@@ -45,7 +49,7 @@ const LoginForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    console.log('Login form submission');
+    console.log('LoginForm: Form submission started');
 
     if (!email.trim()) {
       setFormError('Email is required');
@@ -61,45 +65,57 @@ const LoginForm = () => {
       setIsSubmitting(true);
       setFormError('');
       setNeedsVerification(false);
-      // setVerificationDetails(null);
       
-      console.log('Attempting login with email:', email);  
+      console.log('LoginForm: Attempting login with email:', email);  
       const result = await login(email, password);
-      console.log('Login result:', result);
+      console.log('LoginForm: Login result:', result);
       
       if (result.success) {
+        // Handle "remember me" option
         if (remember) {
           localStorage.setItem('rememberedEmail', email);
         } else {
           localStorage.removeItem('rememberedEmail');
         }
         
-        // Check if account was restored
+        // CRITICAL FIX: Handle account restoration redirection
         if (result.accountRestored) {
-          console.log('Account was restored, redirecting to welcome-back page');
-          sessionStorage.setItem('accountRestored', 'true');
-          localStorage.setItem('accountRestored', 'true');
-          navigate('/welcome-back', { replace: true, state: { from } });
+          console.log('LoginForm: Account restoration detected - redirecting to welcome-back page');
+          
+          // Set a reliable flag for the welcome back page
+          window.accountWasJustRestored = true;
+          
+          // Redirect to welcome back page
+          navigate('/welcome-back', { 
+            replace: true, 
+            state: { 
+              from,
+              isAccountRestoration: true // Flag to ensure we know this is a restoration flow
+            } 
+          });
           return;
         }
         
-        console.log('Login successful, navigating to:', from);
-        setTimeout(() => {
-          window.location.reload();
-        }, 200);
-        navigate(from, { replace: true });
+        // Normal login flow - if result has preventReload, navigate programmatically
+        if (result.preventReload) {
+          console.log(`LoginForm: Navigating to: ${result.redirectingTo || '/'}`);
+          navigate(result.redirectingTo || '/', { replace: true });
+        } else {
+          console.log('LoginForm: Normal login - page will reload/redirect via loginUser');
+        }
       } 
       else if (result.needsVerification) {
+        console.log('LoginForm: Email verification required');
         setNeedsVerification(true);
-        // setVerificationDetails(result.verificationDetails);
         setInfoMessage('');
       }
       else {
+        console.log('LoginForm: Login failed:', result.error);
         setFormError(result.error || 'Login failed');
         setInfoMessage('');
       }
     } catch (error) {
-      console.error('Login submission error:', error);
+      console.error('LoginForm: Submission error:', error);
       setFormError('An unexpected error occurred.');
       setInfoMessage('');
     } finally {

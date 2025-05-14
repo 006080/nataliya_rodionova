@@ -442,134 +442,11 @@ export const clearAllAuthData = async () => {
   }
 }
 
-// export const loginUser = async (email, password) => {
-//   try {
-//     // Important: Reset logout flag - use the correct flag name "isUserLogout"
-//     window.hasLoggedOut = false
-//     sessionStorage.removeItem('isUserLogout')
 
-//     // Also remove the old flag name for compatibility
-//     sessionStorage.removeItem('hasLoggedOut')
-
-//     // Broadcast login to all tabs
-//     if (window.authChannel) {
-//       window.authChannel.postMessage({
-//         type: 'USER_LOGIN',
-//       })
-//     }
-
-//     localStorage.removeItem('cartItems')
-//     localStorage.removeItem('favorites')
-
-//     const apiUrl = getApiUrl()
-
-//     const response = await fetch(`${apiUrl}/api/auth/login`, {
-//       method: 'POST',
-//       headers: { 'Content-Type': 'application/json' },
-//       body: JSON.stringify({ email, password }),
-//       credentials: 'include',
-//     })
-
-//     const data = await response.json()
-
-//     // Handle email verification error
-//     if (response.status === 403 && data.needsVerification) {
-//       return {
-//         success: false,
-//         needsVerification: true,
-//         verificationDetails: data.verificationDetails || { email },
-//       }
-//     }
-
-//     if (!response.ok) {
-//       return {
-//         success: false,
-//         error: data.error || 'Login failed',
-//       }
-//     }
-
-//     setTokens(data.accessToken, data.refreshToken, data.user)
-
-//     const localCartItems = JSON.parse(localStorage.getItem('cartItems') || '[]')
-
-//     if (localCartItems.length > 0) {
-//       try {
-//         await fetch(`${apiUrl}/api/cart/merge`, {
-//           method: 'POST',
-//           headers: {
-//             'Content-Type': 'application/json',
-//             Authorization: `Bearer ${data.accessToken}`,
-//           },
-//           body: JSON.stringify({ items: localCartItems }),
-//           credentials: 'include',
-//         })
-//       } catch (error) {
-//         // Continue despite cart error
-//       }
-//     }
-
-//     const localFavorites = JSON.parse(localStorage.getItem('favorites') || '[]')
-//     if (localFavorites.length > 0) {
-//       try {
-//         await fetch(`${apiUrl}/api/favorites/merge`, {
-//           method: 'POST',
-//           headers: {
-//             'Content-Type': 'application/json',
-//             Authorization: `Bearer ${data.accessToken}`,
-//           },
-//           body: JSON.stringify({ items: localFavorites }),
-//           credentials: 'include',
-//         })
-
-//         // After successful merge, clear local favorites
-//         localStorage.removeItem('favorites')
-//       } catch (error) {
-//         console.error('Error merging favorites:', error)
-//       }
-//     }
-
-//     const authStateChangedEvent = new CustomEvent('auth-state-changed')
-//     window.dispatchEvent(authStateChangedEvent)
-
-//     try {
-//       const cartLoadEvent = new CustomEvent('load-user-cart')
-//       window.dispatchEvent(cartLoadEvent)
-
-//       const favoritesLoadEvent = new CustomEvent('load-user-favorites');
-//       window.dispatchEvent(favoritesLoadEvent);
-//     } catch (cartError) {
-//       console.error('Error triggering cart load:', cartError)
-//     }
-
-//     // Force page reload after allowing time for cart load
-//     setTimeout(() => {
-//       window.location.reload()
-//     }, 300)
-
-//     return {
-//       success: true,
-//       user: data.user,
-//       reloading: true,
-//     }
-//   } catch (error) {
-//     return {
-//       success: false,
-//       error: error.message || 'An unexpected error occurred',
-//     }
-//   }
-// }
-
-// // Make refreshAccessToken available globally
-// window.refreshAccessToken = refreshAccessToken
-
-
-
-// Modified login function in authService.js with improved account restoration handling
 export const loginUser = async (email, password) => {
   try {
     console.log('Login attempt for:', email);
     
-    // Important: Reset logout flag
     window.hasLoggedOut = false;
     sessionStorage.removeItem('isUserLogout');
     sessionStorage.removeItem('hasLoggedOut');
@@ -636,17 +513,20 @@ export const loginUser = async (email, password) => {
         console.log('Restoration response:', restorationData);
         
         if (restorationResponse.ok && restorationData.success) {
-          // Explicitly set the restoration flag
-          sessionStorage.setItem('accountRestored', 'true');
-          localStorage.setItem('accountRestored', 'true'); // Backup in local storage too
+          // Set window-level flag for restoration
+          window.accountWasJustRestored = true;
           
-          console.log('Account was successfully restored - flags set');
+          // Update user in memory with restored data
+          if (restorationData.user) {
+            setTokens(data.accessToken, data.refreshToken, restorationData.user);
+          }
           
           return {
             success: true,
             user: restorationData.user || data.user,
             accountRestored: true,
-            message: 'Your account has been successfully restored.'
+            message: 'Your account has been successfully restored.',
+            preventReload: true  // Prevent default page reload
           };
         }
       } catch (restoreError) {
@@ -669,7 +549,6 @@ export const loginUser = async (email, password) => {
           credentials: 'include',
         });
       } catch (error) {
-        // Continue despite cart error
         console.error('Error merging cart:', error);
       }
     }
@@ -705,15 +584,16 @@ export const loginUser = async (email, password) => {
       console.error('Error triggering cart load:', cartError);
     }
 
-    // Force page reload after allowing time for cart load
+    // UPDATED: Navigate to home after login instead of just reloading
     setTimeout(() => {
-      window.location.reload();
+      window.location.href = '/'; // Redirect to home page
     }, 300);
 
     return {
       success: true,
       user: data.user,
       reloading: true,
+      redirectingTo: '/' // Add this to indicate redirection destination
     };
   } catch (error) {
     console.error('Login error:', error);

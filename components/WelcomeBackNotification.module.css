@@ -78,9 +78,9 @@
   transition: opacity 0.2s;
 }
 
-.closeButton:hover {
+/* .closeButton:hover {
   opacity: 1;
-}
+} */
 
 @media (max-width: 576px) {
   .welcomeBackContainer {

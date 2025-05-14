@@ -96,7 +96,7 @@ const DeleteAccountModule = () => {
           <h3 className={styles.subheading}>Delete Your Account</h3>
           <div className={styles.warningBox}>
             <div className={styles.warningIcon}>
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#dc3545" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
                 <line x1="12" y1="9" x2="12" y2="13"></line>
                 <line x1="12" y1="17" x2="12.01" y2="17"></line>
@@ -119,7 +119,7 @@ const DeleteAccountModule = () => {
         
         <button
           onClick={openModal}
-          className={`${styles.button} ${styles.buttonDanger} ${styles.buttonMarginTop}`}
+          className={`${styles.buttonDanger}`}
         >
           Delete My Account
         </button>
@@ -135,7 +135,7 @@ const DeleteAccountModule = () => {
               <>
                 <div className={styles.modalHeader}>
                   <div className={styles.modalIcon}>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#dc3545" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
                       <line x1="12" y1="9" x2="12" y2="13"></line>
                       <line x1="12" y1="17" x2="12.01" y2="17"></line>
@@ -183,13 +183,13 @@ const DeleteAccountModule = () => {
                 
                 <div className={styles.modalFooter}>
                   <button 
-                    className={`${styles.button} ${styles.buttonSecondary}`} 
+                    className={`${styles.buttonSecondary}`} 
                     onClick={closeModal}
                   >
                     Cancel
                   </button>
                   <button 
-                    className={`${styles.button} ${styles.buttonDanger}`} 
+                    className={`${styles.buttonDanger}`} 
                     onClick={proceed}
                   >
                     Continue Deletion
@@ -200,7 +200,7 @@ const DeleteAccountModule = () => {
               <>
                 <div className={styles.modalHeader}>
                   <div className={styles.modalIcon}>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <circle cx="12" cy="12" r="10"></circle>
                       <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
                     </svg>
@@ -240,14 +240,14 @@ const DeleteAccountModule = () => {
                 
                 <div className={styles.modalFooter}>
                   <button 
-                    className={`${styles.button} ${styles.buttonSecondary}`} 
+                    className={`${styles.buttonSecondary}`} 
                     onClick={closeModal}
                     disabled={loading}
                   >
                     Cancel
                   </button>
                   <button 
-                    className={`${styles.button} ${styles.buttonDanger}`} 
+                    className={`${styles.buttonDanger}`} 
                     onClick={handleDeleteAccount}
                     disabled={confirmEmail !== 'DELETE' || loading}
                   >

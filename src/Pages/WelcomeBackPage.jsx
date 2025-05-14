@@ -1,19 +1,34 @@
-import { useEffect } from 'react';
+import { useEffect} from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styles from './WelcomeBackPage.module.css';
 
 const WelcomeBackPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  
   const from = location.state?.from || '/profile';
+  const isAccountRestoration = location.state?.isAccountRestoration || false;
   
   useEffect(() => {
-    const timer = setTimeout(() => {
-      navigate(from);
-    }, 10000);
+    console.log('WelcomeBackPage mounted, checking restoration state');
     
-    return () => clearTimeout(timer);
-  }, [navigate, from]);
+    const wasRestored = window.accountWasJustRestored === true || isAccountRestoration;
+    
+    if (!wasRestored) {
+      console.log('WelcomeBackPage: Not a restoration flow, redirecting to profile');
+      navigate('/profile', { replace: true });
+      return;
+    }
+  }, [navigate, from, isAccountRestoration]);
+  
+  const handleContinue = () => {
+    navigate(from, { 
+      replace: true,
+      state: { 
+        fromWelcomeBack: true 
+      }
+    });
+  };
   
   return (
     <div className={styles.welcomeBackContainer}>
@@ -35,18 +50,14 @@ const WelcomeBackPage = () => {
             <li>Your reviews and feedback remain connected to your account</li>
             <li>Your cart items and favorited products are available</li>
           </ul>
-          
-          <p className={styles.continueBrowsing}>
-            You'll be automatically redirected to your profile in a few seconds, or you can click the button below to continue.
-          </p>
         </div>
         
         <div className={styles.navigationButtons}>
           <button 
-            onClick={() => navigate('/profile')}
+            onClick={handleContinue}
             className={styles.profileButton}
           >
-            Go to My Profile
+            Continue Now
           </button>
           <button 
             onClick={() => navigate('/')}
