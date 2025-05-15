@@ -34,6 +34,7 @@ function AuthProviderComponent({ children }) {
   });
   const [loading, setLoading] = useState(true);
   const [authError, setAuthError] = useState('');
+  const [accountRestored, setAccountRestored] = useState(false);
 
   useEffect(() => {
     const initAuth = async () => {
@@ -119,26 +120,42 @@ function AuthProviderComponent({ children }) {
   }, []);
 
 
-
   const login = async (email, password) => {
     try {
       setAuthError('');
+      setAccountRestored(false);
+      
+      console.log('AuthContext: Starting login process');
       
       const result = await loginUser(email, password);
       
-
+      console.log('AuthContext: Login result:', {
+        success: result.success,
+        hasUser: !!result.user,
+        accountRestored: !!result.accountRestored,
+        preventReload: !!result.preventReload
+      });
+      
       if (!result.success) {
         setAuthError(result.error || 'Login failed');
         return result;
       }
       
-
-      if (result.user && !result.reloading) {
+      // Update user state with login result if we have a user object
+      if (result.user) {
         setUser(result.user);
+        sessionStorage.setItem('sessionActive', 'true');
+      }
+      
+      // CRITICAL FIX: Handle account restoration
+      if (result.accountRestored) {
+        console.log('AuthContext: Account restoration detected');
+        setAccountRestored(true);
       }
       
       return result;
     } catch (error) {
+      console.error('AuthContext login error:', error);
       setAuthError(error.message || 'An unexpected error occurred');
       return {
         success: false,
@@ -146,7 +163,6 @@ function AuthProviderComponent({ children }) {
       };
     }
   };
-
 
 
   const register = async (name, email, password) => {
@@ -207,10 +223,13 @@ function AuthProviderComponent({ children }) {
     }
   };
 
-  // Logout handler
+
   const logout = async () => {
     try {
       setLoading(true);
+      
+      // Check if we're in the account deletion flow
+      const isAccountDeletionFlow = sessionStorage.getItem('accountDeletionFlow') === 'true';
       
       // Clear authentication data
       const success = await clearAllAuthData();
@@ -240,12 +259,15 @@ function AuthProviderComponent({ children }) {
         }
       }
       
-      // Reload page and redirect to login
-      window.location.reload(true);
-      window.location.href = '/login';
+      if (!isAccountDeletionFlow) {
+        // Only for normal logout: reload page and redirect to login
+        window.location.reload(true);
+        window.location.href = '/login';
+      }
       
       return true;
     } catch (error) {
+      console.error('Logout error:', error);
       return false;
     } finally {
       setLoading(false);
@@ -258,17 +280,19 @@ function AuthProviderComponent({ children }) {
     isAuthenticated: !!user?.id && isAuthenticated(),
     loading,
     authError,
+    accountRestored,
     login,
     register,
     logout,
     resendVerificationEmail,
     clearAuthError: () => setAuthError(''),
+    clearAccountRestored: () => setAccountRestored(false),
     authFetch,
     setUser: (newUserData) => {
       window.currentUser = newUserData;
       setUser(newUserData);
     },
-  }), [user, loading, authError]);
+  }), [user, loading, authError, accountRestored]);
 
   return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
 }

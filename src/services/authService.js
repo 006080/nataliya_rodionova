@@ -442,35 +442,36 @@ export const clearAllAuthData = async () => {
   }
 }
 
+
 export const loginUser = async (email, password) => {
   try {
-    // Important: Reset logout flag - use the correct flag name "isUserLogout"
-    window.hasLoggedOut = false
-    sessionStorage.removeItem('isUserLogout')
-
-    // Also remove the old flag name for compatibility
-    sessionStorage.removeItem('hasLoggedOut')
+    console.log('Login attempt for:', email);
+    
+    window.hasLoggedOut = false;
+    sessionStorage.removeItem('isUserLogout');
+    sessionStorage.removeItem('hasLoggedOut');
 
     // Broadcast login to all tabs
     if (window.authChannel) {
       window.authChannel.postMessage({
         type: 'USER_LOGIN',
-      })
+      });
     }
 
-    localStorage.removeItem('cartItems')
-    localStorage.removeItem('favorites')
+    localStorage.removeItem('cartItems');
+    localStorage.removeItem('favorites');
 
-    const apiUrl = getApiUrl()
+    const apiUrl = getApiUrl();
 
     const response = await fetch(`${apiUrl}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
       credentials: 'include',
-    })
+    });
 
-    const data = await response.json()
+    const data = await response.json();
+    console.log('Login response data:', data);
 
     // Handle email verification error
     if (response.status === 403 && data.needsVerification) {
@@ -478,20 +479,64 @@ export const loginUser = async (email, password) => {
         success: false,
         needsVerification: true,
         verificationDetails: data.verificationDetails || { email },
-      }
+      };
     }
 
     if (!response.ok) {
       return {
         success: false,
         error: data.error || 'Login failed',
+      };
+    }
+    
+    // Set tokens and update memory
+    setTokens(data.accessToken, data.refreshToken, data.user);
+    
+    // Check if user's account was marked for deletion (needs restoration)
+    const needsRestoration = data.user && data.user.markedForDeletion === true;
+    console.log('Account needs restoration:', needsRestoration);
+    
+    if (needsRestoration) {
+      console.log('Attempting to restore account for user:', data.user.email);
+      try {
+        // Call the restore endpoint
+        const restorationResponse = await fetch(`${apiUrl}/api/users/restore`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${data.accessToken}`
+          },
+          credentials: 'include',
+        });
+        
+        const restorationData = await restorationResponse.json();
+        console.log('Restoration response:', restorationData);
+        
+        if (restorationResponse.ok && restorationData.success) {
+          // Set window-level flag for restoration
+          window.accountWasJustRestored = true;
+          
+          // Update user in memory with restored data
+          if (restorationData.user) {
+            setTokens(data.accessToken, data.refreshToken, restorationData.user);
+          }
+          
+          return {
+            success: true,
+            user: restorationData.user || data.user,
+            accountRestored: true,
+            message: 'Your account has been successfully restored.',
+            preventReload: true  // Prevent default page reload
+          };
+        }
+      } catch (restoreError) {
+        console.error('Error restoring account:', restoreError);
+        // Continue with login even if restoration fails
       }
     }
 
-    setTokens(data.accessToken, data.refreshToken, data.user)
-
-    const localCartItems = JSON.parse(localStorage.getItem('cartItems') || '[]')
-
+    // Regular login flow for cart/favorites merging
+    const localCartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
     if (localCartItems.length > 0) {
       try {
         await fetch(`${apiUrl}/api/cart/merge`, {
@@ -502,13 +547,13 @@ export const loginUser = async (email, password) => {
           },
           body: JSON.stringify({ items: localCartItems }),
           credentials: 'include',
-        })
+        });
       } catch (error) {
-        // Continue despite cart error
+        console.error('Error merging cart:', error);
       }
     }
 
-    const localFavorites = JSON.parse(localStorage.getItem('favorites') || '[]')
+    const localFavorites = JSON.parse(localStorage.getItem('favorites') || '[]');
     if (localFavorites.length > 0) {
       try {
         await fetch(`${apiUrl}/api/favorites/merge`, {
@@ -519,45 +564,42 @@ export const loginUser = async (email, password) => {
           },
           body: JSON.stringify({ items: localFavorites }),
           credentials: 'include',
-        })
-
-        // After successful merge, clear local favorites
-        localStorage.removeItem('favorites')
+        });
+        localStorage.removeItem('favorites');
       } catch (error) {
-        console.error('Error merging favorites:', error)
+        console.error('Error merging favorites:', error);
       }
     }
 
-    const authStateChangedEvent = new CustomEvent('auth-state-changed')
-    window.dispatchEvent(authStateChangedEvent)
+    const authStateChangedEvent = new CustomEvent('auth-state-changed');
+    window.dispatchEvent(authStateChangedEvent);
 
     try {
-      const cartLoadEvent = new CustomEvent('load-user-cart')
-      window.dispatchEvent(cartLoadEvent)
+      const cartLoadEvent = new CustomEvent('load-user-cart');
+      window.dispatchEvent(cartLoadEvent);
 
       const favoritesLoadEvent = new CustomEvent('load-user-favorites');
       window.dispatchEvent(favoritesLoadEvent);
     } catch (cartError) {
-      console.error('Error triggering cart load:', cartError)
+      console.error('Error triggering cart load:', cartError);
     }
 
-    // Force page reload after allowing time for cart load
+    // UPDATED: Navigate to home after login instead of just reloading
     setTimeout(() => {
-      window.location.reload()
-    }, 300)
+      window.location.href = '/'; // Redirect to home page
+    }, 300);
 
     return {
       success: true,
       user: data.user,
       reloading: true,
-    }
+      redirectingTo: '/' // Add this to indicate redirection destination
+    };
   } catch (error) {
+    console.error('Login error:', error);
     return {
       success: false,
       error: error.message || 'An unexpected error occurred',
-    }
+    };
   }
-}
-
-// Make refreshAccessToken available globally
-window.refreshAccessToken = refreshAccessToken
+};

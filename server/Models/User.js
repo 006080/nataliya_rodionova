@@ -77,7 +77,18 @@ const UserSchema = new mongoose.Schema({
     userAgent: String,
     ip: String,
     lastUsed: Date
-  }]
+  }],
+  // Account deletion fields
+  markedForDeletion: {
+    type: Boolean,
+    default: false
+  },
+  deletionDate: {
+    type: Date
+  },
+  deletionReason: {
+    type: String
+  }
 }, { timestamps: true });
 
 // UserSchema.index({ email: 1 });
@@ -85,6 +96,7 @@ UserSchema.index({ role: 1 });
 UserSchema.index({ registeredAt: 1 });
 UserSchema.index({ emailVerificationToken: 1 }, { sparse: true });
 UserSchema.index({ passwordResetToken: 1 }, { sparse: true });
+UserSchema.index({ markedForDeletion: 1, deletionDate: 1 }); 
 
 /**
  * Improved password comparison method with better error handling
@@ -193,13 +205,47 @@ UserSchema.statics.resetPassword = async function(userId, newPassword) {
   }
 };
 
+
+UserSchema.statics.restoreAccount = async function(userId) {
+  try {
+    // Use native MongoDB operations to ensure fields are properly updated
+    const result = await mongoose.connection.db.collection('users').updateOne(
+      { _id: mongoose.Types.ObjectId(userId) },
+      { 
+        $set: { markedForDeletion: false },
+        $unset: { deletionDate: "", deletionReason: "" }
+      }
+    );
+    
+    if (result.modifiedCount === 0) {
+      throw new Error('User not found or account is not marked for deletion');
+    }
+    
+    // Fetch the updated user document
+    return await this.findById(userId);
+  } catch (error) {
+    console.error('Account restoration error:', error);
+    throw error;
+  }
+};
+
 // Custom query methods
 UserSchema.query.byRole = function(role) {
   return this.where({ role });
 };
 
 UserSchema.query.active = function() {
-  return this.where({ locked: false });
+  return this.where({ 
+    locked: false,
+    markedForDeletion: { $ne: true } 
+  });
+};
+
+UserSchema.query.pendingDeletion = function() {
+  return this.where({
+    markedForDeletion: true,
+    deletionDate: { $exists: true }
+  });
 };
 
 const User = mongoose.model('User', UserSchema);

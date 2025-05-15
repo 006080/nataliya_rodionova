@@ -1,0 +1,149 @@
+.welcomeBackContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  padding: 2rem;
+  background-color: #f8f9fa;
+}
+
+.welcomeBackCard {
+  width: 100%;
+  max-width: 600px;
+  padding: 2.5rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  animation: fadeIn 0.6s ease-out;
+}
+
+.welcomeBackIcon {
+  font-size: 5rem;
+  margin-bottom: 1.5rem;
+  animation: bounce 2s infinite;
+}
+
+.welcomeBackTitle {
+  font-size: 2.5rem;
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+}
+
+.messageBox {
+  margin-bottom: 2rem;
+}
+
+.welcomeBackMessage {
+  font-size: 1.25rem;
+  color: #34495e;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.restoredItemsList {
+  text-align: left;
+  background-color: #f8f9fa;
+  padding: 1.5rem 2rem;
+  border-radius: 8px;
+  margin: 1.5rem 0;
+  list-style-type: none;
+}
+
+.restoredItemsList li {
+  margin: 0.75rem 0;
+  position: relative;
+  padding-left: 1.5rem;
+  color: #2c3e50;
+}
+
+.restoredItemsList li:before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: #27ae60;
+  font-weight: bold;
+}
+
+.continueBrowsing {
+  font-size: 1rem;
+  color: #7f8c8d;
+  margin-top: 1.5rem;
+}
+
+.navigationButtons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.profileButton, .homeButton {
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.profileButton {
+  background-color: #3498db;
+  color: white;
+}
+
+.profileButton:hover {
+  background-color: #2980b9;
+}
+
+.homeButton {
+  background-color: #f8f9fa;
+  color: #2c3e50;
+  border: 1px solid #ddd;
+}
+
+.homeButton:hover {
+  background-color: #ecf0f1;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-20px);
+  }
+  60% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .welcomeBackCard {
+    padding: 1.5rem;
+  }
+  
+  .welcomeBackTitle {
+    font-size: 2rem;
+  }
+  
+  .navigationButtons {
+    flex-direction: column;
+  }
+  
+  .profileButton, .homeButton {
+    width: 100%;
+  }
+}

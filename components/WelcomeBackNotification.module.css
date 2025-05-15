@@ -1,0 +1,91 @@
+.welcomeBackContainer {
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  max-width: 400px;
+  z-index: 1100;
+  transition: all 0.4s ease;
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.hidden {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+.welcomeBackContent {
+  background-color: #d1e7dd;
+  border-left: 5px solid #198754;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  animation: slideIn 0.5s forwards;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.welcomeBackIcon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  color: #198754;
+  margin-right: 1rem;
+}
+
+.welcomeBackMessage {
+  flex-grow: 1;
+}
+
+.welcomeBackMessage h4 {
+  margin: 0 0 0.5rem 0;
+  color: #0f5132;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.welcomeBackMessage p {
+  margin: 0;
+  color: #0f5132;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: #0f5132;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 0.5rem;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+/* .closeButton:hover {
+  opacity: 1;
+} */
+
+@media (max-width: 576px) {
+  .welcomeBackContainer {
+    right: 1rem;
+    left: 1rem;
+    max-width: none;
+  }
+}

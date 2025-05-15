@@ -163,7 +163,9 @@ router.post('/api/auth/login', loginLimiter, trackLoginAttempts, async (req, res
         name: user.name,
         email: user.email,
         role: user.role,
-        emailVerified: user.emailVerified
+        emailVerified: user.emailVerified,
+        markedForDeletion: user.markedForDeletion || false, 
+        deletionDate: user.deletionDate || null  
       },
     });
   } catch (error) {
@@ -686,6 +688,7 @@ router.post('/api/auth/reset-password/:token', async (req, res) => {
     res.status(500).json({ error: 'Internal server error.' });
   }
 });
+
 
 // Admin route to reset a user's password
 router.post('/api/admin/reset-user-password', async (req, res) => {

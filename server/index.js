@@ -16,13 +16,14 @@ import bodyParser from "body-parser";
 import paypalRoutes from './routes/paypal.js';
 import productRoutes from './routes/product.js';
 import { initializeReminderSystem } from './services/paymentReminderService.js';
+import { initializeCleanupJobs } from './services/cleanupJobs.js';
 import cookieParser from 'cookie-parser';
 import authRoutes from './routes/auth.js';
 import orderRoutes from './routes/order.js';
 import cartRoutes from './routes/cart.js';
 import reviewRoutes from './routes/review.js';
 import favoriteRoutes from './routes/favoritesRoutes.js';
-
+import userDeletionRoutes from './routes/userDeletion.js';
 
 dotenv.config({ path: './.env.local' });
 
@@ -156,6 +157,10 @@ mongoose.connect(MONGO_URI)
         // Initialize the payment reminder system
         initializeReminderSystem();
         console.log('Payment reminder system initialized');
+
+        // Initialize data privacy cleanup jobs
+        initializeCleanupJobs();
+        console.log('Data privacy cleanup jobs initialized');
     })
     .catch((err) => {
         console.error('MongoDB connection error:', err);
@@ -266,6 +271,7 @@ app.use(orderRoutes);
 app.use(cartRoutes);
 app.use(favoriteRoutes);
 app.use(reviewRoutes);
+app.use(userDeletionRoutes);
   
 
 // Handle 404 errors
