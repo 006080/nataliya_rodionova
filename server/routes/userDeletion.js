@@ -56,10 +56,10 @@ router.delete('/api/users/me', authenticate, async (req, res) => {
     user.markedForDeletion = true;
 
     // For production: 30 days from now
-    // const deletionDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    const deletionDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
     
     // For testing: 2 minutes from now (uncomment for testing)
-    const deletionDate = new Date(Date.now() + 2 * 60 * 1000);
+    // const deletionDate = new Date(Date.now() + 2 * 60 * 1000);
     
     user.deletionDate = deletionDate;
     if (reason) {
