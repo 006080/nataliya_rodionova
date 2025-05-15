@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../src/contexts/AuthContext';
 import { authFetch } from '../src/services/authService';
-import styles from '../src/Pages/Profile.module.css';
+import styles from './DeleteAccountModule.module.css';
 
 const DeleteAccountModule = () => {
   const { logout } = useAuth();
@@ -200,7 +200,7 @@ const DeleteAccountModule = () => {
               <>
                 <div className={styles.modalHeader}>
                   <div className={styles.modalIcon}>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#dc3545" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <circle cx="12" cy="12" r="10"></circle>
                       <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
                     </svg>
