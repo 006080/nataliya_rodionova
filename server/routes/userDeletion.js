@@ -54,9 +54,14 @@ router.delete('/api/users/me', authenticate, async (req, res) => {
     
     // Mark user for deletion
     user.markedForDeletion = true;
-    user.deletionDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days from now
+
+    // For production: 30 days from now
+    // const deletionDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
     
-    // Store deletion reason if provided
+    // For testing: 2 minutes from now (uncomment for testing)
+    const deletionDate = new Date(Date.now() + 2 * 60 * 1000);
+    
+    user.deletionDate = deletionDate;
     if (reason) {
       user.deletionReason = reason;
     }
@@ -94,6 +99,17 @@ router.delete('/api/users/me', authenticate, async (req, res) => {
       },
       { $set: { pendingAnonymization: true, anonymizationDate: user.deletionDate } }
     );
+
+    // Send account deletion notification email
+    try {
+      // Import the email service dynamically to avoid circular dependencies
+      const accountEmailService = await import('../services/accountEmailService.js');
+      await accountEmailService.sendAccountDeletionEmail(user, deletionDate);
+      console.log(`Deletion notification email sent to ${user.email}`);
+    } catch (emailError) {
+      console.error('Error sending account deletion email:', emailError);
+      // Continue with the process even if email fails
+    }
     
     // Return success response
     res.json({ 
@@ -134,7 +150,6 @@ router.post('/api/users/restore', authenticate, async (req, res) => {
       deletionReason: user.deletionReason
     });
     
-    // CRITICAL FIX: Use native MongoDB operations to ensure fields are properly updated
     // This bypasses any Mongoose schema validation or middleware that might interfere
     const updateResult = await mongoose.connection.db.collection('users').updateOne(
       { _id: user._id },
@@ -190,6 +205,18 @@ router.post('/api/users/restore', authenticate, async (req, res) => {
         { $unset: { pendingAnonymization: "", anonymizationDate: "" } }
       )
     ]);
+
+
+      // Send welcome back email
+      try {
+        // Import the email service dynamically to avoid circular dependencies
+        const accountEmailService = await import('../services/accountEmailService.js');
+        await accountEmailService.sendAccountRestorationEmail(updatedUser);
+        console.log(`Account restoration email sent to ${updatedUser.email}`);
+      } catch (emailError) {
+        console.error('Error sending account restoration email:', emailError);
+        // Continue with the process even if email fails
+      }
     
     console.log('RESTORE ENDPOINT: Account restoration complete');
     

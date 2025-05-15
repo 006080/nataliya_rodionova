@@ -96,7 +96,7 @@ UserSchema.index({ role: 1 });
 UserSchema.index({ registeredAt: 1 });
 UserSchema.index({ emailVerificationToken: 1 }, { sparse: true });
 UserSchema.index({ passwordResetToken: 1 }, { sparse: true });
-UserSchema.index({ markedForDeletion: 1, deletionDate: 1 }); // Add index for account deletion queries
+UserSchema.index({ markedForDeletion: 1, deletionDate: 1 }); 
 
 /**
  * Improved password comparison method with better error handling

@@ -55,6 +55,7 @@
   justify-content: center;
   align-items: center;
   padding: 1rem;
+  overflow-y: scroll;
 }
 
 .deleteModal {
@@ -105,7 +106,6 @@
   background-color: #f8f9fa;
   border-bottom: 1px solid #dee2e6;
 }
-
 
 .modalHeader h3 {
   margin: 0 0 0 0.75rem;
@@ -223,3 +223,16 @@
   line-height: 1.5;
 }
 
+@media (max-width: 460px) {
+  .modalHeader h3 {
+    width: 200px;
+    font-size: 1rem;
+    font-weight: 500;
+  }
+}
+
+@media (max-width: 380px) {
+  .modalHeader h3 {
+    width: 160px;
+  }
+}
