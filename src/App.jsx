@@ -27,6 +27,7 @@ import Collaboration from "./Pages/Collaboration";
 import FavoritesPage from "./Pages/FavoritesPage";
 import GoodbyePage from "./Pages/GoodbyePage";
 import WelcomeBackPage from "./Pages/WelcomeBackPage";
+import CookieBanner from "../components/CookieBanner";
 
 
 const Unauthorized = () => (
@@ -42,6 +43,7 @@ const AppContent = () => {
 
   return (
     <>
+      <CookieBanner />
       <Header />
       <Routes> 
         <Route path="/" element={<Home />} />
