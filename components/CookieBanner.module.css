@@ -1,249 +1,6 @@
-/* .cookieBanner {
-  position: fixed;
-  bottom: 10%;
-  left: 5%;
-  right: 50%;
-  background-color: #1a1a1a;
-  box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.3);
-  z-index: 1000;
-  border-top: 1px solid #333;
-  border-radius: 10px;
-  max-height: 80vh;
-  overflow-y: auto;
-  min-width: 280px;
-}
-
-.bannerContainer {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 1.5rem;
-}
-
-.mainBanner, .settingsPanel {
-  width: 100%;
-}
-
-.bannerTitle {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #f0f0f0;
-  margin-bottom: 0.75rem;
-}
-
-.bannerText {
-  color: #b0b0b0;
-  margin-bottom: 1.25rem;
-  line-height: 1.6;
-}
-
-.bannerButtons {
-  display: flex;
-  flex-direction: column-reverse;
-  gap: 0.75rem;
-  margin-top: 1.5rem;
-}
-
-@media (min-width: 998px) {
-  .bannerContainer {
-    padding: 2rem;
-  }
-  
-  .bannerButtons {
-    flex-direction: row;
-    justify-content: flex-end;
-    gap: 1rem;
-  }
-}
-
-@media (min-width: 768px) {
-  .cookieBanner {
-    bottom: 5%; 
-  }
-}
-
-.settingsButton, .rejectButton, .backButton {
-  padding: 0.75rem 1.25rem;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  background-color: #2a2a2a;
-  color: #d0d0d0;
-  border: 1px solid #444;
-  transition: all 0.2s ease;
-}
-
-.settingsButton:hover, .rejectButton:hover, .backButton:hover {
-  background-color: #3a3a3a;
-  border-color: #555;
-}
-
-.acceptButton, .saveButton {
-  padding: 0.75rem 1.25rem;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  background-color: #2e54e8;
-  color: white;
-  border: none;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.acceptButton:hover, .saveButton:hover {
-  background-color: #3a64fd;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-}
-
-.cookieOptions {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.cookieOption {
-  padding: 1.25rem;
-  background-color: #222;
-  border: 1px solid #333;
-  border-radius: 6px;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.cookieOptionHeader {
-  margin-bottom: 0.75rem;
-}
-
-.cookieOptionLabel {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-}
-
-.cookieOptionLabel.disabled {
-  cursor: not-allowed;
-  opacity: 0.8;
-}
-
-.checkbox {
-  margin-right: 0.75rem;
-  width: 1.1rem;
-  height: 1.1rem;
-  cursor: pointer;
-  accent-color: #2e54e8;
-}
-
-.cookieOptionTitle {
-  font-weight: 600;
-  color: #f0f0f0;
-  font-size: 1.1rem;
-}
-
-.cookieOptionDescription {
-  font-size: 0.9rem;
-  color: #a0a0a0;
-  line-height: 1.5;
-}
-
-.privacyLink {
-  text-align: center;
-  margin-top: 1.5rem;
-}
-
-.privacyLinkText {
-  color: #8aa2ff;
-  font-size: 0.9rem;
-  text-decoration: none;
-  transition: color 0.2s;
-}
-
-.privacyLinkText:hover {
-  color: #a0b8ff;
-  text-decoration: underline;
-}
-
-.cookieSettingsButton {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background-color: #2a2a2a;
-  color: #f0f0f0;
-  border: none;
-  border-radius: 50px;
-  padding: 0.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  cursor: pointer;
-  z-index: 999;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
-  transition: all 0.3s ease;
-}
-
-.cookieSettingsButton:hover {
-  background-color: #3a3a3a;
-  transform: translateY(-2px);
-  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.4);
-}
-
-.cookieIcon {
-  color: beige;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.cookieIcon svg {
-  width: 24px;
-  height: 24px;
-}
-
-@media (max-width: 768px) {
-  .cookieIcon svg {
-    width: 16px;
-    height: 16px;
-  }
-}
-
-.cookieSettingsText {
-  font-size: 0.85rem;
-  font-weight: 500;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.cookieSettingsButton {
-  animation: fadeIn 0.3s ease-out forwards;
-}
-
-@media (max-width: 768px) {
-  .cookieSettingsButton {
-    bottom: 70px;
-    right: 10px;
-    padding: 0.3rem;
-  }
-}
-
-input[type="checkbox"] {
-  background-color: #333;
-  border: 1px solid #444;
-}
-
-input[type="checkbox"]:checked {
-  background-color: #2e54e8;
-  border-color: #2e54e8;
-}
- */
-
-
-
  .cookieBanner {
   position: fixed;
-  bottom: 0;
+  bottom: 60px;
   left: 0;
   right: 0;
   background-color: rgba(0, 0, 0, 0.9);
@@ -289,6 +46,10 @@ input[type="checkbox"]:checked {
 }
 
 @media (min-width: 768px) {
+  .cookieBanner {
+    position: fixed;
+    bottom: 0;
+  }
   .bannerContainer {
     padding: 2rem;
   }
@@ -339,7 +100,7 @@ input[type="checkbox"]:checked {
 .cookieSettingsButton {
   position: fixed;
   bottom: 20px;
-  right: 20px;
+  left: 5px;
   background-color: #2a2a2a;
   color: #f0f0f0;
   border: none;
@@ -380,4 +141,13 @@ input[type="checkbox"]:checked {
 
 .cookieSettingsLink:hover {
   color: #a0b8ff;
+}
+
+
+@media (max-width: 768px) {
+  .cookieSettingsButton {
+    bottom: 70px;
+    left: 0;
+    padding: 0.1rem;
+  }
 }
