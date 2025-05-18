@@ -84,6 +84,7 @@ button {
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  margin-left: 10px;
 }
 
 button:disabled {
@@ -109,6 +110,7 @@ legend {
 .radioGroup input {
   margin-right: 5px;
 }
+
 
 /* Responsive adjustments for smaller screens */
 @media (max-width: 768px) {

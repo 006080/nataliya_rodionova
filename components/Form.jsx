@@ -1,7 +1,7 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
 import styles from "./Form.module.css";
-import SubmitForm from "./SubmitForm";
+import { hasThirdPartyConsent } from "../src/utils/consentUtils";
 
 const Form = () => {
   const [formFields, setFormFields] = useState({
@@ -14,7 +14,50 @@ const Form = () => {
 
   const [status, setStatus] = useState("");
   const [openModal, setOpenModal] = useState(false);
+  const [consentRequired, setConsentRequired] = useState(false);
   const recaptchaRef = useRef();
+
+  // Check consent status on component mount
+  useEffect(() => {
+    // Initial consent check
+    const hasConsent = hasThirdPartyConsent();
+    setConsentRequired(!hasConsent);
+    
+    // Listen for consent changes
+    const handleConsentChange = (event) => {
+      if (event.detail && event.detail.consent === 'all') {
+        // Update UI immediately when consent is granted
+        setConsentRequired(false);
+        
+        // Manually load reCAPTCHA if needed
+        import('../src/utils/consentUtils').then(module => {
+          module.loadReCaptcha();
+          
+          // Force a small delay to make sure reCAPTCHA is properly initialized
+          setTimeout(() => {
+            // Clear any previous status message related to consent
+            if (status.includes('cookie') || status.includes('consent')) {
+              setStatus('');
+            }
+          }, 1000);
+        });
+      } else if (event.detail && event.detail.consent === 'essential') {
+        // Update UI immediately when consent is declined
+        setConsentRequired(true);
+        
+        // Set a status message if form was previously in a submittable state
+        if (!status.includes('cookie') && !status.includes('consent') && formFields.terms === 'yes') {
+          setStatus('reCAPTCHA requires cookie consent to submit this form.');
+        }
+      }
+    };
+    
+    window.addEventListener('consentChanged', handleConsentChange);
+    
+    return () => {
+      window.removeEventListener('consentChanged', handleConsentChange);
+    };
+  }, [status, formFields.terms]);
 
   const fullWidthStyles = [styles.inputWrapper, styles.fullWidth].join(" ");
 
@@ -27,7 +70,20 @@ const Form = () => {
   
   const handleSubmit = async (event) => {
     event.preventDefault();
+    
+    // If reCAPTCHA consent is required but not given, show message
+    if (consentRequired) {
+      setStatus("To submit this form, you must accept cookies for reCAPTCHA by clicking 'Accept All' in the cookie banner. You can find it in the page footer.");
+      return;
+    }
+    
     try {
+      // Execute reCAPTCHA verification
+      if (!recaptchaRef.current) {
+        setStatus("ReCAPTCHA could not be loaded. Please try again later.");
+        return;
+      }
+      
       const captchaToken = await recaptchaRef.current.executeAsync();
       recaptchaRef.current.reset(); 
 
@@ -156,13 +212,39 @@ const Form = () => {
             </div>
           </div>
           <div>
+            {consentRequired && (
+              <div className={styles.consentMessage}>
+                <h3>Cookie Consent Required for Form Submission</h3>
+                <p>
+                  To submit this form, you need to accept cookies. Google reCAPTCHA 
+                  requires cookies to protect our website from spam and abuse.
+                </p>
+                <p>
+                  Please accept cookies by clicking &quot;Accept All&quot; in the 
+                  <button 
+                    onClick={() => window.dispatchEvent(new CustomEvent('openCookieSettings'))}
+                    className={styles.cookieSettingsLink}
+                  >
+                    cookie settings
+                  </button>.
+                </p>
+              </div>
+            )}
+            
             <button
               className={styles.button}
               type="submit"
-              disabled={!isFormValid}
+              disabled={!isFormValid || consentRequired}
             >
               Submit
             </button>
+            
+            {status && (
+              <div className={styles.statusMessage}>
+                {status}
+              </div>
+            )}
+            
             <div className={styles.textArea}>
               <p style={{ fontStyle: "italic", fontFamily: "monospace" }}>
                 We will respond to every email within 24 hours, from Monday to Saturday.
@@ -182,12 +264,15 @@ const Form = () => {
           </div>
         </form>
       </div>
-      <ReCAPTCHA
+      
+      {/* Only render ReCAPTCHA if the user has given consent */}
+      {!consentRequired && (
+        <ReCAPTCHA
           sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
           size="invisible"
           ref={recaptchaRef}
         />
-      {openModal && <SubmitForm onClose={() => setOpenModal(false)} />}
+      )}
     </>
   );
 };

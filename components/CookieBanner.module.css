@@ -1,4 +1,4 @@
-.cookieBanner {
+/* .cookieBanner {
   position: fixed;
   bottom: 10%;
   left: 5%;
@@ -163,7 +163,6 @@
   text-decoration: underline;
 }
 
-/* Cookie Settings Button (Mini Banner) */
 .cookieSettingsButton {
   position: fixed;
   bottom: 20px;
@@ -212,7 +211,6 @@
   font-weight: 500;
 }
 
-/* Animation for the mini banner */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
@@ -222,7 +220,6 @@
   animation: fadeIn 0.3s ease-out forwards;
 }
 
-/* Make the mini button smaller on mobile */
 @media (max-width: 768px) {
   .cookieSettingsButton {
     bottom: 70px;
@@ -240,4 +237,147 @@ input[type="checkbox"]:checked {
   background-color: #2e54e8;
   border-color: #2e54e8;
 }
+ */
 
+
+
+ .cookieBanner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.9);
+  box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  border-top: 1px solid #333;
+}
+
+.bannerContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.bannerTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #f0f0f0;
+  margin-bottom: 0.75rem;
+}
+
+.bannerText {
+  color: #b0b0b0;
+  margin-bottom: 1.25rem;
+  line-height: 1.6;
+}
+
+.policyLink {
+  color: #8aa2ff;
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+
+.policyLink:hover {
+  color: #a0b8ff;
+}
+
+.bannerButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .bannerContainer {
+    padding: 2rem;
+  }
+  
+  .bannerButtons {
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: 1rem;
+  }
+}
+
+.continueButton {
+  padding: 0.75rem 1.25rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  background-color: #2a2a2a;
+  color: #d0d0d0;
+  border: 1px solid #444;
+  transition: all 0.2s ease;
+}
+
+.continueButton:hover {
+  background-color: #3a3a3a;
+  border-color: #555;
+}
+
+.acceptButton {
+  padding: 0.75rem 1.25rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  background-color: #2e54e8;
+  color: white;
+  border: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.acceptButton:hover {
+  background-color: #3a64fd;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Cookie Settings Button (Mini Banner) */
+.cookieSettingsButton {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #2a2a2a;
+  color: #f0f0f0;
+  border: none;
+  border-radius: 50px;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  z-index: 999;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.cookieSettingsButton:hover {
+  background-color: #3a3a3a;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.4);
+}
+
+.cookieIcon {
+  color: beige;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cookieSettingsLink {
+  background: none;
+  border: none;
+  color: #8aa2ff;
+  cursor: pointer;
+  padding: 0 0.3rem;
+  font-size: inherit;
+  text-decoration: underline;
+  font-family: inherit;
+}
+
+.cookieSettingsLink:hover {
+  color: #a0b8ff;
+}
