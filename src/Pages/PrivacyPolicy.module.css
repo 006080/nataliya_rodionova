@@ -1,0 +1,90 @@
+.policyContainer {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  line-height: 1.6;
+  font-family: Arial, sans-serif;
+  color: #333;
+}
+
+.policyContainer h1 {
+  font-size: 2rem;
+  text-align: center;
+  margin-bottom: 0.5rem;
+  font-family: 'Playfair Display', serif;
+  font-weight: bold;
+}
+
+.lastUpdated {
+  text-align: center;
+  font-style: italic;
+  color: #666;
+  margin-bottom: 2rem;
+}
+
+.policyContainer h2 {
+  font-size: 1.5rem;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-weight: bold;
+  color: #444;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.5rem;
+}
+
+.policyContainer h3 {
+  font-size: 1.2rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-weight: bold;
+  color: #444;
+}
+
+.policyContainer p {
+  font-size: 16px;
+  color: #555;
+  margin-bottom: 1rem;
+}
+
+.policyContainer ul {
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+  list-style-type: disc;
+}
+
+.policyContainer li {
+  font-size: 16px;
+  color: #555;
+  margin-bottom: 0.5rem;
+}
+
+.policyContainer section {
+  margin-bottom: 2rem;
+}
+
+.policyContainer strong {
+  font-weight: 600;
+  color: #000;
+}
+
+@media (max-width: 768px) {
+  .policyContainer {
+    padding: 1.5rem 1rem;
+  }
+
+  .policyContainer h1 {
+    font-size: 1.75rem;
+  }
+
+  .policyContainer h2 {
+    font-size: 1.35rem;
+  }
+
+  .policyContainer h3 {
+    font-size: 1.1rem;
+  }
+}

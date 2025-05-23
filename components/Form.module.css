@@ -1,16 +1,18 @@
 .wrapper {
   position: fixed;
-  width: 65%; /* 70% of the viewport width on all devices */
+  width: 65%;
   padding: 40px;
-  padding-right: 20px; /* Optional: add right padding if needed for better spacing */
-  left: 0; /* Align to the left with no left margin */
+  padding-right: 20px; 
+  left: 0; 
   background-color: rgba(255, 255, 255, 0.18);
   border: 1px solid rgba(204, 204, 204, 0.51);
   border-radius: 10px;
   backdrop-filter: blur(7px);
   box-sizing: border-box;
-  height: 100vh; /* Full viewport height */
+  overflow: auto;
+  height: 100vh;
 }
+
 
 /* Form alignment */
 h3 {
@@ -24,7 +26,7 @@ h3 {
 
 .header {
   padding-left: 400px;
-  margin-top: 100px;
+  margin-top: 60px;
   color: white;
 }
 
@@ -84,6 +86,7 @@ button {
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  margin-left: 10px;
 }
 
 button:disabled {
@@ -112,67 +115,73 @@ legend {
 
 /* Responsive adjustments for smaller screens */
 @media (max-width: 768px) {
+  .wrapper {
+    position: fixed;
+    width: 85%; /* 70% of the viewport width on all devices */
+    padding: 25px;
+    padding-right: 15px; /* Optional: add right padding if needed for better spacing */
+    left: 0 !important;
+    background-color: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(204, 204, 204, 0.51);
+    border-radius: 10px;
+    backdrop-filter: blur(7px);
+    height: 100vh; /* Full viewport height */
+  }
 
-.wrapper {
-  position: fixed;
-  width: 85%; /* 70% of the viewport width on all devices */
-  padding: 25px;
-  padding-right: 15px; /* Optional: add right padding if needed for better spacing */
-  left: 0 !important;
-  background-color: rgba(255, 255, 255, 0.18);
-  border: 1px solid rgba(204, 204, 204, 0.51);
-  border-radius: 10px;
-  backdrop-filter: blur(7px);
-  height: 100vh; /* Full viewport height */
-}
+  .inputItem {
+    flex: 1;
+    margin-bottom: 5px;
+  }
 
-label {
-  color: rgb(169, 169, 169);
-  font-size: small;
-}
+  label {
+    color: rgb(169, 169, 169);
+    font-size: small;
+    margin-bottom: 5px;
+  }
 
-legend {
-  font-size: small;
-}
+  legend {
+    font-size: small;
+  }
 
   .radioGroup {
     font-size: small;
-  display: flex;
-  gap: 20px;
-}
+    display: flex;
+    gap: 10px;
+  }
 
-.radioGroup label {
-  display: flex;
-  align-items: center;
-}
+  .radioGroup label {
+    display: flex;
+    align-items: center;
+  }
 
-.radioGroup input {
-  margin-right: 3px;
-}
+  .radioGroup input {
+    margin-right: 3px;
+  }
 
   .inputWrapperRow {
     flex-direction: column; /* Stack inputs vertically on mobile */
     gap: 2px;
   }
 
-.header {
-  margin-bottom: 3px;
-  padding-left: 0;
-  margin-top: 40px;
-  color: white;
-}
+  .header {
+    margin-bottom: 3px;
+    padding-left: 0;
+    margin-top: 100px;
+    color: white;
+  }
 
-.form {
-  width: 90%; /* Full width within the .wrapper */
-  padding: 0px 0px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
+  .form {
+    width: 90%; /* Full width within the .wrapper */
+    padding: 0px 0px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
 
   .textArea {
     font-size: xx-small;
     margin-top: 20px;
+    margin-bottom: 120px;
   }
 }
 
@@ -180,19 +189,20 @@ legend {
   .wrapper {
     width: 65%; /* Maintain 70% width on tablet */
     padding: 30px;
+    overflow: auto;
   }
 
   .header {
-  padding-left: 100px;
-  margin-top: 100px;
-  color: white;
-}
+    padding-left: 100px;
+    margin-top: 100px;
+    color: white;
+  }
 
-.form {
-  width: 70%; /* Full width within the .wrapper */
-  padding: 20px 100px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
+  .form {
+    width: 70%; /* Full width within the .wrapper */
+    padding: 20px 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }

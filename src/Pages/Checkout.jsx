@@ -115,7 +115,6 @@ const Checkout = () => {
     checkPendingOrder();
   }, [formStep, removeFromCart, clearPendingOrder, pendingOrderId]);
 
-  // Save measurements to localStorage when they change
   useEffect(() => {
     if (measurements) {
       localStorage.setItem('measurements', JSON.stringify(measurements));

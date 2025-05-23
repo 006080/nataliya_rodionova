@@ -59,6 +59,7 @@
 }
 
 .deleteModal {
+  max-height: 90vh;
   background-color: white;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -66,7 +67,7 @@
   max-width: 550px;
   position: relative;
   padding: 0;
-  overflow: hidden;
+  overflow: scroll;
   animation: modalAppear 0.3s ease-out;
 }
 
