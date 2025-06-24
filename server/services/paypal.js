@@ -22,7 +22,7 @@ const getPayPalAccessToken = async () => {
   const auth = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
 
   try {
-    const response = await fetch("https://api-m.sandbox.paypal.com/v1/oauth2/token", {
+    const response = await fetch("https://api-m.paypal.com/v1/oauth2/token", {
       method: "POST",
       headers: {
         "Authorization": `Basic ${auth}`,
@@ -105,7 +105,7 @@ const createPayPalOrder = async (cartItems, measurements, deliveryDetails) => {
     payment_source: {
       paypal: {
         experience_context: {
-          brand_name: 'VARONA',
+          brand_name: 'VARONA_by_Nataliya_Rodionova',
           shipping_preference: 'GET_FROM_FILE',
           // user_action: 'PAY_NOW',
           // return_url: process.env.FRONTEND_URL_PROD + '/checkout',
@@ -368,7 +368,7 @@ const capturePayPalOrder = async (orderId) => {
     
     const accessToken = await getPayPalAccessToken();
     
-    const response = await fetch(`https://api-m.sandbox.paypal.com/v2/checkout/orders/${orderId}/capture`, {
+    const response = await fetch(`https://api-m.paypal.com/v2/checkout/orders/${orderId}/capture`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -513,7 +513,7 @@ const getPayPalOrderDetails = async (orderId) => {
   try {
     const accessToken = await getPayPalAccessToken();
     
-    const response = await fetch(`https://api-m.sandbox.paypal.com/v2/checkout/orders/${orderId}`, {
+    const response = await fetch(`https://api-m.paypal.com/v2/checkout/orders/${orderId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
