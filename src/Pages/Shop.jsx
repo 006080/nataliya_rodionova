@@ -98,7 +98,7 @@ const Shop = () => {
         images={scarfImages}
         onImageClick={() => handleImageClick(scarfImages)}
         name="Scarf"
-        price={1}
+        price={180}
         description="Made entirely from 100% cotton, this scarf ensures comfort and breathability. The ruffled style, adorned with delicate lace detailing, exudes vintage elegance. Convenient drawstrings at the front allow for easy closure or adjustment."
         material={'100% Wool'}
         color={'#999999'}
