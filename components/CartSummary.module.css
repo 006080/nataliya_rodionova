@@ -13,6 +13,8 @@
   border: 1px solid #cccccc82;
   border-radius: 10px;
   backdrop-filter: blur(7px);
+  max-height: 90vh; /* Prevent from overflowing viewport */
+  overflow-y: auto;
 }
 
 .colorDisplay {

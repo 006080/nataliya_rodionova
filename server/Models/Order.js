@@ -65,6 +65,10 @@ const DeliveryDetailsSchema = new mongoose.Schema({
   phone: {
     type: String,
     required: true
+  },
+  color: {
+    type: String,
+    default: ''
   }
 }, { _id: false });
 
