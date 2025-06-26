@@ -513,7 +513,7 @@ const getPayPalOrderDetails = async (orderId) => {
   try {
     const accessToken = await getPayPalAccessToken();
     
-    const response = await fetch(`https://api-m.paypal.com/v2/checkout/orders/${orderId}`, {
+    const response = await fetch(`https://api-m.sandbox.paypal.com/v2/checkout/orders/${orderId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
