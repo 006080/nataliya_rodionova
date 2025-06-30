@@ -21,6 +21,7 @@ const CardProduct = ({
   description,
   material = 'Not specified',
   color = 'Not specified',
+  colors = [], // ✅ new dynamic prop with default empty array
 }) => {
   const [count, setCount] = useState(1)
   const [selectedStars, setSelectedStars] = useState(0)
@@ -46,7 +47,7 @@ const CardProduct = ({
         color: selectedColor,
       }
       addToCart(product)
-      setCount(1) // Reset the count after adding to cart
+      setCount(1)
     }
   }
 
@@ -113,21 +114,24 @@ const CardProduct = ({
           </p>
         </div>
 
-        {/* 🎨 Color Picker */}
-        <label className={styles.colorLabel}>
-          <span style={{ fontSize: '14px' }}>Pick your color:</span>
-          <input
-            type="color"
-            value={selectedColor}
-            onChange={(e) => setSelectedColor(e.target.value)}
-            className={styles.colorSwatchButton}
-          />
-        </label>
-
-        <div
-          className={styles.colorSwatch}
-          style={{ backgroundColor: selectedColor }}
-        />
+        {/* 🎨 Dynamic Color Swatches */}
+        {colors.length > 0 && (
+          <div className={styles.colorSelector}>
+            <span style={{ fontSize: '14px' }}>Available Colors:</span>
+            <div className={styles.colorSwatchList}>
+              {colors.map((colorOption) => (
+                <div
+                  key={colorOption}
+                  className={`${styles.colorCircle} ${
+                    selectedColor === colorOption ? styles.selectedCircle : ''
+                  }`}
+                  style={{ backgroundColor: colorOption }}
+                  onClick={() => setSelectedColor(colorOption)}
+                />
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className={styles.starPrice}>
           <p style={{ fontSize: '20px', fontStyle: 'italic' }}>${price}</p>
@@ -211,6 +215,7 @@ CardProduct.propTypes = {
   description: PropTypes.string.isRequired,
   material: PropTypes.string,
   color: PropTypes.string,
+  colors: PropTypes.arrayOf(PropTypes.string), // ✅ added prop type
 }
 
 export default CardProduct

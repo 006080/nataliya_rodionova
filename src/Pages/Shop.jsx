@@ -89,7 +89,7 @@ const Shop = () => {
         price={120}
         description="Made entirely from 100% cotton, this collar ensures comfort and breathability. The ruffled style, adorned with delicate lace detailing, exudes vintage elegance. Convenient drawstrings at the front allow for easy closure or adjustment."
         material={'100% cotton'}
-        color={'#ffffff'}
+        colors={['black', '#555555', '#white']}
       />
 
       <CardProduct
@@ -101,7 +101,7 @@ const Shop = () => {
         price={180}
         description="Made entirely from 100% cotton, this scarf ensures comfort and breathability. The ruffled style, adorned with delicate lace detailing, exudes vintage elegance. Convenient drawstrings at the front allow for easy closure or adjustment."
         material={'100% Wool'}
-        color={'#999999'}
+        colors={['#333333', '#555555', '#999999']}
       />
 
       <CardProduct
@@ -113,7 +113,7 @@ const Shop = () => {
         price={480}
         description="Made entirely from 100% cotton, these trousers ensure comfort and breathability. The ruffled style, adorned with delicate lace detailing, exudes vintage elegance. Convenient drawstrings at the front allow for easy closure or adjustment."
         material={'80% wool  20% cashmere'}
-        color={'#999999'}
+        colors={['#333333', '#555555', '#999999']}
       />
 
       <CardProduct
@@ -125,7 +125,7 @@ const Shop = () => {
         price={680}
         description="Designed for both comfort and style, this piece features a cozy wool-blend fabric in a classic checkerboard pattern. The deep V-neck and ribbed hem add a touch of elegance, while the relaxed fit allows for effortless layering. Pair it with combat boots and high socks for a trendy street-style look."
         material={"100% sheep wool"}
-        color={'#8B4513'}
+        colors={['beige', 'brown', '#999999']}
       />
 
 <CardProduct
@@ -137,7 +137,7 @@ const Shop = () => {
         price={120}
         description="Elegant handmade gloves crafted from 100% cotton lace. Lightweight, breathable, and detailed with black buttons for a timeless vintage touch."
         material={"100% cotton"}
-        color={'#000000'}
+        colors={['black', 'beige', 'white', 'grey']}
       />
 
       {cartIsOpen && (
