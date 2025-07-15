@@ -125,6 +125,7 @@ const WishedProduct = ({
         </div>
 
         <div className={styles.actionArea}>
+     <div style={{display:"flex", flexDirection:"row", justifyContent: "space-between", width: '100%'}}>
           <div className={styles.quantityControl}>
             <button onClick={decrement} className={styles.quantityButton}>-</button>
             <span className={styles.quantity}>{count}</span>
@@ -135,6 +136,7 @@ const WishedProduct = ({
             <FontAwesomeIcon icon={faShoppingCart} className={styles.cartIcon} />
             <span>Add to Cart</span>
           </Button>
+        </div>
         </div>
       </div>
       

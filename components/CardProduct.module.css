@@ -259,6 +259,10 @@ h3 {
   transition: transform 0.2s ease;
 }
 
+.cartIcon {
+  margin-right: 10px;
+}
+
 .colorCircle:hover {
   transform: scale(1.1);
 }
