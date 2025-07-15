@@ -8,9 +8,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 40px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #f0f0f0;
+  flex-wrap: wrap; /* Ensures better wrapping on very small screens */
+  gap: 10px;
+  margin-bottom: 30px;
 }
 
 .titleSection {
@@ -34,7 +34,8 @@
 
 .headerActions {
   display: flex;
-  gap: 15px;
+  align-items: center;
+  /* gap: 15px; */
 }
 
 .cartButton, .clearButton {
@@ -42,7 +43,7 @@
   align-items: center;
   gap: 8px;
   padding: 10px 20px;
-  border-radius: 30px;
+  border-radius: 5px;
   font-size: 14px;
   font-weight: 500;
   border: none;
@@ -62,13 +63,13 @@
 
 .clearButton {
   background-color: white;
-  color: #ff4d4d;
-  border: 1px solid #ff4d4d;
+  color: #000000;
+  border: 1px solid #000000;
 }
 
 .clearButton:hover {
-  background-color: #fff5f5;
-  transform: translateY(-2px);
+  background-color: #000000;
+  color: #e0e0e0;
 }
 
 .wishlistContainer {
@@ -155,6 +156,15 @@
   text-align: center;
 }
 
+.titleSection {
+  display: flex;
+  flex-direction: row;
+  justify-items: center;
+  align-items: center;
+  width: 300px;
+ justify-content: space-between;
+}
+
 .confirmationIcon {
   font-size: 50px;
   color: #ff9800;
@@ -182,7 +192,7 @@
 
 .cancelButton, .confirmButton {
   padding: 10px 20px;
-  border-radius: 30px;
+  border-radius: 5px;
   font-size: 14px;
   font-weight: 500;
   border: none;
@@ -200,12 +210,12 @@
 }
 
 .confirmButton {
-  background-color: #ff4d4d;
+  background-color: #fa0000;
   color: white;
 }
 
 .confirmButton:hover {
-  background-color: #ff3333;
+  background-color: #b80000;
 }
 
 @media (max-width: 768px) {

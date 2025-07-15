@@ -33,10 +33,10 @@
 
 .removeButton {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  background-color: white;
-  color: #000;
+  top: 12px;
+  right: 12px;
+  background-color: rgba(255, 255, 255, 0.603);
+  color: #636363;
   border: none;
   border-radius: 50%;
   padding: 10px 12px;
@@ -45,8 +45,6 @@
   justify-content: center;
   cursor: pointer;
   opacity: 0;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .wishedItem:hover .removeButton {
@@ -55,6 +53,7 @@
 
 .removeButton:hover {
   color: white;
+  background-color: #00000042;
 }
 
 .info {
@@ -76,6 +75,7 @@
 
 .productName {
   font-family: "Playfair Display", serif;
+  font-style: italic;
   font-size: 22px;
   font-weight: 600;
   margin: 0;
@@ -129,41 +129,31 @@
   color: #666;
 }
 
-.colorPickerContainer {
+.colorSelector {
+  margin-top: 10px;
+}
+
+.colorSwatchList {
   display: flex;
-  align-items: center;
   gap: 10px;
+  margin-top: 5px;
 }
 
-.colorSwatch {
-  display: inline-block;
-  width: 20px;
-  height: 20px;
+.colorCircle {
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  border: 1px solid #ddd;
-}
-
-.colorPicker {
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  border-radius: 50%;
-  background: none;
   cursor: pointer;
-  transition: transform 0.2s ease;
+  border: 2px solid transparent;
+  transition: transform 0.2s;
 }
 
-.colorPicker::-webkit-color-swatch-wrapper {
-  padding: 0;
-}
-
-.colorPicker::-webkit-color-swatch {
-  border: none;
-  border-radius: 50%;
-}
-
-.colorPicker:hover {
+.colorCircle:hover {
   transform: scale(1.1);
+}
+
+.selectedCircle {
+  border-color: black;
 }
 
 .starsWrapper {
@@ -200,7 +190,7 @@
   width: 100px;
   height: 30px;
   background-color: #f2f2f2;
-  border-radius: 9px;
+  border-radius: 5px;
   border: 1px solid #eaeaea;
 }
 
@@ -282,7 +272,7 @@ padding: 0 10px;
   max-width: 100%;
   max-height: 90vh;
   object-fit: contain;
-  border-radius: 8px;
+  border-radius: 9px;
 }
 
 .modalControls {

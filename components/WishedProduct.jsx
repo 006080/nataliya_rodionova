@@ -93,7 +93,7 @@ const WishedProduct = ({
           onClick={removeFromWishlist}
           aria-label="Remove from wishlist"
         >
-          <FontAwesomeIcon icon={faTrash} />
+          <FontAwesomeIcon icon={faTrash}  />
         </button>
       </div>
 

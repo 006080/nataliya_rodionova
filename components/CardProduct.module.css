@@ -249,18 +249,20 @@ h3 {
   gap: 12px;
   margin-top: 10px;
 }
+ .cartIcon {
+  margin-right: 10px;
+ }
 
 .colorCircle {
   width: 14px;
   height: 14px;
   border-radius: 50%;
   cursor: pointer;
-  border: 1px solid #ccc;
-  transition: transform 0.2s ease;
+  border: 1px solid #cccccc69;
 }
 
-.cartIcon {
-  margin-right: 10px;
+.addButtonControl {
+  width: 100px;
 }
 
 .colorCircle:hover {
