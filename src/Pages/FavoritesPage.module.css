@@ -244,4 +244,29 @@
     flex-direction: column;
     gap: 10px;
   }
+
+  .clearButton {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 400;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+
+  .clearButton {
+    background-color: white;
+    color: #000000;
+    border: 1px solid #000000;
+  }
+  
+  .clearButton:hover {
+    background-color: #000000;
+    color: #e0e0e0;
+  }
 }
