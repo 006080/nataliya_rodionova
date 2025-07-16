@@ -28,7 +28,8 @@ const CardProduct = ({
   const [selectedStars, setSelectedStars] = useState(0);
   const [fullscreenImage, setFullscreenImage] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [selectedColor, setSelectedColor] = useState(color);
+  const [selectedColor, setSelectedColor] = useState(color || colors[0] || "");
+
 
   const { addToCart } = useCart();
   const { toggleFavorite, isFavorite } = useFavorites();
@@ -54,6 +55,7 @@ const CardProduct = ({
 
   const handleStarClick = (starIndex) => setSelectedStars(starIndex + 1);
 
+
   const handleHeartClick = () => {
     const product = {
       id,
@@ -63,10 +65,10 @@ const CardProduct = ({
       description,
       material,
       color: selectedColor,
+      colors, // ✅ ADD THIS
     };
     toggleFavorite(product);
   };
-
   const openImageModal = (index) => {
     setCurrentImageIndex(index);
     setFullscreenImage(images[index]);

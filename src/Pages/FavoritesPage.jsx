@@ -130,16 +130,16 @@ const FavoritesPage = () => {
 
       <div className={styles.wishlistContainer}>
         {favorites.map((product) => (
-          <WishedProduct
-            key={product.id}
-            id={product.id}
-            name={product.name}
-            images={product.image ? [product.image] : []}
-            price={product.price}
-            description={product.description || "No description available for this product."}
-            material={product.material || "Not specified"}
-            color={product.color || "Not specified"}
-          />
+        <WishedProduct
+        key={product.id}
+        id={product.id}
+        name={product.name}
+        images={product.image ? [product.image] : []}
+        price={product.price}
+        description={product.description}
+        material={product.material}
+        colors={Array.isArray(product.colors) ? product.colors : []}
+      />
         ))}
       </div>
 
