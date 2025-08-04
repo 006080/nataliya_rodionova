@@ -58,11 +58,11 @@ export const loadReCaptcha = () => {
     
     // Add load event to confirm the script loaded successfully
     recaptchaScript.onload = () => {
-      console.log('reCAPTCHA script loaded successfully');
+      // console.log('reCAPTCHA script loaded successfully');
     };
     
     recaptchaScript.onerror = () => {
-      console.error('reCAPTCHA script failed to load');
+      // console.error('reCAPTCHA script failed to load');
       loadedScripts.recaptcha = false;
       
       // Try loading again after a delay
@@ -99,7 +99,7 @@ export const loadPayPal = () => {
     
     // Add load event to confirm the script loaded successfully
     paypalScript.onload = () => {
-      console.log('PayPal script loaded successfully');
+      // console.log('PayPal script loaded successfully');
       window.dispatchEvent(new CustomEvent('paypalLoaded'));
     };
     
@@ -132,7 +132,7 @@ export const renderRecaptchaIfConsented = (recaptchaRef) => {
     return true;
   } else {
     // If no consent, show an alternative message and prevent form submission
-    console.log('ReCAPTCHA requires cookie consent');
+    // console.log('ReCAPTCHA requires cookie consent');
     return false;
   }
 };
@@ -145,7 +145,7 @@ export const renderPayPalIfConsented = () => {
     return true;
   } else {
     // If no consent, return false
-    console.log('PayPal requires cookie consent');
+    // console.log('PayPal requires cookie consent');
     return false;
   }
 };
@@ -167,3 +167,5 @@ export const initConsentManagement = () => {
     }
   });
 };
+
+

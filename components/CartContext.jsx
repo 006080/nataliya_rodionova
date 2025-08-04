@@ -1,5 +1,6 @@
 import { createContext, useState, useContext, useEffect } from 'react'
 import { getAccessToken, isAuthenticated } from '../src/services/authService'
+import { getStorageItem, setStorageItem, getConsentSettings } from '../src/utils/enhancedConsentUtils'
 import {
   saveCartToDatabase,
   fetchCartFromDatabase,
@@ -13,7 +14,8 @@ export const useCart = () => useContext(CartContext)
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState(() => {
     try {
-      const savedCartItems = localStorage.getItem('cartItems')
+      // Use consent-aware storage getter
+      const savedCartItems = getStorageItem('cartItems', 'shoppingData')
       return savedCartItems ? JSON.parse(savedCartItems) : []
     } catch (error) {
       console.error('Error loading cart from localStorage:', error)
@@ -25,6 +27,44 @@ export const CartProvider = ({ children }) => {
   const [isUserAuthenticated, setIsUserAuthenticated] = useState(() => 
     isAuthenticated()
   )
+
+  // DIRECT consent checking function - no dependencies on complex logic
+  const hasShoppingDataConsent = () => {
+    try {
+      const consentSettings = getConsentSettings();
+      const hasConsent = consentSettings.localStorage.granted && consentSettings.localStorage.categories.shoppingData;
+      console.log('🛒 Direct consent check:', {
+        isAuthenticated: isUserAuthenticated,
+        granted: consentSettings.localStorage.granted,
+        shoppingData: consentSettings.localStorage.categories.shoppingData,
+        hasConsent
+      });
+      return hasConsent;
+    } catch (error) {
+      console.error('Error checking consent:', error);
+      return false;
+    }
+  };
+
+  // SIMPLE localStorage wrapper - only saves if user is not authenticated OR has consent
+  const safeSetItem = (key, value) => {
+    console.log('🛒 safeSetItem called:', { key, isUserAuthenticated });
+    
+    // For unauthenticated users, always allow (setStorageItem will handle consent)
+    if (!isUserAuthenticated) {
+      console.log('✅ Unauthenticated user - allowing localStorage');
+      return setStorageItem(key, value, 'shoppingData');
+    }
+    
+    // For authenticated users, check consent directly
+    if (hasShoppingDataConsent()) {
+      console.log('✅ Authenticated user with consent - allowing localStorage');
+      return setStorageItem(key, value, 'shoppingData');
+    } else {
+      console.log('❌ Authenticated user without consent - blocking localStorage');
+      return false;
+    }
+  };
 
   const getApiUrl = () => {
     return import.meta.env.VITE_NODE_ENV === "production"
@@ -44,7 +84,7 @@ export const CartProvider = ({ children }) => {
   
           if (dbCartItems && dbCartItems.length > 0) {
             setCartItems(dbCartItems)
-            localStorage.setItem('cartItems', JSON.stringify(dbCartItems))
+            safeSetItem('cartItems', JSON.stringify(dbCartItems))
           } else {
             if (cartItems.length > 0) {
               await saveCartToDatabase(cartItems)
@@ -68,7 +108,6 @@ export const CartProvider = ({ children }) => {
   // Listen for auth state changes
   useEffect(() => {
     const handleAuthStateChange = async () => {
-      // Skip if logout flag is set
       if (sessionStorage.getItem('isUserLogout') === 'true') {
         return
       }
@@ -81,10 +120,10 @@ export const CartProvider = ({ children }) => {
           const dbCartItems = await fetchCartFromDatabase()
 
           if (dbCartItems.length > 0 && cartItems.length > 0) {
-            // console.log('CartContext: Merging carts')
+            // Merge logic here if needed
           } else if (dbCartItems.length > 0) {
             setCartItems(dbCartItems)
-            localStorage.setItem('cartItems', JSON.stringify(dbCartItems))
+            safeSetItem('cartItems', JSON.stringify(dbCartItems))
           } else if (cartItems.length > 0) {
             await saveCartToDatabase(cartItems)
           }
@@ -108,8 +147,10 @@ export const CartProvider = ({ children }) => {
 
   useEffect(() => {
     const handleLoadUserCart = async () => {
-
-      localStorage.removeItem('cartItems')
+      const currentCart = getStorageItem('cartItems', 'shoppingData')
+      if (currentCart) {
+        safeSetItem('cartItems', '[]')
+      }
       setCartItems([])
       if (isAuthenticated()) {
         await syncCartWithDatabase(true)
@@ -123,44 +164,69 @@ export const CartProvider = ({ children }) => {
     }
   }, [])
 
-  
-useEffect(() => {
-  localStorage.setItem('cartItems', JSON.stringify(cartItems))
-
-  if (sessionStorage.getItem('isUserLogout') === 'true') {
-    return
-  }
-
-  // For authenticated users, sync with database (with debounce)
-  if (isUserAuthenticated && initialSyncDone) {
-    const timeoutId = setTimeout(() => {
-      // Use a direct check before saving to avoid timing issues
-      if (isAuthenticated()) {
-        saveCartToDatabase(cartItems).then(success => {
-          if (success) {
-            // console.log('Cart successfully synced with database');
-          } else {
-            console.error('Failed to sync cart with database');
-          }
-        }).catch((error) => {
-          console.error('Error saving cart to database:', error)
-        })
+  useEffect(() => {
+    const handleStorageConsentChange = (event) => {
+      const storageSettings = event.detail;
+      console.log('🛒 Storage consent changed:', storageSettings);
+      
+      if (!storageSettings.granted || !storageSettings.categories.shoppingData) {
+        console.log('Cart items will not be saved due to privacy settings');
       } else {
-        // console.log('Skipping database sync - user no longer authenticated');
+        if (storageSettings.granted && storageSettings.categories.shoppingData && cartItems.length > 0) {
+          console.log('Shopping data consent granted - saving existing cart items to localStorage');
+          // Use direct setStorageItem here since this is the consent grant handler
+          const saveSuccess = setStorageItem('cartItems', JSON.stringify(cartItems), 'shoppingData');
+          if (saveSuccess) {
+            console.log('Existing cart items successfully saved to localStorage');
+          }
+        }
       }
-    }, 500)
+    };
 
-    return () => clearTimeout(timeoutId)
-  }
-}, [cartItems, isUserAuthenticated, initialSyncDone])
+    window.addEventListener('storageConsentChanged', handleStorageConsentChange);
+    
+    return () => {
+      window.removeEventListener('storageConsentChanged', handleStorageConsentChange);
+    };
+  }, [cartItems]);
+
+  useEffect(() => {
+    console.log('🛒 Cart items changed:', { count: cartItems.length, isUserAuthenticated, initialSyncDone });
+    
+    // Use safe localStorage setter
+    const saveSuccess = safeSetItem('cartItems', JSON.stringify(cartItems))
+
+    if (!saveSuccess && cartItems.length > 0) {
+      console.log('Cart not saved to localStorage')
+    }
+
+    if (sessionStorage.getItem('isUserLogout') === 'true') {
+      return
+    }
+
+    // For authenticated users, sync with database
+    if (isUserAuthenticated && initialSyncDone) {
+      const timeoutId = setTimeout(() => {
+        if (isAuthenticated()) {
+          saveCartToDatabase(cartItems).then(success => {
+            if (success) {
+              console.log('✅ Cart synced with database');
+            } else {
+              console.error('❌ Failed to sync cart with database');
+            }
+          }).catch((error) => {
+            console.error('Error saving cart to database:', error)
+          })
+        }
+      }, 500)
+
+      return () => clearTimeout(timeoutId)
+    }
+  }, [cartItems, isUserAuthenticated, initialSyncDone])
 
   useEffect(() => {
     const handleLogout = async () => {
-
-    setCartItems([])
-    localStorage.removeItem('cartItems')
-
-
+      setCartItems([])
       setIsUserAuthenticated(false)
       setInitialSyncDone(false)
     }
@@ -181,7 +247,7 @@ useEffect(() => {
         const dbCartItems = await fetchCartFromDatabase()
         if (dbCartItems && dbCartItems.length > 0) {
           setCartItems(dbCartItems)
-          localStorage.setItem('cartItems', JSON.stringify(dbCartItems))
+          safeSetItem('cartItems', JSON.stringify(dbCartItems))
         }
       } catch (error) {
         console.error('Error refreshing cart after merge:', error)
@@ -195,149 +261,139 @@ useEffect(() => {
     }
   }, [])
 
-
-
-// UPDATED: Modified to treat items with the same product but different colors as distinct
-const addToCart = (product) => {
-  setCartItems((prevItems) => {
-    // Create a composite identifier that includes product ID (or name) and color
-    const productColor = product.color || '';
+  const addToCart = (product) => {
+    console.log('🛒 addToCart called:', { productId: product.id, isUserAuthenticated });
     
-    // First try to find by ID and color
-    const existingItemById = product.id
-      ? prevItems.find((item) => item.id === product.id && (item.color || '') === productColor)
-      : null;
+    setCartItems((prevItems) => {
+      const productColor = product.color || '';
       
-    // If not found by ID and color, try by name and color
-    const existingItem = existingItemById || 
-      prevItems.find((item) => item.name === product.name && (item.color || '') === productColor);
-      
-    const quantityToAdd = product.quantity || 1;
+      const existingItemById = product.id
+        ? prevItems.find((item) => item.id === product.id && (item.color || '') === productColor)
+        : null;
+        
+      const existingItem = existingItemById || 
+        prevItems.find((item) => item.name === product.name && (item.color || '') === productColor);
+        
+      const quantityToAdd = product.quantity || 1;
 
-    if (existingItem) {
-      // Update existing item with same ID/name AND color
-      return prevItems.map((item) => {
-        if (
-          ((product.id && item.id === product.id) || 
-           (!product.id && item.name === product.name)) && 
-          (item.color || '') === productColor
-        ) {
-          return { ...item, quantity: item.quantity + quantityToAdd };
+      if (existingItem) {
+        return prevItems.map((item) => {
+          if (
+            ((product.id && item.id === product.id) || 
+             (!product.id && item.name === product.name)) && 
+            (item.color || '') === productColor
+          ) {
+            return { ...item, quantity: item.quantity + quantityToAdd };
+          }
+          return item;
+        });
+      } else {
+        return [
+          ...prevItems,
+          {
+            ...product,
+            quantity: quantityToAdd,
+          },
+        ];
+      }
+    });
+  };
+
+  const updateQuantity = (itemIdentifier, quantity) => {
+    setCartItems((prevItems) => {
+      if (typeof itemIdentifier === 'object' && itemIdentifier !== null) {
+        const { id, name, color } = itemIdentifier;
+        const itemColor = color || '';
+
+        return prevItems.map((item) => {
+          const matchesId = id && item.id === id;
+          const matchesName = name && item.name === name;
+          const matchesColor = (item.color || '') === itemColor;
+          
+          if ((matchesId || matchesName) && matchesColor) {
+            return { ...item, quantity };
+          }
+          return item;
+        });
+      }
+
+      if (typeof itemIdentifier === 'string') {
+        const matchById = prevItems.some((item) => item.id === itemIdentifier);
+
+        if (matchById) {
+          return prevItems.map((item) =>
+            item.id === itemIdentifier ? { ...item, quantity } : item
+          );
+        } else {
+          return prevItems.map((item) =>
+            item.name === itemIdentifier ? { ...item, quantity } : item
+          );
         }
-        return item;
-      });
-    } else {
-      return [
-        ...prevItems,
-        {
-          ...product,
-          quantity: quantityToAdd,
-        },
-      ];
-    }
-  });
-};
+      }
 
-// UPDATED: Modified to include color in the item identification
-const updateQuantity = (itemIdentifier, quantity) => {
-  setCartItems((prevItems) => {
-    if (typeof itemIdentifier === 'object' && itemIdentifier !== null) {
+      return prevItems;
+    });
+  };
+
+  const removeFromCart = async (itemIdentifier) => {
+    let updatedCartItems = [];
+    
+    if (!itemIdentifier) {
+      setCartItems([]);
+      safeSetItem('cartItems', '[]');
+      
+      if (isUserAuthenticated) {
+        try {
+          await clearDatabaseCart();
+        } catch (error) {
+          console.error('Error clearing database cart:', error);
+        }
+      }
+      return;
+    }
+
+    // Remove specific item logic
+    if (typeof itemIdentifier === 'string') {
+      const matchById = cartItems.some((item) => item.id === itemIdentifier);
+
+      if (matchById) {
+        updatedCartItems = cartItems.filter((item) => item.id !== itemIdentifier);
+      } else {
+        updatedCartItems = cartItems.filter((item) => item.name !== itemIdentifier);
+      }
+    } else if (typeof itemIdentifier === 'object' && itemIdentifier !== null) {
       const { id, name, color } = itemIdentifier;
       const itemColor = color || '';
 
-      return prevItems.map((item) => {
-        const matchesId = id && item.id === id;
-        const matchesName = name && item.name === name;
-        const matchesColor = (item.color || '') === itemColor;
-        
-        if ((matchesId || matchesName) && matchesColor) {
-          return { ...item, quantity };
-        }
-        return item;
-      });
-    }
-
-    if (typeof itemIdentifier === 'string') {
-      const matchById = prevItems.some((item) => item.id === itemIdentifier);
-
-      if (matchById) {
-        return prevItems.map((item) =>
-          item.id === itemIdentifier ? { ...item, quantity } : item
+      if (id) {
+        updatedCartItems = cartItems.filter(
+          (item) => item.id !== id || (item.color || '') !== itemColor
         );
-      } else {
-        return prevItems.map((item) =>
-          item.name === itemIdentifier ? { ...item, quantity } : item
+      } else if (name) {
+        updatedCartItems = cartItems.filter(
+          (item) => item.name !== name || (item.color || '') !== itemColor
         );
       }
     }
-
-    return prevItems;
-  });
-};
-
-// UPDATED: Modified to include color in item identification
-const removeFromCart = async (itemIdentifier) => {
-  let updatedCartItems = [];
-  
-  if (!itemIdentifier) {
-    setCartItems([]);
-    localStorage.removeItem('cartItems');
     
-    if (isUserAuthenticated) {
+    setCartItems(updatedCartItems);
+    // Do NOT save to localStorage here - let useEffect handle it
+    
+    if (isUserAuthenticated && initialSyncDone) {
       try {
-        await clearDatabaseCart();
+        await saveCartToDatabase(updatedCartItems);
       } catch (error) {
-        console.error('Error clearing database cart:', error);
+        console.error('Error saving updated cart to database:', error);
       }
     }
-    return;
-  }
-
-  // Remove specific item
-  if (typeof itemIdentifier === 'string') {
-
-    const matchById = cartItems.some((item) => item.id === itemIdentifier);
-
-    if (matchById) {
-      updatedCartItems = cartItems.filter((item) => item.id !== itemIdentifier);
-    } else {
-      updatedCartItems = cartItems.filter((item) => item.name !== itemIdentifier);
-    }
-  } else if (typeof itemIdentifier === 'object' && itemIdentifier !== null) {
-    const { id, name, color } = itemIdentifier;
-    const itemColor = color || '';
-
-    if (id) {
-      updatedCartItems = cartItems.filter(
-        (item) => item.id !== id || (item.color || '') !== itemColor
-      );
-    } else if (name) {
-      updatedCartItems = cartItems.filter(
-        (item) => item.name !== name || (item.color || '') !== itemColor
-      );
-    }
-  }
-  
-  setCartItems(updatedCartItems);
-  localStorage.setItem('cartItems', JSON.stringify(updatedCartItems));
-  
-  if (isUserAuthenticated && initialSyncDone) {
-    try {
-      await saveCartToDatabase(updatedCartItems);
-    } catch (error) {
-      console.error('Error saving updated cart to database:', error);
-    }
-  }
-};
-
+  };
 
   const clearPendingOrder = async () => {
     setCartItems([]);
-    localStorage.removeItem('cartItems');
+    // Do NOT save to localStorage here - let useEffect handle it
   
     if (isUserAuthenticated) {
       try {
-        
         const apiUrl = getApiUrl();
         const token = getAccessToken();
         
@@ -351,13 +407,10 @@ const removeFromCart = async (itemIdentifier) => {
         
         if (!response.ok) {
           console.error('Direct API call to clear cart failed:', response.status);
-     
           const success = await clearDatabaseCart();
           if (!success) {
             console.error('Helper function also failed to clear cart');
           }
-        } else {
-          // console.log('Cart cleared successfully from database');
         }
       } catch (error) {
         console.error('Error clearing database cart:', error);
@@ -365,22 +418,20 @@ const removeFromCart = async (itemIdentifier) => {
     }
   }
 
+  useEffect(() => {
+    const handleCartCleared = () => {
+      setCartItems([])
+      safeSetItem('cartItems', '[]')
+      setIsUserAuthenticated(false)
+      setInitialSyncDone(false)
+    }
 
-useEffect(() => {
-  const handleCartCleared = () => {
-    setCartItems([])
-    localStorage.removeItem('cartItems')
-    setIsUserAuthenticated(false)
-    setInitialSyncDone(false)
-  }
+    window.addEventListener('cart-cleared', handleCartCleared)
 
-  window.addEventListener('cart-cleared', handleCartCleared)
-
-  return () => {
-    window.removeEventListener('cart-cleared', handleCartCleared)
-  }
-}, [])
-
+    return () => {
+      window.removeEventListener('cart-cleared', handleCartCleared)
+    }
+  }, [])
 
   return (
     <CartContext.Provider

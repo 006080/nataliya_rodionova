@@ -320,13 +320,13 @@ function PayPalPayment({
             PayPal requires cookies to function properly and ensure secure transactions.
           </p>
           <p>
-            Please accept cookies by clicking "Accept All" in the 
+            Please accept cookies by clicking &quot;Accept All&quot; in the 
             <button 
               onClick={() => window.dispatchEvent(new CustomEvent('openCookieSettings'))}
               className={styles.cookieSettingsLink}
             >
               cookie settings
-            </button>.
+            </button>
           </p>
         </div>
       </div>
@@ -367,3 +367,13 @@ function PayPalPayment({
 }
 
 export default PayPalPayment;
+
+
+
+
+
+
+
+
+
+
