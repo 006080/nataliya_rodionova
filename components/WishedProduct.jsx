@@ -22,7 +22,7 @@ const WishedProduct = ({
   colors = [],
 }) => {
   const [count, setCount] = useState(1);
-  const [selectedColor, setSelectedColor] = useState(colors[0] || "Not specified");
+  const [selectedColor, setSelectedColor] = useState(colors[0] || "");
   const [fullscreenImage, setFullscreenImage] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -41,10 +41,9 @@ const WishedProduct = ({
         price,
         quantity: count,
         material,
-        colors: selectedColor,
+        color: selectedColor, // ✅ теперь передаём только выбранный цвет
         description,
       };
-
       addToCart(product);
       setCount(1);
     }
@@ -82,7 +81,11 @@ const WishedProduct = ({
             onClick={() => openImageModal(0)}
           />
         )}
-        <button className={styles.removeButton} onClick={removeFromWishlist} aria-label="Remove from wishlist">
+        <button
+          className={styles.removeButton}
+          onClick={removeFromWishlist}
+          aria-label="Remove from wishlist"
+        >
           <FontAwesomeIcon icon={faTrash} />
         </button>
       </div>
@@ -121,15 +124,28 @@ const WishedProduct = ({
         </div>
 
         <div className={styles.actionArea}>
-          <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              width: "100%",
+            }}
+          >
             <div className={styles.quantityControl}>
-              <button onClick={decrement} className={styles.quantityButton}>-</button>
+              <button onClick={decrement} className={styles.quantityButton}>
+                -
+              </button>
               <span className={styles.quantity}>{count}</span>
-              <button onClick={increment} className={styles.quantityButton}>+</button>
+              <button onClick={increment} className={styles.quantityButton}>
+                +
+              </button>
             </div>
 
             <Button onClick={itemAdd} className={styles.addButton}>
-              <FontAwesomeIcon icon={faShoppingCart} className={styles.cartIcon} />
+              <FontAwesomeIcon
+                icon={faShoppingCart}
+                className={styles.cartIcon}
+              />
               <span>Add to Cart</span>
             </Button>
           </div>
@@ -137,9 +153,19 @@ const WishedProduct = ({
       </div>
 
       {fullscreenImage && (
-        <div className={styles.fullscreenModal} onClick={() => setFullscreenImage(null)}>
-          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-            <img src={fullscreenImage} alt="Fullscreen view" className={styles.fullscreenImage} />
+        <div
+          className={styles.fullscreenModal}
+          onClick={() => setFullscreenImage(null)}
+        >
+          <div
+            className={styles.modalContent}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={fullscreenImage}
+              alt="Fullscreen view"
+              className={styles.fullscreenImage}
+            />
             {images.length > 1 && (
               <div className={styles.modalControls}>
                 <button className={styles.modalArrow} onClick={showPrevImage}>
