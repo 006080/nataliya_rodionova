@@ -25,6 +25,12 @@ const scarfImages = [
   cld.image("image_6483441_9_txsndd").toURL(),
 ];
 
+const skirtImages = [
+  cld.image("rock__vorne_jvrult").toURL(),
+  cld.image("image_6483441_6_qhuykn").toURL(),
+  cld.image("image_6483441_9_txsndd").toURL(),
+];
+
 const trousersImages = [
   cld.image("trousers_x3ryc0").toURL(),
 ];
@@ -103,6 +109,19 @@ const Shop = () => {
         material={'100% Wool'}
         colors={['#333333', '#555555', '#999999']}
       />
+
+<CardProduct
+        addToCart={addToCart}
+        id="skirt"  // Unique ID for this product
+        images={skirtImages}
+        onImageClick={() => handleImageClick(scarfImages)}
+        name="Skirt"
+        price={560}
+        description="Patchwork-style boucle skirt featuring a bold black and purple checkerboard pattern. Made from a soft yarn blend for both warmth and comfort."
+        material={'50% wool, 50% acrilic'}
+        colors={['#333333', '#555555', '#999999']}
+      />
+
 
       <CardProduct
         addToCart={addToCart}

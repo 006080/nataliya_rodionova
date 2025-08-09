@@ -27,7 +27,7 @@ const hardcodedReviews = [
     id: 5,
     name: "Wolfgang Jger",
     rating: 5,
-    message: "",
+    message: "Ich habe einen Schal von Nataliya. Er ist sehr schön und vor allem Warm. In den Wintermonaten ist er jetzt zu einem Teil meines Lebens geworden.",
     image: "https://res.cloudinary.com/dwenvtwyx/image/upload/v1739534959/reviews/gsrlobxiixf7jzxonfld.jpg",
     date: "2/14/2025",
   },
@@ -37,13 +37,6 @@ const hardcodedReviews = [
     rating: 5,
     message: "Complimenti per la sfilata, per i materiali e le fluidità dei tessuti.Parlavi già 10 anni fa di gender fluid e collezione unisex. Inoltre mi piace molto le vestibilità e le assimetrie.  Complimenti Natalia. Un grande baci ❤️",
     image: "https://res.cloudinary.com/dwenvtwyx/image/upload/v1737314284/reviews/tqjcusg3f7nwj8dvpjr7.jpg",
-    date: "1/19/2025"
-  },
-  {
-    id: 5,
-    name: "Maggie Angelova",
-    rating: 5,
-    message: "Highly recommend checking out this new brand!!Very cool and unique designs - perfect balance between trendy and timeless. Definitely a brand to watch out for!",
     date: "1/19/2025"
   },
   {
