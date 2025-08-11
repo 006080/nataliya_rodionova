@@ -38,8 +38,8 @@ export const schedulePaymentReminders = async (orderId) => {
     // Calculate scheduled times
     const now = new Date();
     const initialReminderTime = new Date(now.getTime() + 1 * 60 * 1000); // 1 minutes from now
-    const followupReminderTime = new Date(now.getTime() + 3 * 60 * 1000); // 3 minutes from now
-    // const followupReminderTime = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours from now
+    // const followupReminderTime = new Date(now.getTime() + 3 * 60 * 1000); // 3 minutes from now
+    const followupReminderTime = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours from now
     
     // Create initial reminder task
     const initialReminder = new ReminderTask({

@@ -188,7 +188,7 @@ const CookieBanner = () => {
                 className={styles.continueButton}
                 onClick={handleContinueWithoutConsent}
               >
-                Essential Only
+                Reject All
               </button>
               <button
                 className={styles.settingsButton}
@@ -344,3 +344,8 @@ const CookieBanner = () => {
 }
 
 export default CookieBanner
+
+
+
+
+
