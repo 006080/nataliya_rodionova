@@ -1,42 +1,50 @@
+h2,
+h3 {
+  text-align: center;
+  color: #000000;
+  font-weight: 500;
+}
+ 
+.productImage {
+  width: 250px;
+  height: auto;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-right: 15px;
+}
 
-  h2, h3 {
-    text-align: center;
-    color: #000000;
-    font-weight: 500;
-  }
-  
-  .cartItem {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    border-bottom: 1px solid #ddd;
-    padding: 10px 0;
-  }
-  
-  .submitButton {
-    display: block;
-    width: 100%;
-    padding: 10px;
-    margin-top: 20px;
-    background-color: #0070f3;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-  }
-  
-  .submitButton:hover {
-    background-color: #005bb5;
-  }
-  
-  .paypalContainer {
-    background-color: white;
-    margin-top: 20px;
-    text-align: center;
-  }
-  
-  /* Order Confirmation Styling */
+.cartItem {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  border-bottom: 1px solid #ddd;
+  padding: 10px 0;
+}
+
+.submitButton {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin-top: 20px;
+  background-color: #0070f3;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.submitButton:hover {
+  background-color: #005bb5;
+}
+
+.paypalContainer {
+  background-color: white;
+  margin-top: 20px;
+  text-align: center;
+}
+
+/* Order Confirmation Styling */
 .cartContainer {
   max-width: 800px;
   margin: 40px auto;
@@ -45,6 +53,15 @@
   border-radius: 20px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
+}
+
+.sum {
+  text-align: left;
+  font-size: 18px;
+  font-weight: 500;
+  color: #000000;
+  margin-top: 15px;
+  padding-top: 15px;
 }
 
 .cartContainer:hover {
@@ -59,8 +76,54 @@
   position: relative;
 }
 
+.quantityControls {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  align-content: center;
+  justify-content: space-around;
+  width: 60px;
+  padding: 10px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  background-color: #f2f2f2;
+  border-radius: 9px;
+  cursor: pointer;
+}
+
+.quantity {
+  font-size: 12px;
+}
+
+.quantityValue {
+  width: 80px;
+}
+
+.qbutton {
+  background-color: transparent;
+  color: #000;
+  padding: 0;
+  margin: 0;
+}
+
+.qbutton:hover,
+.qbutton:active,
+.qbutton:focus {
+  background-color: transparent;
+  outline: none;
+  box-shadow: none;
+}
+
+.texts {
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  gap: 5px;
+}
+
 .cartContainer h1::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -10px;
   left: 50%;
@@ -164,7 +227,7 @@
 }
 
 .cartContainer::before {
-  content: '';
+  content: "";
   position: absolute;
   top: -10px;
   left: -10px;
@@ -187,17 +250,38 @@
     padding: 20px;
     margin: 20px;
   }
-  
+
+  .texts, p {
+    font-size: 12px;
+  }
+
   .cartContainer h1 {
     font-size: 2rem;
   }
-  
+
   .cartContainer h2 {
     font-size: 1.5rem;
   }
-  
+
   .cartContainer .order-details {
     padding: 15px;
+  }
+
+  .sum {
+    text-align: left;
+    font-size: 14px;
+    font-weight: 500;
+    color: #000000;
+    margin-top: 10px;
+    padding-top: 20px;
+  }
+
+  .productImage {
+    width: 205px;
+    height: auto;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-right: 15px;
   }
 }
 
@@ -223,12 +307,18 @@
   animation: fadeIn 0.5s ease-out forwards;
 }
 
-.cartContainer > *:nth-child(1) { animation-delay: 0.1s; }
-.cartContainer > *:nth-child(2) { animation-delay: 0.2s; }
-.cartContainer > *:nth-child(3) { animation-delay: 0.3s; }
-.cartContainer > *:nth-child(4) { animation-delay: 0.4s; }
-
-
+.cartContainer > *:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.cartContainer > *:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.cartContainer > *:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.cartContainer > *:nth-child(4) {
+  animation-delay: 0.4s;
+}
 
 /* Checkout Steps and Progress Styling */
 .checkoutSteps {
@@ -241,7 +331,7 @@
 
 /* Line connecting the steps */
 .checkoutSteps::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   left: 0;
@@ -493,6 +583,15 @@
 
 /* Responsive Adjustments */
 @media (max-width: 768px) {
+  .sum {
+    text-align: left;
+    font-size: 14px;
+    font-weight: 500;
+    color: #000000;
+    margin-top: 15px;
+    padding-top: 15px;
+  }
+
   .reviewSection {
     grid-template-columns: 1fr;
   }
@@ -528,7 +627,7 @@
 }
 
 .checkoutContainer h2::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -10px;
   left: 50%;
@@ -560,19 +659,19 @@
   border-bottom: none;
 }
 
-.productImage {
+/* .productImage {
   width: 70px;
   height: 70px;
   object-fit: cover;
   border-radius: 8px;
   margin-right: 15px;
-}
+} */
 
 .sum {
-  text-align: right;
+  text-align: left;
   font-size: 18px;
-  font-weight: bold;
-  color: #2d3748;
+  font-weight: 500;
+  color: #000000;
   margin-top: 15px;
   padding-top: 15px;
 }
@@ -585,9 +684,8 @@
 }
 
 .total {
-  margin-top: 10px; 
+  margin-top: 10px;
 }
-
 
 .cancelMessage {
   position: relative;
@@ -682,7 +780,8 @@
 
 /* Subtle bounce animation */
 @keyframes bounce {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   50% {

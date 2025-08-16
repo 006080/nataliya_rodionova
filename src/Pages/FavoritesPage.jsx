@@ -106,35 +106,40 @@ const FavoritesPage = () => {
       )}
       
       <div className={styles.header}>
-        <div className={styles.titleSection}>
-          <h1 className={styles.title}>My Wishlist</h1>
-          <p className={styles.subtitle}>{favorites.length} {favorites.length === 1 ? 'item' : 'items'} saved</p>
-        </div>
-        
-        <div className={styles.headerActions}>
-          <button 
-            onClick={handleClearFavoritesClick} 
-            className={styles.clearButton}
-            aria-label="Clear all favorites"
-          >
-            <FontAwesomeIcon icon={faTrashAlt} />
-            <span>Clear All</span>
-          </button>
-        </div>
-      </div>
+        <div style={{display:'flex', flexDirection:'row', alignItems:'center', width: '100%', justifyContent:'space-between'}}>
+  <div className={styles.titleSection}>
+    <div style={{display: 'flex', flexDirection: 'column'}}>
+    <h1 className={styles.title}>My Wishlist</h1>
+    <p className={styles.subtitle}>{favorites.length} {favorites.length === 1 ? 'item' : 'items'} saved</p>
+  </div>
+  </div>
+  
+  <div className={styles.headerActions}>
+    <button 
+      onClick={handleClearFavoritesClick} 
+      className={styles.clearButton}
+      aria-label="Clear all favorites"
+    >
+      <FontAwesomeIcon icon={faTrashAlt} />
+      <span>Clear All</span>
+    </button>
+  </div>
+  </div>
+</div>
+
 
       <div className={styles.wishlistContainer}>
         {favorites.map((product) => (
-          <WishedProduct
-            key={product.id}
-            id={product.id}
-            name={product.name}
-            images={product.image ? [product.image] : []}
-            price={product.price}
-            description={product.description || "No description available for this product."}
-            material={product.material || "Not specified"}
-            color={product.color || "Not specified"}
-          />
+        <WishedProduct
+        key={product.id}
+        id={product.id}
+        name={product.name}
+        images={product.image ? [product.image] : []}
+        price={product.price}
+        description={product.description}
+        material={product.material}
+        colors={Array.isArray(product.colors) ? product.colors : []}
+      />
         ))}
       </div>
 

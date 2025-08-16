@@ -15,9 +15,7 @@ const cld = new Cloudinary({
 });
 
 // Define your Cloudinary images (Multiple images for carousel)
-const collarImages = [
-  cld.image("collar_vzz5yo").toURL(),
-];
+const collarImages = [cld.image("collar_vzz5yo").toURL()];
 
 const scarfImages = [
   cld.image("image_6483441_8_lr6b1a").toURL(),
@@ -25,13 +23,18 @@ const scarfImages = [
   cld.image("image_6483441_9_txsndd").toURL(),
 ];
 
-const trousersImages = [
-  cld.image("trousers_x3ryc0").toURL(),
+const skirtImages = [
+  cld.image("13403_u6y5rb").toURL(),
+  cld.image("rock__vorne_jvrult").toURL(),
+  cld.image("Rock_züruck_fhwgmu").toURL(),
+  cld.image("Burning_Man_imx0zw").toURL(),
 ];
 
+const trousersImages = [cld.image("trousers_x3ryc0").toURL()];
+
 const gloves = [
-  cld.image("5E6EEA4C-C555-4329-9E4A-7895944041D0_r7vgpm").toURL()
-]
+  cld.image("5E6EEA4C-C555-4329-9E4A-7895944041D0_r7vgpm").toURL(),
+];
 
 const dress = [
   cld.image("0B9C10B5-B616-4D36-AE73-D48E03C60EB2_e3t2x7").toURL(),
@@ -82,62 +85,74 @@ const Shop = () => {
     <div className={styles.shop}>
       <CardProduct
         addToCart={addToCart}
-        id="collar-001"  // Unique ID for this product
+        id="collar-001" // Unique ID for this product
         images={collarImages}
         onImageClick={() => handleImageClick(collarImages)}
         name="Collar"
         price={120}
         description="Made entirely from 100% cotton, this collar ensures comfort and breathability. The ruffled style, adorned with delicate lace detailing, exudes vintage elegance. Convenient drawstrings at the front allow for easy closure or adjustment."
-        material={'100% cotton'}
-        color={'#ffffff'}
+        material={"100% cotton"}
+        colors={["black", "#555555", "#white"]}
       />
 
       <CardProduct
         addToCart={addToCart}
-        id="scarf-002"  // Unique ID for this product
+        id="scarf-002" // Unique ID for this product
         images={scarfImages}
         onImageClick={() => handleImageClick(scarfImages)}
         name="Scarf"
         price={180}
         description="Made entirely from 100% cotton, this scarf ensures comfort and breathability. The ruffled style, adorned with delicate lace detailing, exudes vintage elegance. Convenient drawstrings at the front allow for easy closure or adjustment."
-        material={'100% Wool'}
-        color={'#999999'}
+        material={"100% Wool"}
+        colors={["#333333", "#555555", "#999999"]}
       />
 
       <CardProduct
         addToCart={addToCart}
-        id="trousers-003"  // Unique ID for this product
+        id="trousers-003" // Unique ID for this product
         images={trousersImages}
         onImageClick={() => handleImageClick(trousersImages)}
         name="Trousers"
         price={480}
         description="Made entirely from 100% cotton, these trousers ensure comfort and breathability. The ruffled style, adorned with delicate lace detailing, exudes vintage elegance. Convenient drawstrings at the front allow for easy closure or adjustment."
-        material={'80% wool  20% cashmere'}
-        color={'#999999'}
+        material={"80% wool  20% cashmere"}
+        colors={["#333333", "#555555", "#999999"]}
       />
 
       <CardProduct
         addToCart={addToCart}
-        id="dress-004"  // Unique ID for this product
-        images={dress}
-        onImageClick={() => handleImageClick(dress)}
-        name="Men's dress"
-        price={680}
-        description="Designed for both comfort and style, this piece features a cozy wool-blend fabric in a classic checkerboard pattern. The deep V-neck and ribbed hem add a touch of elegance, while the relaxed fit allows for effortless layering. Pair it with combat boots and high socks for a trendy street-style look."
-        material={"100% sheep wool"}
-        color={'#8B4513'}
+        id="skirt" // Unique ID for this product
+        images={skirtImages}
+        onImageClick={() => handleImageClick(skirtImages)}
+        name="Skirt"
+        price={560}
+        description="Patchwork-style boucle skirt featuring a bold black and purple checkerboard pattern. Made from a soft yarn blend for both warmth and comfort."
+        material={"50% wool, 50% acrilic"}
+        colors={["#B611ED", "#CCF045", "#0028F0"]}
       />
 
-<CardProduct
+      <CardProduct
         addToCart={addToCart}
-        id="gloves-001"  // Unique ID for this product
+        id="gloves-001" // Unique ID for this product
         images={gloves}
         onImageClick={() => handleImageClick(gloves)}
         name="Gloves"
         price={120}
         description="Elegant handmade gloves crafted from 100% cotton lace. Lightweight, breathable, and detailed with black buttons for a timeless vintage touch."
         material={"100% cotton"}
-        color={'#000000'}
+        colors={["black", "beige", "white", "grey"]}
+      />
+
+      <CardProduct
+        addToCart={addToCart}
+        id="dress-004" // Unique ID for this product
+        images={dress}
+        onImageClick={() => handleImageClick(dress)}
+        name="Men's dress"
+        price={680}
+        description="Designed for both comfort and style, this piece features a cozy wool-blend fabric in a classic checkerboard pattern. The deep V-neck and ribbed hem add a touch of elegance, while the relaxed fit allows for effortless layering. Pair it with combat boots and high socks for a trendy street-style look."
+        material={"100% sheep wool"}
+        colors={["beige", "brown", "#999999"]}
       />
 
       {cartIsOpen && (
@@ -154,7 +169,7 @@ const Shop = () => {
             <Slider
               {...{
                 dots: true,
-                infinite: false,  // Disable infinite scrolling to prevent repetition
+                infinite: false, // Disable infinite scrolling to prevent repetition
                 speed: 500,
                 slidesToShow: 1,
                 slidesToScroll: 1,
@@ -170,10 +185,7 @@ const Shop = () => {
                 </div>
               ))}
             </Slider>
-            <button
-              className={styles.closeButton}
-              onClick={handleClosePreview}
-            >
+            <button className={styles.closeButton} onClick={handleClosePreview}>
               &times;
             </button>
           </div>

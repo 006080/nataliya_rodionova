@@ -1,17 +1,18 @@
-import { useState } from 'react'
-import PropTypes from 'prop-types'
-import Button from './Button'
-import styles from './CardProduct.module.css'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { useState } from "react";
+import PropTypes from "prop-types";
+import Button from "./Button";
+import styles from "./CardProduct.module.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faStar,
   faChevronLeft,
   faChevronRight,
   faHeart,
-} from '@fortawesome/free-solid-svg-icons'
-import { useCart } from './CartContext'
-import { useFavorites } from './FavoriteContext'
-import { hexToColorName } from '../src/utils/colorConvertion'
+} from "@fortawesome/free-solid-svg-icons";
+import { useCart } from "./CartContext";
+import { useFavorites } from "./FavoriteContext";
+import { hexToColorName } from "../src/utils/colorConvertion";
+import { faShoppingCart } from "@fortawesome/free-solid-svg-icons";
 
 const CardProduct = ({
   id,
@@ -19,20 +20,22 @@ const CardProduct = ({
   images,
   price,
   description,
-  material = 'Not specified',
-  color = 'Not specified',
+  material = "Not specified",
+  color = "Not specified",
+  colors = [], // ✅ new dynamic prop with default empty array
 }) => {
-  const [count, setCount] = useState(1)
-  const [selectedStars, setSelectedStars] = useState(0)
-  const [fullscreenImage, setFullscreenImage] = useState(null)
-  const [currentImageIndex, setCurrentImageIndex] = useState(0)
-  const [selectedColor, setSelectedColor] = useState(color)
+  const [count, setCount] = useState(1);
+  const [selectedStars, setSelectedStars] = useState(0);
+  const [fullscreenImage, setFullscreenImage] = useState(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [selectedColor, setSelectedColor] = useState(color || colors[0] || "");
 
-  const { addToCart } = useCart()
-  const { toggleFavorite, isFavorite } = useFavorites()
 
-  const increment = () => setCount(count + 1)
-  const decrement = () => count > 1 && setCount(count - 1)
+  const { addToCart } = useCart();
+  const { toggleFavorite, isFavorite } = useFavorites();
+
+  const increment = () => setCount(count + 1);
+  const decrement = () => count > 1 && setCount(count - 1);
 
   const itemAdd = () => {
     if (count >= 1) {
@@ -44,13 +47,14 @@ const CardProduct = ({
         quantity: count,
         material,
         color: selectedColor,
-      }
-      addToCart(product)
-      setCount(1) // Reset the count after adding to cart
+      };
+      addToCart(product);
+      setCount(1);
     }
-  }
+  };
 
-  const handleStarClick = (starIndex) => setSelectedStars(starIndex + 1)
+  const handleStarClick = (starIndex) => setSelectedStars(starIndex + 1);
+
 
   const handleHeartClick = () => {
     const product = {
@@ -61,26 +65,26 @@ const CardProduct = ({
       description,
       material,
       color: selectedColor,
-    }
-    toggleFavorite(product)
-  }
-
+      colors, // ✅ ADD THIS
+    };
+    toggleFavorite(product);
+  };
   const openImageModal = (index) => {
-    setCurrentImageIndex(index)
-    setFullscreenImage(images[index])
-  }
+    setCurrentImageIndex(index);
+    setFullscreenImage(images[index]);
+  };
 
   const showNextImage = () => {
-    const nextIndex = (currentImageIndex + 1) % images.length
-    setCurrentImageIndex(nextIndex)
-    setFullscreenImage(images[nextIndex])
-  }
+    const nextIndex = (currentImageIndex + 1) % images.length;
+    setCurrentImageIndex(nextIndex);
+    setFullscreenImage(images[nextIndex]);
+  };
 
   const showPrevImage = () => {
-    const prevIndex = (currentImageIndex - 1 + images.length) % images.length
-    setCurrentImageIndex(prevIndex)
-    setFullscreenImage(images[prevIndex])
-  }
+    const prevIndex = (currentImageIndex - 1 + images.length) % images.length;
+    setCurrentImageIndex(prevIndex);
+    setFullscreenImage(images[prevIndex]);
+  };
 
   return (
     <div className={styles.fashionItem}>
@@ -93,49 +97,52 @@ const CardProduct = ({
 
       <div className={styles.info}>
         <div className={styles.titleLine}>
-          <h3 style={{ textAlign: 'left' }}>{name}</h3>
+          <h3 style={{ textAlign: "left" }}>{name}</h3>
           <FontAwesomeIcon
             icon={faHeart}
             className={styles.heart}
             style={{
-              color: isFavorite(id) ? 'black' : '',
-              cursor: 'pointer',
+              color: isFavorite(id) ? "black" : "",
+              cursor: "pointer",
             }}
             onClick={handleHeartClick}
           />
         </div>
 
         <div className={styles.notes}>
-          <p style={{ fontSize: '14px' }}>{description}</p>
-          <p style={{ fontSize: '14px' }}>Material: {material}</p>
-          <p style={{ fontSize: '14px' }}>
+          <p style={{ fontSize: "14px" }}>{description}</p>
+          <p style={{ fontSize: "14px" }}>Material: {material}</p>
+          <p style={{ fontSize: "14px" }}>
             Default Color: {hexToColorName(color)}
           </p>
         </div>
 
-        {/* 🎨 Color Picker */}
-        <label className={styles.colorLabel}>
-          <span style={{ fontSize: '14px' }}>Pick your color:</span>
-          <input
-            type="color"
-            value={selectedColor}
-            onChange={(e) => setSelectedColor(e.target.value)}
-            className={styles.colorSwatchButton}
-          />
-        </label>
-
-        <div
-          className={styles.colorSwatch}
-          style={{ backgroundColor: selectedColor }}
-        />
+        {/* 🎨 Dynamic Color Swatches */}
+        {colors.length > 0 && (
+          <div className={styles.colorSelector}>
+            <span style={{ fontSize: "14px" }}>Available Colors:</span>
+            <div className={styles.colorSwatchList}>
+              {colors.map((colorOption) => (
+                <div
+                  key={colorOption}
+                  className={`${styles.colorCircle} ${
+                    selectedColor === colorOption ? styles.selectedCircle : ""
+                  }`}
+                  style={{ backgroundColor: colorOption }}
+                  onClick={() => setSelectedColor(colorOption)}
+                />
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className={styles.starPrice}>
-          <p style={{ fontSize: '20px', fontStyle: 'italic' }}>${price}</p>
+          <p style={{ fontSize: "20px", fontStyle: "italic" }}>${price}</p>
           <div
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
             }}
           >
             {[...Array(5)].map((_, index) => (
@@ -143,8 +150,8 @@ const CardProduct = ({
                 key={index}
                 icon={faStar}
                 style={{
-                  color: index < selectedStars ? 'black' : 'grey',
-                  cursor: 'pointer',
+                  color: index < selectedStars ? "black" : "grey",
+                  cursor: "pointer",
                 }}
                 onClick={() => handleStarClick(index)}
               />
@@ -165,7 +172,14 @@ const CardProduct = ({
               +
             </p>
           </div>
-          <Button onClick={itemAdd}>Add to Cart</Button>
+
+          <Button onClick={itemAdd}>
+            <FontAwesomeIcon
+              icon={faShoppingCart}
+              className={styles.cartIcon}
+            />
+            Add to Cart
+          </Button>
         </div>
       </div>
 
@@ -182,7 +196,7 @@ const CardProduct = ({
               src={fullscreenImage}
               alt="Fullscreen"
               className={styles.fullscreenImage}
-              style={{ width: '450px', height: '100%' }}
+              style={{ width: "450px", height: "100%" }}
             />
             <div className={styles.modalArrows}>
               <FontAwesomeIcon
@@ -200,8 +214,8 @@ const CardProduct = ({
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
 CardProduct.propTypes = {
   id: PropTypes.string.isRequired,
@@ -211,6 +225,7 @@ CardProduct.propTypes = {
   description: PropTypes.string.isRequired,
   material: PropTypes.string,
   color: PropTypes.string,
-}
+  colors: PropTypes.arrayOf(PropTypes.string), // ✅ added prop type
+};
 
-export default CardProduct
+export default CardProduct;
