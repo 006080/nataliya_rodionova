@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import ReCAPTCHA from 'react-google-recaptcha'
 import styles from './Form.module.css'
-import { hasThirdPartyConsent } from '../src/utils/consentUtils'
+import { getConsentSettings } from '../src/utils/enhancedConsentUtils'
 import RecaptchaStyling from './RecaptchaStyling'
 
 const Form = () => {
@@ -21,8 +21,8 @@ const Form = () => {
   // Check consent status on component mount
   useEffect(() => {
     // Initial consent check
-    const hasConsent = hasThirdPartyConsent()
-    setConsentRequired(!hasConsent)
+    const settings = getConsentSettings()
+    setConsentRequired(settings.cookies !== 'all')
 
     // Listen for consent changes
     const handleConsentChange = (event) => {
@@ -287,8 +287,8 @@ const Form = () => {
             size="invisible"
             ref={recaptchaRef}
           />
-              <RecaptchaStyling />
-          </>
+          <RecaptchaStyling />
+        </>
       )}
     </>
   )

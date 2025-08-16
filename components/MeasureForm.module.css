@@ -53,3 +53,28 @@ form {
 
 
 
+.storageNotice {
+  padding: 1rem;
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  margin-bottom: 1rem;
+}
+
+.privacyLink {
+  background: none;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  padding: 0 0.3rem;
+  font-size: inherit;
+  text-decoration: underline;
+  font-family: inherit;
+}
+
+.privacyLink:hover {
+  color: #0056b3;
+}

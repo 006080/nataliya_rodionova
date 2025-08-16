@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { PayPalButtons, PayPalScriptProvider, usePayPalScriptReducer } from '@paypal/react-paypal-js';
 import styles from './PayPalPayment.module.css';
 import { hasThirdPartyConsent } from '../src/utils/consentUtils';
 
-const LoadingSpinner = () => (
+const LoadingSpinner = ({ message = "Loading payment options..." }) => (
   <div className={styles.spinnerContainer}>
     <div className={styles.spinner}></div>
-    <p>Loading payment options...</p>
+    <p>{message}</p>
   </div>
 );
 
@@ -56,85 +56,121 @@ function PayPalPayment({
   const [paymentStatus, setPaymentStatus] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState(null);
-  const [isClientLoaded, setIsClientLoaded] = useState(false);
   const [orderId, setOrderId] = useState(existingOrderId);
-  const [consentRequired, setConsentRequired] = useState(!hasThirdPartyConsent());
+  const [isRedirecting, setIsRedirecting] = useState(false);
+  
+  // Much simpler state management
+  const [showPayPal, setShowPayPal] = useState(false);
+  const [hasConsent, setHasConsent] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Listen for consent changes - ALWAYS at the top level
+  const initRef = useRef(false);
+
+  // Setup initial state and handle consent changes
   useEffect(() => {
-    const handleConsentChange = (event) => {
-      if (event.detail && event.detail.consent === 'all') {
-        // Update consent status immediately when accepted
-        setConsentRequired(false);
+    const setupPayPal = () => {
+      const currentConsent = hasThirdPartyConsent();
+      
+      if (currentConsent) {
+        console.log('PayPal: Has consent, setting up...');
+        setHasConsent(true);
+        setIsLoading(true);
+        setShowPayPal(false);
         
-        // Force a refresh of the client loading state
-        setIsClientLoaded(false);
-        
-        // Manually trigger script loading
+        // Load PayPal script
         import('../src/utils/consentUtils').then(module => {
           module.loadPayPal();
-          
-          // Set a timeout to ensure the PayPal script has time to load
+        }).catch(error => {
+          console.error('PayPal: Script import failed:', error);
+          // Still try to show buttons
           setTimeout(() => {
-            setIsClientLoaded(true);
-          }, 1500);
+            setShowPayPal(true);
+            setIsLoading(false);
+          }, 1000);
         });
-      } else if (event.detail && event.detail.consent === 'essential') {
-        // Update to show consent required message immediately
-        setConsentRequired(true);
-        setIsClientLoaded(false);
+        
+        // Primary timeout to show buttons
+        setTimeout(() => {
+          console.log('PayPal: Showing buttons');
+          setShowPayPal(true);
+          setIsLoading(false);
+        }, 1500);
+        
+      } else {
+        console.log('PayPal: No consent');
+        setHasConsent(false);
+        setShowPayPal(false);
+        setIsLoading(false);
       }
     };
-    
-    window.addEventListener('consentChanged', handleConsentChange);
-    
-    // Initial check on mount
-    if (hasThirdPartyConsent()) {
-      setConsentRequired(false);
-    } else {
-      setConsentRequired(true);
+
+    // Only run initial check once
+    if (!initRef.current) {
+      initRef.current = true;
+      setupPayPal();
     }
+
+    const handleConsentChange = (event) => {
+      console.log('PayPal: Consent changed!', event.detail);
+      
+      if (event.detail && event.detail.consent === 'all') {
+        console.log('PayPal: Granting consent - setting up...');
+        setHasConsent(true);
+        setIsLoading(true);
+        setShowPayPal(false);
+        
+        import('../src/utils/consentUtils').then(module => {
+          module.loadPayPal();
+        }).catch(error => {
+          console.error('PayPal: Script import failed:', error);
+          setTimeout(() => {
+            setShowPayPal(true);
+            setIsLoading(false);
+          }, 1000);
+        });
+        
+        setTimeout(() => {
+          console.log('PayPal: Consent granted - showing buttons');
+          setShowPayPal(true);
+          setIsLoading(false);
+        }, 1500);
+        
+      } else if (event.detail && (event.detail.consent === 'essential' || event.detail.consent === 'none')) {
+        console.log('PayPal: Revoking consent - hiding buttons immediately');
+        setHasConsent(false);
+        setShowPayPal(false);
+        setIsLoading(false);
+      }
+    };
+
+    const handlePayPalLoaded = () => {
+      console.log('PayPal: Script loaded event');
+      // Check current consent state when script loads
+      if (hasThirdPartyConsent()) {
+        setTimeout(() => {
+          console.log('PayPal: Script loaded - showing buttons');
+          setShowPayPal(true);
+          setIsLoading(false);
+        }, 300);
+      }
+    };
+
+    // Register event listeners
+    window.addEventListener('consentChanged', handleConsentChange);
+    window.addEventListener('paypalLoaded', handlePayPalLoaded);
     
     return () => {
       window.removeEventListener('consentChanged', handleConsentChange);
+      window.removeEventListener('paypalLoaded', handlePayPalLoaded);
     };
-  }, []);
+  }, []); // Empty dependency array
 
-  // Listen for PayPal script loading events - ALWAYS at the top level
+  // Handle existing order ID
   useEffect(() => {
-    // Only add event listeners if consent is given
-    if (!consentRequired) {
-      const handlePayPalLoaded = () => {
-        console.log("PayPal script load event detected");
-        setIsClientLoaded(true);
-      };
-      
-      window.addEventListener('paypalLoaded', handlePayPalLoaded);
-      
-      // Add some extra time to make sure script is properly initialized
-      const timer = setTimeout(() => {
-        setIsClientLoaded(true);
-      }, 2000);
-      
-      return () => {
-        window.removeEventListener('paypalLoaded', handlePayPalLoaded);
-        clearTimeout(timer);
-      };
+    if (existingOrderId && existingOrderId !== orderId) {
+      setOrderId(existingOrderId);
     }
-  }, [consentRequired]); // Depend on consentRequired to re-run when consent changes
-
-  // Check for pending order on component mount - ALWAYS at the top level
-  useEffect(() => {
-    const checkForPendingOrder = async () => {
-      // If existingOrderId is already provided, use it
-      if (existingOrderId) {
-        setOrderId(existingOrderId);
-        return;
-      }
-    };
-
-    checkForPendingOrder();
-  }, [existingOrderId]);
+  }, [existingOrderId, orderId]);
 
   const formatCartItems = (cartItems) => {
     return cartItems.map(item => ({
@@ -148,14 +184,39 @@ function PayPalPayment({
     }));
   };
 
+  const checkUserInteraction = async (orderId) => {
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const response = await fetch(
+        `${getApiUrl()}/api/payments/${orderId}/check-interaction`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+      
+      if (!response.ok) {
+        console.error(`Failed to check interaction: ${response.status}`);
+        return false;
+      }
+      
+      const data = await response.json();
+      return data.exists || data.created || data.hasEmail || false;
+    } catch (error) {
+      console.error('Error checking user interaction:', error);
+      return false;
+    }
+  };
+
   const createOrder = async () => {
     setIsProcessing(true);
     setError(null);
     
     try {
-      // If we already have an order ID (either from props or state), use it
       if (orderId) {
         setPaymentStatus(`Using existing order: ${orderId}`);
+        await checkUserInteraction(orderId);
         return orderId;
       }
 
@@ -188,10 +249,8 @@ function PayPalPayment({
         throw new Error('No order ID returned from backend');
       }
 
-      // Store the new order ID
       setOrderId(data.id);
       
-      // Notify parent component about the created order ID
       if (onOrderCreated && typeof onOrderCreated === 'function') {
         onOrderCreated(data.id);
       }
@@ -209,7 +268,7 @@ function PayPalPayment({
     }
   };
 
-  const onApprove = async (data, actions) => {
+  const onApprove = async (data) => {
     setIsProcessing(true);
     setPaymentStatus('Processing payment...');
 
@@ -233,7 +292,6 @@ function PayPalPayment({
       if (paymentStatus === 'COMPLETED') {
         setPaymentStatus('Payment successful!');
         
-        // Clear the pending order ID using the provided callback
         if (clearOrderId && typeof clearOrderId === 'function') {
           clearOrderId();
         }
@@ -257,14 +315,72 @@ function PayPalPayment({
   };
 
   const handleCancel = async (data) => {
-    setPaymentStatus("Payment cancelled");
+    setIsRedirecting(true);
+    setPaymentStatus("Processing cancellation...");
     
     try {
-      if (onCancel && typeof onCancel === 'function') {
-        onCancel(data, false);
+      const checkResponse = await fetch(
+        `${getApiUrl()}/api/payments/${data.orderID}/check-interaction`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+      
+      if (checkResponse.ok) {
+        const checkData = await checkResponse.json();
+        
+        if (checkData.hasEmail || checkData.exists) {
+          try {
+            await fetch(
+              `${getApiUrl()}/api/payments/${data.orderID}/update-canceled`,
+              {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: 'PAYER_ACTION_REQUIRED' })
+              }
+            );
+          } catch (updateError) {
+            console.error("Error updating order status:", updateError);
+          }
+        }
+        
+        if (onCancel && typeof onCancel === 'function') {
+          onCancel(data, true);
+        }
+        
+        setTimeout(() => {
+          window.location.href = `/order-status/${data.orderID}`;
+        }, 500);
+        
+      } else {
+        console.error("Failed to check interaction:", await checkResponse.text());
+        
+        if (onCancel && typeof onCancel === 'function') {
+          onCancel(data, true);
+        }
+        
+        setTimeout(() => {
+          window.location.href = `/order-status/${data.orderID}`;
+        }, 500);
       }
     } catch (error) {
       console.error("Error in handleCancel:", error);
+      
+      if (onCancel && typeof onCancel === 'function') {
+        onCancel(data, true);
+      }
+      
+      if (data && data.orderID) {
+        setTimeout(() => {
+          window.location.href = `/order-status/${data.orderID}`;
+        }, 500);
+      } else {
+        setIsRedirecting(false);
+        if (onCancel && typeof onCancel === 'function') {
+          onCancel(data, false);
+        }
+      }
     }
   };
 
@@ -274,6 +390,7 @@ function PayPalPayment({
     setPaymentStatus('Payment error');
   };
 
+  // Data validation
   const isDataValid = cart.length > 0 && 
                      measurements && 
                      deliveryDetails && 
@@ -309,8 +426,17 @@ function PayPalPayment({
     );
   }
 
-  // Render the consent message if needed
-  if (consentRequired) {
+  // Show redirecting spinner
+  if (isRedirecting) {
+    return (
+      <div className={styles.payPalContainer}>
+        <LoadingSpinner message="Redirecting to complete payment..." />
+      </div>
+    );
+  }
+
+  // Show consent message if no consent
+  if (!hasConsent && !isLoading) {
     return (
       <div className={styles.payPalContainer}>
         <div className={styles.consentMessage}>
@@ -320,21 +446,24 @@ function PayPalPayment({
             PayPal requires cookies to function properly and ensure secure transactions.
           </p>
           <p>
-            Please accept cookies by clicking "Accept All" in the 
+            Please accept cookies by clicking &quot;Accept All&quot; in the 
             <button 
-              onClick={() => window.dispatchEvent(new CustomEvent('openCookieSettings'))}
+              onClick={() => {
+                console.log('PayPal: Opening cookie settings...');
+                window.dispatchEvent(new CustomEvent('openCookieSettings'));
+              }}
               className={styles.cookieSettingsLink}
             >
               cookie settings
-            </button>.
+            </button>
           </p>
         </div>
       </div>
     );
   }
 
-  // Show spinner if client is not loaded yet
-  if (!isClientLoaded) {
+  // Show loading while setting up
+  if (isLoading) {
     return (
       <div className={styles.payPalContainer}>
         <LoadingSpinner />
@@ -342,28 +471,54 @@ function PayPalPayment({
     );
   }
 
-  return (
-    <PayPalScriptProvider
-      options={{
-        'client-id': `${import.meta.env.VITE_PAYPAL_CLIENT_ID}`,
-        currency: 'EUR',
-      }}
-    >
-      <div className={styles.payPalContainer}>
-        {error && <div className={styles.errorMessage}>{error}</div>}
+  // Show PayPal buttons when ready
+  if (hasConsent && showPayPal) {
+    return (
+      <PayPalScriptProvider
+        options={{
+          'client-id': `${import.meta.env.VITE_PAYPAL_CLIENT_ID}`,
+          currency: 'EUR',
+        }}
+      >
+        <div className={styles.payPalContainer}>
+          {error && <div className={styles.errorMessage}>{error}</div>}
 
-        <div className={styles.paypalButtonContainer}>
-          <PayPalButtonsWrapper
-            createOrder={createOrder}
-            onApprove={onApprove}
-            onCancel={handleCancel}
-            onError={onError}
-            disabled={isProcessing}
-          />
+          <div className={styles.paypalButtonContainer}>
+            <PayPalButtonsWrapper
+              createOrder={createOrder}
+              onApprove={onApprove}
+              onCancel={handleCancel}
+              onError={onError}
+              disabled={isProcessing}
+            />
+          </div>
         </div>
-      </div>
-    </PayPalScriptProvider>
+      </PayPalScriptProvider>
+    );
+  }
+
+  // Fallback
+  return (
+    <div className={styles.payPalContainer}>
+      <LoadingSpinner />
+    </div>
   );
 }
 
 export default PayPalPayment;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
