@@ -103,7 +103,7 @@ const CartSummary = ({ onClose }) => {
           </div>
 
           <p style={{ fontSize: "12px", marginBottom: "15px", fontStyle: "italic", fontWeight: "200" }}>
-            Shipping & taxes calculated at checkout
+            Price includes taxes and shipping.
           </p>
 
           <Link to="/checkout" onClick={onClose} className={styles.checkoutButton}>

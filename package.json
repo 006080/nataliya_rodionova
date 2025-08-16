@@ -70,5 +70,18 @@
       "^.+\\.css$": "identity-obj-proxy",
       "\\.(jpg|jpeg|png|gif|webp|svg)$": "jest-transform-stub"
     }
-  }
+  },
+  "description": "A responsive, design-focused web project inspired by the fashion brand **Varona** by Nataliya Rodionova. This portfolio project showcases elegant layout, clean structure, and accessibility best practices for fashion, art, and cultural websites.",
+  "main": "vite.config.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/006080/nataliya_rodionova.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/006080/nataliya_rodionova/issues"
+  },
+  "homepage": "https://github.com/006080/nataliya_rodionova#readme"
 }

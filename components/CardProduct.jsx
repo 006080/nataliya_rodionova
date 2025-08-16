@@ -8,11 +8,11 @@ import {
   faChevronLeft,
   faChevronRight,
   faHeart,
+  faShoppingCart,
 } from "@fortawesome/free-solid-svg-icons";
 import { useCart } from "./CartContext";
 import { useFavorites } from "./FavoriteContext";
 import { hexToColorName } from "../src/utils/colorConvertion";
-import { faShoppingCart } from "@fortawesome/free-solid-svg-icons";
 
 const CardProduct = ({
   id,
@@ -21,15 +21,15 @@ const CardProduct = ({
   price,
   description,
   material = "Not specified",
+  colors = [],                       // ✅ Default colors first
   color = "Not specified",
-  colors = [], // ✅ new dynamic prop with default empty array
+  primaryColor, // ✅ Then fallback
 }) => {
   const [count, setCount] = useState(1);
   const [selectedStars, setSelectedStars] = useState(0);
   const [fullscreenImage, setFullscreenImage] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [selectedColor, setSelectedColor] = useState(color || colors[0] || "");
-
+  const [selectedColor, setSelectedColor] = useState(color || primaryColor);
 
   const { addToCart } = useCart();
   const { toggleFavorite, isFavorite } = useFavorites();
@@ -55,7 +55,6 @@ const CardProduct = ({
 
   const handleStarClick = (starIndex) => setSelectedStars(starIndex + 1);
 
-
   const handleHeartClick = () => {
     const product = {
       id,
@@ -65,10 +64,12 @@ const CardProduct = ({
       description,
       material,
       color: selectedColor,
-      colors, // ✅ ADD THIS
+      colors,
+      primaryColor,
     };
     toggleFavorite(product);
   };
+
   const openImageModal = (index) => {
     setCurrentImageIndex(index);
     setFullscreenImage(images[index]);
@@ -110,17 +111,20 @@ const CardProduct = ({
         </div>
 
         <div className={styles.notes}>
-          <p style={{ fontSize: "14px" }}>{description}</p>
-          <p style={{ fontSize: "14px" }}>Material: {material}</p>
-          <p style={{ fontSize: "14px" }}>
-            Default Color: {hexToColorName(color)}
-          </p>
+          <p style={{ fontSize: "13px" }}>{description}</p>
+          <p style={{ fontSize: "14px" }}><em>Material: </em> {material}</p>
+         {primaryColor && (
+  <p style={{ fontSize: "14px" }}>
+   <em> Primary Color: </em> {hexToColorName(primaryColor)}
+  </p>
+)}
+
         </div>
 
         {/* 🎨 Dynamic Color Swatches */}
         {colors.length > 0 && (
           <div className={styles.colorSelector}>
-            <span style={{ fontSize: "14px" }}>Available Colors:</span>
+            <span style={{ fontSize: "14px" }}> <em>Available Colors:</em></span>
             <div className={styles.colorSwatchList}>
               {colors.map((colorOption) => (
                 <div
@@ -174,10 +178,7 @@ const CardProduct = ({
           </div>
 
           <Button onClick={itemAdd}>
-            <FontAwesomeIcon
-              icon={faShoppingCart}
-              className={styles.cartIcon}
-            />
+            <FontAwesomeIcon icon={faShoppingCart} className={styles.cartIcon} />
             Add to Cart
           </Button>
         </div>
@@ -199,16 +200,8 @@ const CardProduct = ({
               style={{ width: "450px", height: "100%" }}
             />
             <div className={styles.modalArrows}>
-              <FontAwesomeIcon
-                icon={faChevronLeft}
-                className={styles.arrow}
-                onClick={showPrevImage}
-              />
-              <FontAwesomeIcon
-                icon={faChevronRight}
-                className={styles.arrow}
-                onClick={showNextImage}
-              />
+              <FontAwesomeIcon icon={faChevronLeft} className={styles.arrow} onClick={showPrevImage} />
+              <FontAwesomeIcon icon={faChevronRight} className={styles.arrow} onClick={showNextImage} />
             </div>
           </div>
         </div>
@@ -225,7 +218,8 @@ CardProduct.propTypes = {
   description: PropTypes.string.isRequired,
   material: PropTypes.string,
   color: PropTypes.string,
-  colors: PropTypes.arrayOf(PropTypes.string), // ✅ added prop type
+  colors: PropTypes.arrayOf(PropTypes.string),
+  primaryColor: PropTypes.string,
 };
 
 export default CardProduct;
