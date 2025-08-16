@@ -3,6 +3,7 @@ import {
   getPersistedAccessToken,
   persistAccessToken,
 } from '../utils/authHelpers'
+import { cleanupOptionalStorage, setStorageItem, getStorageItem } from '../utils/enhancedConsentUtils'
 
 const getApiUrl = () => {
   return import.meta.env.VITE_NODE_ENV === 'production'
@@ -329,8 +330,9 @@ export const clearAllAuthData = async () => {
     window.hasLoggedOut = true
     sessionStorage.setItem('isUserLogout', 'true')
 
-    localStorage.removeItem('cartItems')
-    localStorage.removeItem('favorites')
+    // Clear cart and favorites using consent-aware methods
+    setStorageItem('cartItems', '[]', 'shoppingData')
+    setStorageItem('favorites', '[]', 'shoppingData')
 
     // Broadcast logout to all tabs
     if (window.authChannel) {
@@ -346,27 +348,24 @@ export const clearAllAuthData = async () => {
     // Clear session indicators
     sessionStorage.removeItem('sessionActive')
 
-    // WHITELIST APPROACH: Save only specific items we want to keep
-    const whitelistedKeys = [
-      // 'cartItems',
-      'measurements',
-      'deliveryDetails',
-      'rememberedEmail',
-    ]
+    // Use enhanced consent cleanup instead of manual localStorage management
+    // This will preserve essential keys while clearing optional data based on user consent
+    cleanupOptionalStorage()
 
-    // Save values for whitelisted keys
+    // Preserve essential user data that should survive logout
+    const essentialKeys = ['measurements', 'deliveryDetails', 'rememberedEmail']
     const preservedData = {}
-    whitelistedKeys.forEach((key) => {
-      preservedData[key] = localStorage.getItem(key)
+    
+    essentialKeys.forEach((key) => {
+      const value = getStorageItem(key, 'userPreferences')
+      if (value) {
+        preservedData[key] = value
+      }
     })
 
-    localStorage.clear()
-
-    // Restore only the whitelisted items
+    // Restore preserved essential data
     Object.keys(preservedData).forEach((key) => {
-      if (preservedData[key]) {
-        localStorage.setItem(key, preservedData[key])
-      }
+      setStorageItem(key, preservedData[key], 'userPreferences')
     })
 
     // Clear sessionStorage except for isUserLogout flag and any whitelisted items
@@ -442,7 +441,6 @@ export const clearAllAuthData = async () => {
   }
 }
 
-
 export const loginUser = async (email, password) => {
   try {
     console.log('Login attempt for:', email);
@@ -458,8 +456,9 @@ export const loginUser = async (email, password) => {
       });
     }
 
-    localStorage.removeItem('cartItems');
-    localStorage.removeItem('favorites');
+    // Clear cart and favorites using consent-aware methods
+    setStorageItem('cartItems', '[]', 'shoppingData')
+    setStorageItem('favorites', '[]', 'shoppingData')
 
     const apiUrl = getApiUrl();
 
@@ -536,7 +535,7 @@ export const loginUser = async (email, password) => {
     }
 
     // Regular login flow for cart/favorites merging
-    const localCartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
+    const localCartItems = JSON.parse(getStorageItem('cartItems', 'shoppingData') || '[]');
     if (localCartItems.length > 0) {
       try {
         await fetch(`${apiUrl}/api/cart/merge`, {
@@ -553,7 +552,7 @@ export const loginUser = async (email, password) => {
       }
     }
 
-    const localFavorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    const localFavorites = JSON.parse(getStorageItem('favorites', 'shoppingData') || '[]');
     if (localFavorites.length > 0) {
       try {
         await fetch(`${apiUrl}/api/favorites/merge`, {
@@ -565,7 +564,7 @@ export const loginUser = async (email, password) => {
           body: JSON.stringify({ items: localFavorites }),
           credentials: 'include',
         });
-        localStorage.removeItem('favorites');
+        setStorageItem('favorites', '[]', 'shoppingData'); // Clear after merge
       } catch (error) {
         console.error('Error merging favorites:', error);
       }

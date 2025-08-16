@@ -30,7 +30,7 @@ import FavoritesPage from "./Pages/FavoritesPage";
 import GoodbyePage from "./Pages/GoodbyePage";
 import WelcomeBackPage from "./Pages/WelcomeBackPage";
 import CookieBanner from "../components/CookieBanner";
-import { initConsentManagement } from "../src/utils/consentUtils";
+import { initConsentManagement } from "../src/utils/enhancedConsentUtils";
 import LegalNotice from "./Pages/LegalNotice";
 
 const Unauthorized = () => (
@@ -44,7 +44,7 @@ const Unauthorized = () => (
 const AppContent = () => {
   const location = useLocation();
 
-  // Initialize cookie consent management
+  // Initialize enhanced consent management
   useEffect(() => {
     initConsentManagement();
   }, []);  

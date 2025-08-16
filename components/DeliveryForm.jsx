@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { countries } from "../src/utils/countries";
+import { getStorageItem, setStorageItem, isStorageAllowed } from "../src/utils/enhancedConsentUtils";
 import styles from "./DeliveryForm.module.css";
 
 const DeliveryForm = ({ onFormSubmit, initialData = null }) => {
@@ -9,7 +10,8 @@ const DeliveryForm = ({ onFormSubmit, initialData = null }) => {
     }
     
     try {
-      const savedData = localStorage.getItem('deliveryDetails');
+      // Use consent-aware storage getter
+      const savedData = getStorageItem('deliveryDetails', 'userPreferences');
       if (savedData) {
         return JSON.parse(savedData);
       }
@@ -29,6 +31,45 @@ const DeliveryForm = ({ onFormSubmit, initialData = null }) => {
   });
   
   const [errors, setErrors] = useState({});
+  const [storageNotice, setStorageNotice] = useState('');
+
+  // Check storage consent and update notice
+  const checkAndUpdateStorageNotice = () => {
+    if (!isStorageAllowed('deliveryDetails', 'userPreferences')) {
+      setStorageNotice('Your delivery preferences will not be saved due to your privacy settings.');
+    } else {
+      setStorageNotice('');
+    }
+  };
+
+  useEffect(() => {
+    // Check initial state
+    checkAndUpdateStorageNotice();
+
+    // Listen for storage consent changes
+    const handleStorageConsentChange = (event) => {
+      const { localStorage: storageSettings } = event.detail;
+      
+      if (!storageSettings.granted || !storageSettings.categories.userPreferences) {
+        setStorageNotice('Your delivery preferences will not be saved due to your privacy settings.');
+      } else {
+        setStorageNotice('');
+      }
+    };
+
+    // Also listen for general consent changes to immediately update
+    const handleConsentChange = () => {
+      checkAndUpdateStorageNotice();
+    };
+
+    window.addEventListener('storageConsentChanged', handleStorageConsentChange);
+    window.addEventListener('consentChanged', handleConsentChange);
+
+    return () => {
+      window.removeEventListener('storageConsentChanged', handleStorageConsentChange);
+      window.removeEventListener('consentChanged', handleConsentChange);
+    };
+  }, []);
 
   const validateEmail = (email) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -95,19 +136,46 @@ const DeliveryForm = ({ onFormSubmit, initialData = null }) => {
     e.preventDefault();
     
     if (validateForm()) {
-      try {
-        localStorage.setItem('deliveryDetails', JSON.stringify(deliveryDetails));
-      } catch (error) {
-        console.error('Error saving delivery details to localStorage:', error);
+      // Try to save with consent check
+      const saveSuccess = setStorageItem('deliveryDetails', JSON.stringify(deliveryDetails), 'userPreferences');
+      
+      if (!saveSuccess) {
+        setStorageNotice('Delivery details submitted but not saved due to your privacy settings. You may need to re-enter them on your next visit.');
+      } else {
+        // Clear any previous notice if save was successful
+        setStorageNotice('');
       }
       
       onFormSubmit(deliveryDetails);
     }
   };
 
+  const openPrivacySettings = () => {
+    window.dispatchEvent(new CustomEvent('openConsentSettings'));
+  };
+
   return (
     <form className={styles.deliveryForm} onSubmit={handleSubmit}>
       <h3>Delivery Information</h3>
+      
+      {storageNotice && (
+        <div className={styles.storageNotice}>
+          {storageNotice}
+          {storageNotice.includes('privacy settings') && (
+            <>
+              {' '}
+              <button 
+                type="button"
+                onClick={openPrivacySettings}
+                className={styles.privacyLink}
+              >
+                Update privacy settings
+              </button>{' '}
+              to save your preferences.
+            </>
+          )}
+        </div>
+      )}
       
       <div className={styles.formField}>
         <label htmlFor="fullName">Full Name</label>
@@ -168,23 +236,23 @@ const DeliveryForm = ({ onFormSubmit, initialData = null }) => {
       </div>
 
       <div className={styles.formGroup}>
-          <label htmlFor="country">Country *</label>
-          <select
-            id="country"
-            name="country"
-            value={deliveryDetails.country}
-            onChange={handleChange}
-            className={errors.country ? styles.inputError : ''}
-          >
-            <option value="">Select Country</option>
-            {countries.map(country => (
-              <option key={country.code} value={country.code}>
-                {country.name}
-              </option>
-            ))}
-          </select>
-          {errors.country && <span className={styles.errorMessage}>{errors.country}</span>}
-        </div>
+        <label htmlFor="country">Country *</label>
+        <select
+          id="country"
+          name="country"
+          value={deliveryDetails.country}
+          onChange={handleChange}
+          className={errors.country ? styles.inputError : ''}
+        >
+          <option value="">Select Country</option>
+          {countries.map(country => (
+            <option key={country.code} value={country.code}>
+              {country.name}
+            </option>
+          ))}
+        </select>
+        {errors.country && <span className={styles.errorMessage}>{errors.country}</span>}
+      </div>
       
       <div className={styles.formField}>
         <label htmlFor="email">Email</label>

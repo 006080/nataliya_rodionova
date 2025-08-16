@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../src/contexts/AuthContext';
+import { getStorageItem, setStorageItem, removeStorageItem } from '../src/utils/enhancedConsentUtils';
 import styles from './LoginForm.module.css';
 
 const LoginForm = () => {
@@ -22,8 +23,8 @@ const LoginForm = () => {
   useEffect(() => {
     console.log('LoginForm mounted');
     
-    // Load remembered email
-    const rememberedEmail = localStorage.getItem('rememberedEmail');
+    // Load remembered email with consent check
+    const rememberedEmail = getStorageItem('rememberedEmail', 'userPreferences');
     if (rememberedEmail) {
       setEmail(rememberedEmail);
       setRemember(true);
@@ -71,11 +72,11 @@ const LoginForm = () => {
       console.log('LoginForm: Login result:', result);
       
       if (result.success) {
-        // Handle "remember me" option
+        // Handle "remember me" with consent
         if (remember) {
-          localStorage.setItem('rememberedEmail', email);
+          setStorageItem('rememberedEmail', email, 'userPreferences');
         } else {
-          localStorage.removeItem('rememberedEmail');
+          removeStorageItem('rememberedEmail', 'userPreferences');
         }
         
         // CRITICAL FIX: Handle account restoration redirection

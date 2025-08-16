@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getStorageItem, setStorageItem, isStorageAllowed } from '../src/utils/enhancedConsentUtils';
 import styles from "./MeasureForm.module.css";
 
 const MeasureForm = ({ onSubmit, initialData = null }) => {
@@ -8,7 +9,8 @@ const MeasureForm = ({ onSubmit, initialData = null }) => {
     }
     
     try {
-      const savedData = localStorage.getItem('measurements');
+      // Use consent-aware storage getter
+      const savedData = getStorageItem('measurements', 'userPreferences');
       if (savedData) {
         return JSON.parse(savedData);
       }
@@ -25,6 +27,45 @@ const MeasureForm = ({ onSubmit, initialData = null }) => {
   });
   
   const [submitted, setSubmitted] = useState(false);
+  const [storageNotice, setStorageNotice] = useState('');
+
+  // Check storage consent and update notice
+  const checkAndUpdateStorageNotice = () => {
+    if (!isStorageAllowed('measurements', 'userPreferences')) {
+      setStorageNotice('Your measurement preferences will not be saved due to your privacy settings.');
+    } else {
+      setStorageNotice('');
+    }
+  };
+
+  useEffect(() => {
+    // Check initial state
+    checkAndUpdateStorageNotice();
+
+    // Listen for storage consent changes
+    const handleStorageConsentChange = (event) => {
+      const { localStorage: storageSettings } = event.detail;
+      
+      if (!storageSettings.granted || !storageSettings.categories.userPreferences) {
+        setStorageNotice('Your measurement preferences will not be saved due to your privacy settings.');
+      } else {
+        setStorageNotice('');
+      }
+    };
+
+    // Also listen for general consent changes to immediately update
+    const handleConsentChange = () => {
+      checkAndUpdateStorageNotice();
+    };
+
+    window.addEventListener('storageConsentChanged', handleStorageConsentChange);
+    window.addEventListener('consentChanged', handleConsentChange);
+
+    return () => {
+      window.removeEventListener('storageConsentChanged', handleStorageConsentChange);
+      window.removeEventListener('consentChanged', handleConsentChange);
+    };
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -38,11 +79,14 @@ const MeasureForm = ({ onSubmit, initialData = null }) => {
     if (measurements.height && measurements.chest && measurements.waist && measurements.hips) {
       setSubmitted(true);
       
-      // Save to localStorage before submitting
-      try {
-        localStorage.setItem('measurements', JSON.stringify(measurements));
-      } catch (error) {
-        console.error('Error saving measurements to localStorage:', error);
+      // Try to save to localStorage with consent check
+      const saveSuccess = setStorageItem('measurements', JSON.stringify(measurements), 'userPreferences');
+      
+      if (!saveSuccess) {
+        setStorageNotice('Measurements submitted but not saved due to your privacy settings. You may need to re-enter them on your next visit.');
+      } else {
+        // Clear any previous notice if save was successful
+        setStorageNotice('');
       }
       
       // Call the onSubmit prop with the measurements data
@@ -54,9 +98,33 @@ const MeasureForm = ({ onSubmit, initialData = null }) => {
     }
   };
 
+  const openPrivacySettings = () => {
+    window.dispatchEvent(new CustomEvent('openConsentSettings'));
+  };
+
   return (
     <form onSubmit={handleSubmit} className={styles.measureForm}>
       <h3>Enter Your Measurements</h3>
+      
+      {storageNotice && (
+        <div className={styles.storageNotice}>
+          {storageNotice}
+          {storageNotice.includes('privacy settings') && (
+            <>
+              {' '}
+              <button 
+                type="button"
+                onClick={openPrivacySettings}
+                className={styles.privacyLink}
+              >
+                Update privacy settings
+              </button>{' '}
+              to save your preferences.
+            </>
+          )}
+        </div>
+      )}
+      
       <label>
         Height (cm):
         <input 
