@@ -160,10 +160,11 @@ const OrderDetail = () => {
           <p><strong>Order ID:</strong> {order.id || 'N/A'}</p>
           <p><strong>Date Placed:</strong> {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}</p>
           <p>
-            <strong>Status:</strong> 
+            {/*Hide status badge for now */}
+            {/* <strong>Status:</strong> 
             <span className={`${styles.badge} ${getStatusBadgeClass(order.status)}`}>
               {order.status || 'Processing'}
-            </span>
+            </span> */}
             
             {/* Complete Payment Button next to status if payment is pending */}
             {isPaymentPending(order) && (
@@ -194,7 +195,9 @@ const OrderDetail = () => {
           )}
         </div>
         
-        <div>
+
+        {/* Add Shipping Information Section */}
+        {/* <div>
           <h3 className={styles.cardTitle}>Shipping Information</h3>
           <p>
             <strong>Status:</strong> 
@@ -205,7 +208,7 @@ const OrderDetail = () => {
           {order.isDelivered && order.deliveredAt && (
             <p><strong>Delivered On:</strong> {new Date(order.deliveredAt).toLocaleDateString()}</p>
           )}
-        </div>
+        </div> */}
       </div>
 
       {order.shippingAddress && (

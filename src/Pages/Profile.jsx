@@ -105,8 +105,10 @@ const Profile = () => {
         return styles.badgeSuccess
       case 'Shipped':
         return styles.badgeInfo
+      // case 'Processing':
+      //   return styles.badgeWarning
       case 'Processing':
-        return styles.badgeWarning
+        return styles.badgeSuccess
       case 'Confirmed':
         return styles.badgePrimary
       case 'Cancelled':
@@ -197,7 +199,8 @@ const Profile = () => {
                           order.status
                         )}`}
                       >
-                        {order.status}
+                        {/* {order.status} */}
+                        {order.status === 'Processing' ? 'Paid' : order.status}
                       </span>
                     </td>
                     <td data-label="Total">${order.total.toFixed(2)}</td>

@@ -13,7 +13,7 @@ const MyOrders = () => {
   const [showRestorationNotice, setShowRestorationNotice] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-
+console.log('MyOrders location', orders);
   const getApiUrl = () => {
     return import.meta.env.VITE_NODE_ENV === "production"
       ? import.meta.env.VITE_API_BASE_URL_PROD
@@ -122,8 +122,10 @@ const MyOrders = () => {
         return '#28a745'; // Green
       case 'Shipped':
         return '#17a2b8'; // Teal
+      // case 'Processing':
+      //   return '#ffc107'; // Yellow
       case 'Processing':
-        return '#ffc107'; // Yellow
+        return '#28a745';
       case 'Confirmed':
         return '#007bff'; // Blue
       case 'Cancelled':
@@ -136,7 +138,7 @@ const MyOrders = () => {
   };
 
   const getStatusTextColor = (status) => {
-    return ['Delivered', 'Shipped', 'Confirmed'].includes(status) ? 'white' : 'black';
+    return ['Delivered', 'Shipped', 'Confirmed', 'Processing', 'Payment Pending'].includes(status) ? 'white' : 'black';
   };
 
   if (!user) {
@@ -174,9 +176,10 @@ const MyOrders = () => {
           >
             <option value="all">All Orders</option>
             <option value="pending">Payment Pending</option>
-            <option value="processing">Processing & Confirmed</option>
-            <option value="shipped">Shipped</option>
-            <option value="delivered">Delivered</option>
+            {/* <option value="processing">Processing & Confirmed</option> */}
+            <option value="processing">Paid</option>
+            {/* <option value="shipped">Shipped</option> */}
+            {/* <option value="delivered">Delivered</option> */}
             <option value="cancelled">Cancelled</option>
           </select>
         </div>
@@ -245,7 +248,8 @@ const MyOrders = () => {
                         borderRadius: '4px',
                         fontSize: '0.875rem'
                       }}>
-                        {order.status}
+                        {/*{order.status}*/}
+                        {order.status === 'Processing' ? 'Paid' : order.status}
                       </span>
                     </td>
                     <td style={{ textAlign: 'right', padding: '1rem' }}>${order.total.toFixed(2)}</td>

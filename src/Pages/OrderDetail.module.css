@@ -118,6 +118,20 @@
   gap: 1.5rem;
 }
 
+.orderOverview > :first-child {
+  position: relative;
+}
+
+.orderOverview > :first-child::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 2px;
+  background: #ddd;
+}
+
 /* Status badges */
 .badge {
   display: inline-block;
@@ -325,6 +339,9 @@
   
   .actionButtons button {
     width: 100%;
+  }
+   .orderOverview > :first-child::after {
+    display: none;
   }
 }
 
