@@ -279,8 +279,8 @@ const OrderStatus = () => {
       <div className={styles.container}>
         <div className={styles.cancelledContainer}>
           <div className={styles.cancelIcon}>✕</div>
-          <h2>Order Cancelled</h2>
-          <p>This order has been cancelled and will not be processed.</p>
+          <h2>Order Canceled</h2>
+          <p>This order has been canceled and will not be processed.</p>
           {order.cancelReason && (
             <p className={styles.cancelReason}>
               <strong>Reason:</strong> {order.cancelReason}
@@ -328,9 +328,9 @@ const OrderStatus = () => {
             <Link to="/shop" className={styles.button}>
               Return to Shop
             </Link>
-            <Link to="/checkout" className={styles.secondaryButton}>
+            {/* <Link to="/checkout" className={styles.secondaryButton}>
               Start New Order
-            </Link>
+            </Link> */}
           </div>
         </div>
       </div>

@@ -25,6 +25,8 @@ import reviewRoutes from './routes/review.js';
 import favoriteRoutes from './routes/favoritesRoutes.js';
 import userDeletionRoutes from './routes/userDeletion.js';
 
+import closeOrderRoutes from './routes/closeOrder.js';
+
 dotenv.config({ path: './.env.local' });
 
 const app = express();
@@ -272,6 +274,8 @@ app.use(cartRoutes);
 app.use(favoriteRoutes);
 app.use(reviewRoutes);
 app.use(userDeletionRoutes);
+
+app.use(closeOrderRoutes);
   
 
 // Handle 404 errors

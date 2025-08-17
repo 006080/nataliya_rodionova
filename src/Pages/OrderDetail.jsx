@@ -8,9 +8,10 @@ const OrderDetail = () => {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showCloseDialog, setShowCloseDialog] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   const navigate = useNavigate();
-console.log('order=============', order)
-  // Function to get API URL based on environment
+
   const getApiUrl = () => {
     return import.meta.env.VITE_NODE_ENV === "production"
       ? import.meta.env.VITE_API_BASE_URL_PROD
@@ -23,7 +24,6 @@ console.log('order=============', order)
         setLoading(true);
         setError('');
         
-        // Use the correct API URL format for Vite
         const response = await authFetch(`${getApiUrl()}/api/orders/${id}`);
         
         if (!response.ok) {
@@ -35,7 +35,6 @@ console.log('order=============', order)
         
         const data = await response.json();
         
-        // Make sure orderItems is an array
         if (!data.orderItems) {
           data.orderItems = [];
         }
@@ -54,35 +53,137 @@ console.log('order=============', order)
     }
   }, [id]);
 
-  const getStatusBadgeClass = (status) => {
-    switch (status) {
+  // Simple status mapping for display
+  const getDisplayStatus = () => {
+    if (!order) return 'Unknown';
+    
+    // Check if order is cancelled
+    if (order.status === 'Cancelled' || order.paymentStatus === 'CANCELED') {
+      return 'Canceled';
+    }
+    
+    // Map other statuses
+    if (order.status === 'Processing') {
+      return 'Paid';
+    }
+    
+    return order.status || 'Processing';
+  };
+
+  const getPaymentStatusDisplay = () => {
+    if (!order) return 'Unknown';
+    
+    // Visual update: if Order Status is "Canceled", show "Canceled"
+    if (order.status === 'Cancelled' || order.paymentStatus === 'CANCELED') {
+      return 'Canceled';
+    }
+    
+    if (order.isPaid) {
+      return 'Paid';
+    }
+    
+    return 'Pending';
+  };
+
+  const getStatusBadgeClass = (displayStatus) => {
+    switch (displayStatus) {
       case 'Delivered':
         return styles.badgeSuccess;
       case 'Shipped':
         return styles.badgeInfo;
+      case 'Paid':
+        return styles.badgeSuccess;
       case 'Processing':
         return styles.badgeWarning;
       case 'Confirmed':
         return styles.badgePrimary;
+      case 'Canceled':
+        return styles.badgeDanger;
       case 'Cancelled':
+        return styles.badgeDanger;
+      case 'StatusCancelled': 
         return styles.badgeDanger;
       case 'Payment Pending':
         return styles.badgeSecondary;
+      case 'Pending':
+        return styles.badgeWarning;
       default:
         return styles.badgeSecondary;
     }
   };
 
+  // Check if order can be closed by user
+  const canCloseOrder = () => {
+    if (!order) return false;
+    return order.status === 'PaymentActionRequired' || 
+           order.paymentStatus === 'PAYER_ACTION_REQUIRED' ||
+           order.status === 'Payment Pending';
+  };
+
   // Determine if order requires payment action
   const isPaymentPending = (order) => {
     return order?.status === 'Payment Pending' || 
-           order?.paymentStatus === 'PAYER_ACTION_REQUIRED';
+           order?.paymentStatus === 'PAYER_ACTION_REQUIRED' ||
+           order?.status === 'PaymentActionRequired';
   };
 
   // Handle complete payment button click
   const handleCompletePayment = () => {
     // Navigate to order status page where payment can be completed
     navigate(`/order-status/${order.paypalOrderId || order.id}`);
+  };
+
+  const handleCloseOrder = async () => {
+    setIsClosing(true);
+    setError('');
+
+    try {
+      console.log('Closing order using authFetch...');
+      
+      // Use authFetch - same as you do for fetching order details
+      const response = await authFetch(`${getApiUrl()}/api/orders/${id}/close`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        
+        // Handle specific error cases
+        if (response.status === 401) {
+          navigate('/login');
+          throw new Error('Session expired. Please log in again.');
+        } else if (response.status === 403) {
+          throw new Error('You are not authorized to close this order.');
+        } else if (response.status === 404) {
+          throw new Error('Order not found.');
+        } else if (response.status === 400) {
+          throw new Error(errorData.message || 'This order cannot be closed.');
+        }
+        
+        throw new Error(errorData.message || `Failed to close order (${response.status})`);
+      }
+
+      const result = await response.json();
+      console.log('Order closed successfully:', result);
+
+      // Update order status locally
+      setOrder(prev => ({
+        ...prev,
+        status: 'CANCELED',
+        paymentStatus: 'CANCELED'
+      }));
+      
+      setShowCloseDialog(false);
+      
+    } catch (error) {
+      console.error('Error closing order:', error);
+      setError(error.message);
+    } finally {
+      setIsClosing(false);
+    }
   };
 
   if (loading) {
@@ -128,6 +229,11 @@ console.log('order=============', order)
     );
   }
 
+  const displayStatus = getDisplayStatus();
+  const paymentStatusDisplay = getPaymentStatusDisplay();
+  const showCloseButton = canCloseOrder();
+  const showPaymentPending = isPaymentPending(order);
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -141,16 +247,27 @@ console.log('order=============', order)
       </div>
       
       {/* Payment Action Alert for Pending Payments */}
-      {isPaymentPending(order) && (
+      {showPaymentPending && (
         <div className={styles.paymentAlert}>
           <h3>Payment Action Required</h3>
           <p>This order requires your action to complete the payment process.</p>
-          <button
-            onClick={handleCompletePayment}
-            className={`${styles.button} ${styles.warningButton} ${styles.buttonLarge}`}
-          >
-            Complete Payment Now
-          </button>
+          <div className={styles.alertActions}>
+            <button
+              onClick={handleCompletePayment}
+              className={`${styles.button} ${styles.warningButton} ${styles.buttonLarge}`}
+            >
+              Complete Payment Now
+            </button>
+            {showCloseButton && (
+              <button 
+                onClick={() => setShowCloseDialog(true)}
+                className={`${styles.button} ${styles.dangerButton} ${styles.buttonLarge}`}
+                disabled={isClosing}
+              >
+                Cancel Order
+              </button>
+            )}
+          </div>
         </div>
       )}
       
@@ -160,21 +277,21 @@ console.log('order=============', order)
           <p><strong>Order ID:</strong> {order.paypalOrderId || 'N/A'}</p>
           <p><strong>Date Placed:</strong> {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}</p>
           <p>
-            {/*Hide status badge for now */}
             {/* <strong>Status:</strong> 
-            <span className={`${styles.badge} ${getStatusBadgeClass(order.status)}`}>
-              {order.status || 'Processing'}
+            <span className={`${styles.badge} ${getStatusBadgeClass(displayStatus)}`}>
+              {displayStatus}
             </span> */}
             
             {/* Complete Payment Button next to status if payment is pending */}
-            {isPaymentPending(order) && (
+            {/* {showPaymentPending && (
               <button
                 onClick={handleCompletePayment}
                 className={`${styles.button} ${styles.warningButton} ${styles.buttonSmall}`}
+                style={{ marginLeft: '0px' }}
               >
                 Complete Payment
               </button>
-            )}
+            )} */}
           </p>
           {order.trackingNumber && (
             <p><strong>Tracking Number:</strong> {order.trackingNumber}</p>
@@ -186,30 +303,57 @@ console.log('order=============', order)
           <p><strong>Method:</strong> {order.paymentMethod || 'PayPal'}</p>
           <p>
             <strong>Status:</strong> 
-            <span className={`${styles.badge} ${order.isPaid ? styles.badgeSuccess : styles.badgeWarning}`}>
-              {order.isPaid ? 'Paid' : 'Pending'}
+            <span className={`${styles.badge} ${getStatusBadgeClass(paymentStatusDisplay)}`}>
+              {paymentStatusDisplay}
             </span>
           </p>
-          {order.isPaid && order.paidAt && (
+          {order.isPaid && order.paidAt && paymentStatusDisplay !== 'Canceled' && (
             <p><strong>Paid On:</strong> {new Date(order.paidAt).toLocaleDateString()}</p>
           )}
         </div>
-        
-
-        {/* Add Shipping Information Section */}
-        {/* <div>
-          <h3 className={styles.cardTitle}>Shipping Information</h3>
-          <p>
-            <strong>Status:</strong> 
-            <span className={`${styles.badge} ${order.isDelivered ? styles.badgeSuccess : styles.badgeWarning}`}>
-              {order.isDelivered ? 'Delivered' : 'Pending'}
-            </span>
-          </p>
-          {order.isDelivered && order.deliveredAt && (
-            <p><strong>Delivered On:</strong> {new Date(order.deliveredAt).toLocaleDateString()}</p>
-          )}
-        </div> */}
       </div>
+
+      {/* Close Order Button - only show for orders that can be closed */}
+      {showCloseButton && !showPaymentPending && (
+        <div className={styles.closeOrderSection}>
+          <button 
+            onClick={() => setShowCloseDialog(true)}
+            className={`${styles.button} ${styles.warningButton}`}
+            disabled={isClosing}
+          >
+            Close Order
+          </button>
+          <p className={styles.closeOrderNote}>
+            You can close this order if you no longer wish to proceed with the payment.
+          </p>
+        </div>
+      )}
+
+      {/* Confirmation Dialog */}
+      {showCloseDialog && (
+        <div className={styles.modal}>
+          <div className={styles.modalContent}>
+            <h3>Close Order</h3>
+            <p>Are you sure you want to close this order? This action cannot be undone.</p>
+            <div className={styles.modalActions}>
+              <button 
+                onClick={() => setShowCloseDialog(false)}
+                className={`${styles.button} ${styles.secondaryButton}`}
+                disabled={isClosing}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleCloseOrder}
+                className={`${styles.button} ${styles.dangerButton}`}
+                disabled={isClosing}
+              >
+                {isClosing ? 'Closing...' : 'Yes, Close Order'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {order.shippingAddress && (
         <div className={`${styles.card} ${styles.addressSection}`}>
@@ -288,7 +432,7 @@ console.log('order=============', order)
           </div>
         </div>
       )}
-      
+
       {/* Add Color Preference Section */}
       {order.colorPreference && (
         <div className={styles.card}>
@@ -335,8 +479,8 @@ console.log('order=============', order)
           Back to My Orders
         </button>
         
-        {/* Add Complete Payment button if payment is pending */}
-        {isPaymentPending(order) ? (
+        {/* Show Complete Payment button if payment is pending, otherwise show Continue Shopping */}
+        {showPaymentPending ? (
           <button 
             onClick={handleCompletePayment}
             className={`${styles.button} ${styles.warningButton} ${styles.buttonLarge}`}

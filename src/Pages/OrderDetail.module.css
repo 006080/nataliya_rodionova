@@ -357,4 +357,10 @@
     margin-bottom: 0.5rem;
     margin-right: 0;
   }
+
+  .alertActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
 }

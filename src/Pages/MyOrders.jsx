@@ -92,6 +92,16 @@ console.log('MyOrders location', orders);
     }
   }, [user, location]);
 
+  const getDisplayStatus = (status) => {
+  if (status === 'Cancelled' || status === 'CANCELED' || status === 'StatusCancelled') {
+    return 'Canceled';
+  }
+  if (status === 'Processing') {
+    return 'Paid';
+  }
+  return status;
+};
+
   // Filter orders based on selected filter
   const filteredOrders = () => {
     if (filter === 'all') return orders;
@@ -105,7 +115,9 @@ console.log('MyOrders location', orders);
         case 'delivered':
           return order.status === 'Delivered';
         case 'cancelled':
-          return order.status === 'Cancelled';
+          return order.status === 'Cancelled' || 
+               order.status === 'CANCELED' || 
+               order.status === 'StatusCancelled';
         case 'pending':
           return order.status === 'Payment Pending';
         default:
@@ -129,6 +141,9 @@ console.log('MyOrders location', orders);
       case 'Confirmed':
         return '#007bff'; // Blue
       case 'Cancelled':
+      case 'CANCELED':
+      case 'StatusCancelled':
+      case 'Canceled':  
         return '#dc3545'; // Red
       case 'Payment Pending':
         return '#6c757d'; // Gray
@@ -138,7 +153,7 @@ console.log('MyOrders location', orders);
   };
 
   const getStatusTextColor = (status) => {
-    return ['Delivered', 'Shipped', 'Confirmed', 'Processing', 'Payment Pending'].includes(status) ? 'white' : 'black';
+    return ['Delivered', 'Shipped', 'Confirmed', 'Processing', 'Payment Pending', 'Cancelled'].includes(status) ? 'white' : 'black';
   };
 
   if (!user) {
@@ -180,7 +195,7 @@ console.log('MyOrders location', orders);
             <option value="processing">Paid</option>
             {/* <option value="shipped">Shipped</option> */}
             {/* <option value="delivered">Delivered</option> */}
-            <option value="cancelled">Cancelled</option>
+            <option value="cancelled">Canceled</option>
           </select>
         </div>
         
@@ -249,7 +264,7 @@ console.log('MyOrders location', orders);
                         fontSize: '0.875rem'
                       }}>
                         {/*{order.status}*/}
-                        {order.status === 'Processing' ? 'Paid' : order.status}
+                        {getDisplayStatus(order.status)}
                       </span>
                     </td>
                     <td style={{ textAlign: 'right', padding: '1rem' }}>${order.total.toFixed(2)}</td>

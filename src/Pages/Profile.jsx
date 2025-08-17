@@ -98,6 +98,16 @@ const Profile = () => {
     navigate('/login')
   }
 
+  const getDisplayStatus = (status) => {
+  if (status === 'Cancelled' || status === 'CANCELED' || status === 'StatusCancelled') {
+    return 'Canceled';
+  }
+  if (status === 'Processing') {
+    return 'Paid';
+  }
+  return status;
+  };
+
   // Get status badge class based on order status
   const getStatusBadgeClass = (status) => {
     switch (status) {
@@ -200,7 +210,7 @@ const Profile = () => {
                         )}`}
                       >
                         {/* {order.status} */}
-                        {order.status === 'Processing' ? 'Paid' : order.status}
+                        {getDisplayStatus(order.status)}
                       </span>
                     </td>
                     <td data-label="Total">${order.total.toFixed(2)}</td>
