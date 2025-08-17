@@ -202,7 +202,7 @@ const RegisterForm = () => {
               Terms of Service
             </a>{' '}
             and{' '}
-            <a href="/privacy" target="_blank" rel="noopener noreferrer" className={styles.link}>
+            <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className={styles.link}>
               Privacy Policy
             </a>
           </p>
