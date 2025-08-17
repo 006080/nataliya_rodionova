@@ -98,6 +98,16 @@ const Profile = () => {
     navigate('/login')
   }
 
+  const getDisplayStatus = (status) => {
+  if (status === 'Cancelled' || status === 'CANCELED' || status === 'StatusCancelled') {
+    return 'Canceled';
+  }
+  if (status === 'Processing') {
+    return 'Paid';
+  }
+  return status;
+  };
+
   // Get status badge class based on order status
   const getStatusBadgeClass = (status) => {
     switch (status) {
@@ -105,8 +115,10 @@ const Profile = () => {
         return styles.badgeSuccess
       case 'Shipped':
         return styles.badgeInfo
+      // case 'Processing':
+      //   return styles.badgeWarning
       case 'Processing':
-        return styles.badgeWarning
+        return styles.badgeSuccess
       case 'Confirmed':
         return styles.badgePrimary
       case 'Cancelled':
@@ -189,7 +201,7 @@ const Profile = () => {
               <tbody>
                 {orders.slice(0, 5).map((order) => (
                   <tr key={order.id}>
-                    <td data-label="Order ID">{order.id.substring(0, 8)}...</td>
+                    <td data-label="Order ID">{order.paypalOrderId.substring(0, 8)}...</td>
                     <td data-label="Date">{order.date}</td>
                     <td data-label="Status">
                       <span
@@ -197,7 +209,8 @@ const Profile = () => {
                           order.status
                         )}`}
                       >
-                        {order.status}
+                        {/* {order.status} */}
+                        {getDisplayStatus(order.status)}
                       </span>
                     </td>
                     <td data-label="Total">${order.total.toFixed(2)}</td>

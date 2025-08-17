@@ -13,7 +13,7 @@ const MyOrders = () => {
   const [showRestorationNotice, setShowRestorationNotice] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-
+console.log('MyOrders location', orders);
   const getApiUrl = () => {
     return import.meta.env.VITE_NODE_ENV === "production"
       ? import.meta.env.VITE_API_BASE_URL_PROD
@@ -92,6 +92,16 @@ const MyOrders = () => {
     }
   }, [user, location]);
 
+  const getDisplayStatus = (status) => {
+  if (status === 'Cancelled' || status === 'CANCELED' || status === 'StatusCancelled') {
+    return 'Canceled';
+  }
+  if (status === 'Processing') {
+    return 'Paid';
+  }
+  return status;
+};
+
   // Filter orders based on selected filter
   const filteredOrders = () => {
     if (filter === 'all') return orders;
@@ -105,7 +115,9 @@ const MyOrders = () => {
         case 'delivered':
           return order.status === 'Delivered';
         case 'cancelled':
-          return order.status === 'Cancelled';
+          return order.status === 'Cancelled' || 
+               order.status === 'CANCELED' || 
+               order.status === 'StatusCancelled';
         case 'pending':
           return order.status === 'Payment Pending';
         default:
@@ -122,11 +134,16 @@ const MyOrders = () => {
         return '#28a745'; // Green
       case 'Shipped':
         return '#17a2b8'; // Teal
+      // case 'Processing':
+      //   return '#ffc107'; // Yellow
       case 'Processing':
-        return '#ffc107'; // Yellow
+        return '#28a745';
       case 'Confirmed':
         return '#007bff'; // Blue
       case 'Cancelled':
+      case 'CANCELED':
+      case 'StatusCancelled':
+      case 'Canceled':  
         return '#dc3545'; // Red
       case 'Payment Pending':
         return '#6c757d'; // Gray
@@ -136,7 +153,7 @@ const MyOrders = () => {
   };
 
   const getStatusTextColor = (status) => {
-    return ['Delivered', 'Shipped', 'Confirmed'].includes(status) ? 'white' : 'black';
+    return ['Delivered', 'Shipped', 'Confirmed', 'Processing', 'Payment Pending', 'Cancelled'].includes(status) ? 'white' : 'black';
   };
 
   if (!user) {
@@ -174,10 +191,11 @@ const MyOrders = () => {
           >
             <option value="all">All Orders</option>
             <option value="pending">Payment Pending</option>
-            <option value="processing">Processing & Confirmed</option>
-            <option value="shipped">Shipped</option>
-            <option value="delivered">Delivered</option>
-            <option value="cancelled">Cancelled</option>
+            {/* <option value="processing">Processing & Confirmed</option> */}
+            <option value="processing">Paid</option>
+            {/* <option value="shipped">Shipped</option> */}
+            {/* <option value="delivered">Delivered</option> */}
+            <option value="cancelled">Canceled</option>
           </select>
         </div>
         
@@ -235,7 +253,7 @@ const MyOrders = () => {
               <tbody>
                 {filteredOrders().map(order => (
                   <tr key={order.id} style={{ borderBottom: '1px solid #ddd' }}>
-                    <td style={{ padding: '1rem' }}>{order.id.substring(0, 8)}...</td>
+                    <td style={{ padding: '1rem' }}>{order.paypalOrderId.substring(0, 8)}...</td>
                     <td style={{ padding: '1rem' }}>{order.date}</td>
                     <td style={{ padding: '1rem' }}>
                       <span style={{ 
@@ -245,7 +263,8 @@ const MyOrders = () => {
                         borderRadius: '4px',
                         fontSize: '0.875rem'
                       }}>
-                        {order.status}
+                        {/*{order.status}*/}
+                        {getDisplayStatus(order.status)}
                       </span>
                     </td>
                     <td style={{ textAlign: 'right', padding: '1rem' }}>${order.total.toFixed(2)}</td>
