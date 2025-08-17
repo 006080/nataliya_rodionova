@@ -9,7 +9,7 @@ const OrderDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
-
+console.log('order=============', order)
   // Function to get API URL based on environment
   const getApiUrl = () => {
     return import.meta.env.VITE_NODE_ENV === "production"
@@ -157,7 +157,7 @@ const OrderDetail = () => {
       <div className={`${styles.card} ${styles.orderOverview}`}>
         <div>
           <h3 className={styles.cardTitle}>Order Information</h3>
-          <p><strong>Order ID:</strong> {order.id || 'N/A'}</p>
+          <p><strong>Order ID:</strong> {order.paypalOrderId || 'N/A'}</p>
           <p><strong>Date Placed:</strong> {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}</p>
           <p>
             {/*Hide status badge for now */}

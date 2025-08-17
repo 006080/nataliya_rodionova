@@ -238,7 +238,7 @@ console.log('MyOrders location', orders);
               <tbody>
                 {filteredOrders().map(order => (
                   <tr key={order.id} style={{ borderBottom: '1px solid #ddd' }}>
-                    <td style={{ padding: '1rem' }}>{order.id.substring(0, 8)}...</td>
+                    <td style={{ padding: '1rem' }}>{order.paypalOrderId.substring(0, 8)}...</td>
                     <td style={{ padding: '1rem' }}>{order.date}</td>
                     <td style={{ padding: '1rem' }}>
                       <span style={{ 

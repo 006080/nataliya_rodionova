@@ -191,7 +191,7 @@ const Profile = () => {
               <tbody>
                 {orders.slice(0, 5).map((order) => (
                   <tr key={order.id}>
-                    <td data-label="Order ID">{order.id.substring(0, 8)}...</td>
+                    <td data-label="Order ID">{order.paypalOrderId.substring(0, 8)}...</td>
                     <td data-label="Date">{order.date}</td>
                     <td data-label="Status">
                       <span
