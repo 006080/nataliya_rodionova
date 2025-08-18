@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { 
-  getConsentSettings, 
-  saveConsentSettings, 
+import {
+  getConsentSettings,
+  saveConsentSettings,
   getStorageCategories,
-  hasUserMadeConsentChoice 
+  hasUserMadeConsentChoice,
 } from '../src/utils/enhancedConsentUtils'
 import styles from './CookieBanner.module.css'
 
@@ -18,9 +18,9 @@ const CookieBanner = () => {
       granted: false,
       categories: {
         userPreferences: true,
-        shoppingData: true
-      }
-    }
+        shoppingData: true,
+      },
+    },
   })
 
   const storageCategories = getStorageCategories()
@@ -29,9 +29,9 @@ const CookieBanner = () => {
   useEffect(() => {
     const hasChoice = hasUserMadeConsentChoice()
     const currentSettings = getConsentSettings()
-    
+
     setSettings(currentSettings)
-    
+
     if (!hasChoice) {
       setShowBanner(true)
       setShowMiniBanner(false)
@@ -65,11 +65,11 @@ const CookieBanner = () => {
         granted: true,
         categories: {
           userPreferences: true,
-          shoppingData: true
-        }
-      }
+          shoppingData: true,
+        },
+      },
     }
-    
+
     saveConsentSettings(newSettings)
     setSettings(newSettings)
     closeAllModals()
@@ -82,11 +82,11 @@ const CookieBanner = () => {
         granted: false,
         categories: {
           userPreferences: false,
-          shoppingData: false
-        }
-      }
+          shoppingData: false,
+        },
+      },
     }
-    
+
     saveConsentSettings(newSettings)
     setSettings(newSettings)
     closeAllModals()
@@ -112,16 +112,16 @@ const CookieBanner = () => {
   }
 
   const handleCookieSettingChange = (value) => {
-    setSettings(prev => ({
+    setSettings((prev) => ({
       ...prev,
-      cookies: value
+      cookies: value,
     }))
   }
 
   // UPDATED: Auto-toggle categories when main localStorage toggle changes
   const handleStorageToggle = () => {
-    setSettings(prev => {
-      const newGranted = !prev.localStorage.granted;
+    setSettings((prev) => {
+      const newGranted = !prev.localStorage.granted
       return {
         ...prev,
         localStorage: {
@@ -130,32 +130,34 @@ const CookieBanner = () => {
             // When enabling localStorage, turn on all categories
             // When disabling localStorage, turn off all categories
             userPreferences: newGranted,
-            shoppingData: newGranted
-          }
-        }
+            shoppingData: newGranted,
+          },
+        },
       }
     })
   }
 
   // UPDATED: Auto-update main toggle when categories change
   const handleCategoryToggle = (category) => {
-    setSettings(prev => {
-      const newCategoryValue = !prev.localStorage.categories[category];
+    setSettings((prev) => {
+      const newCategoryValue = !prev.localStorage.categories[category]
       const updatedCategories = {
         ...prev.localStorage.categories,
-        [category]: newCategoryValue
-      };
-      
+        [category]: newCategoryValue,
+      }
+
       // If any category is enabled, enable main localStorage toggle
-      const anyCategoryEnabled = Object.values(updatedCategories).some(value => value);
-      
+      const anyCategoryEnabled = Object.values(updatedCategories).some(
+        (value) => value
+      )
+
       return {
         ...prev,
         localStorage: {
           granted: anyCategoryEnabled, // Auto-update main toggle based on categories
-          categories: updatedCategories
-        }
-      };
+          categories: updatedCategories,
+        },
+      }
     })
   }
 
@@ -173,15 +175,27 @@ const CookieBanner = () => {
             <p className={styles.bannerText}>
               We use essential cookies to ensure the core functionality of our
               website. With your consent, we may also use third-party cookies
-              from services like Google reCAPTCHA and PayPal to enhance security
-              and support payment processing. Additionally, we can store your 
-              preferences locally to improve your experience. Please review our{' '}
+              from services such as Google reCAPTCHA to enhance security and
+              PayPal to support payment processing. In addition, we may use
+              local data storage to remember your preferences, save your
+              shopping cart, and improve your overall experience.
+            </p>
+            <p className={styles.bannerText}>
+              You can manage your choices in Settings, where you may allow only
+              essential cookies or enable all services and local storage. Please
+              review our{' '} 
               <Link to="/privacy-policy" className={styles.policyLink}>
                 Privacy Policy
-              </Link>{' '}
-              carefully before proceeding. By clicking "Accept All", you agree
-              to our use of all cookies and accept the terms of our Privacy
+              </Link>{' '} 
+              carefully before proceeding. By clicking
+              “Accept All”, you agree to the use of cookies, third-party
+              services, and local data storage as described in our Privacy
               Policy.
+            </p>
+            <p className={styles.bannerText}>
+              Please note: If you choose not to accept certain cookies or local
+              data storage, some features may not function properly, and your
+              experience on the site may be limited.
             </p>
             <div className={styles.bannerButtons}>
               <button
@@ -196,10 +210,7 @@ const CookieBanner = () => {
               >
                 Settings
               </button>
-              <button 
-                className={styles.acceptButton}
-                onClick={handleAcceptAll}
-              >
+              <button className={styles.acceptButton} onClick={handleAcceptAll}>
                 Accept All
               </button>
             </div>
@@ -234,10 +245,16 @@ const CookieBanner = () => {
 
       {showSettingsModal && (
         <div className={styles.modal} onClick={handleCloseSettings}>
-          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+          <div
+            className={styles.modalContent}
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className={styles.modalHeader}>
               <h2 className={styles.modalTitle}>Privacy Settings</h2>
-              <button className={styles.closeButton} onClick={handleCloseSettings}>
+              <button
+                className={styles.closeButton}
+                onClick={handleCloseSettings}
+              >
                 ×
               </button>
             </div>
@@ -246,7 +263,7 @@ const CookieBanner = () => {
             <div className={styles.section}>
               <h3 className={styles.sectionTitle}>Third-Party Services</h3>
               <div className={styles.radioGroup}>
-                <label 
+                <label
                   className={styles.radioOption}
                   onClick={() => handleCookieSettingChange('essential')}
                 >
@@ -258,10 +275,11 @@ const CookieBanner = () => {
                     onChange={(e) => handleCookieSettingChange(e.target.value)}
                   />
                   <span>
-                    <strong>Essential Only</strong> - Basic website functionality only
+                    <strong>Essential Only</strong> - Basic website
+                    functionality only
                   </span>
                 </label>
-                <label 
+                <label
                   className={styles.radioOption}
                   onClick={() => handleCookieSettingChange('all')}
                 >
@@ -273,7 +291,8 @@ const CookieBanner = () => {
                     onChange={(e) => handleCookieSettingChange(e.target.value)}
                   />
                   <span>
-                    <strong>All Services</strong> - Include Google reCAPTCHA, PayPal, and other third-party services
+                    <strong>All Services</strong> - Include Google reCAPTCHA,
+                    PayPal, and other third-party services
                   </span>
                 </label>
               </div>
@@ -284,23 +303,38 @@ const CookieBanner = () => {
               <h3 className={styles.sectionTitle}>Local Data Storage</h3>
               <div className={styles.toggleContainer}>
                 <div>
-                  <div className={styles.toggleLabel}>Allow Local Data Storage</div>
+                  <div className={styles.toggleLabel}>
+                    Allow Local Data Storage
+                  </div>
                   <div className={styles.toggleDescription}>
-                    Store your preferences and data locally for a better experience
+                    Store your preferences and data locally for a better
+                    experience
                   </div>
                 </div>
                 <div
-                  className={`${styles.toggle} ${settings.localStorage.granted ? styles.toggleActive : ''}`}
+                  className={`${styles.toggle} ${
+                    settings.localStorage.granted ? styles.toggleActive : ''
+                  }`}
                   onClick={handleStorageToggle}
                 >
                   <div
-                    className={`${styles.toggleSlider} ${settings.localStorage.granted ? styles.toggleSliderActive : ''}`}
+                    className={`${styles.toggleSlider} ${
+                      settings.localStorage.granted
+                        ? styles.toggleSliderActive
+                        : ''
+                    }`}
                   />
                 </div>
               </div>
 
               {/* Category-specific settings */}
-              <div className={`${styles.categoryContainer} ${settings.localStorage.granted ? '' : styles.categoryContainerDisabled}`}>
+              <div
+                className={`${styles.categoryContainer} ${
+                  settings.localStorage.granted
+                    ? ''
+                    : styles.categoryContainerDisabled
+                }`}
+              >
                 {Object.entries(storageCategories).map(([key, category]) => (
                   <div key={key} className={styles.toggleContainer}>
                     <div>
@@ -310,11 +344,19 @@ const CookieBanner = () => {
                       </div>
                     </div>
                     <div
-                      className={`${styles.toggle} ${settings.localStorage.categories[key] ? styles.toggleActive : ''}`}
+                      className={`${styles.toggle} ${
+                        settings.localStorage.categories[key]
+                          ? styles.toggleActive
+                          : ''
+                      }`}
                       onClick={() => handleCategoryToggle(key)}
                     >
                       <div
-                        className={`${styles.toggleSlider} ${settings.localStorage.categories[key] ? styles.toggleSliderActive : ''}`}
+                        className={`${styles.toggleSlider} ${
+                          settings.localStorage.categories[key]
+                            ? styles.toggleSliderActive
+                            : ''
+                        }`}
                       />
                     </div>
                   </div>
@@ -344,8 +386,3 @@ const CookieBanner = () => {
 }
 
 export default CookieBanner
-
-
-
-
-
