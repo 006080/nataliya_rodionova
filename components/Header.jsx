@@ -273,7 +273,7 @@ const Header = () => {
     { path: "/press", label: "PRESS", external: true, href: "https://thefashionvox.wordpress.com/2018/07/27/varona/" },
     { path: "/collaboration", label: "COLLABORATION" },
     { path: "/shop", label: "SHOP" },
-    { path: "/contacts", label: "CONTACTS" }
+    // { path: "/contacts", label: "CONTACTS" }
   ];
 
   return (

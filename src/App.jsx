@@ -67,7 +67,7 @@ const AppContent = () => {
         <Route path="/reviews" element={<Reviews />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-        <Route path="/legal-notice" element={<LegalNotice />} />
+        {/* <Route path="/legal-notice" element={<LegalNotice />} /> */}
         <Route path="/return" element={<ReturnPolicy />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/collaboration" element={<Collaboration />} />
