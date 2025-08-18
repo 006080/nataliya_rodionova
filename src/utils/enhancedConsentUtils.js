@@ -145,7 +145,6 @@ export const isUserPreferencesAllowed = () => {
 // Enhanced localStorage wrapper functions
 export const setStorageItem = (key, value, category = null) => {
   if (!isStorageAllowed(key, category)) {
-    console.log(`Storage denied for key: ${key}`);
     return false;
   }
   
@@ -203,7 +202,6 @@ export const cleanupOptionalStorage = () => {
       }
     });
     
-    console.log('Optional localStorage cleaned up');
   } catch (error) {
     console.error('Error cleaning up localStorage:', error);
   }
@@ -219,7 +217,6 @@ export const cleanupStorageCategory = (category) => {
       localStorage.removeItem(key);
     });
     
-    console.log(`Cleaned up storage category: ${category}`);
   } catch (error) {
     console.error(`Error cleaning up storage category ${category}:`, error);
   }
