@@ -71,7 +71,7 @@ const AppContent = () => {
         <Route path="/return" element={<ReturnPolicy />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/collaboration" element={<Collaboration />} />
-        <Route path="/contacts" element={<Contacts />} />
+        {/* <Route path="/contacts" element={<Contacts />} /> */}
         <Route path="/shop" element={<Shop />} />
         <Route path="/order-status/:orderId" element={<OrderStatus />} />
 
