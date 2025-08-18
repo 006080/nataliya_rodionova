@@ -33,12 +33,6 @@ export const CartProvider = ({ children }) => {
     try {
       const consentSettings = getConsentSettings();
       const hasConsent = consentSettings.localStorage.granted && consentSettings.localStorage.categories.shoppingData;
-      console.log('🛒 Direct consent check:', {
-        isAuthenticated: isUserAuthenticated,
-        granted: consentSettings.localStorage.granted,
-        shoppingData: consentSettings.localStorage.categories.shoppingData,
-        hasConsent
-      });
       return hasConsent;
     } catch (error) {
       console.error('Error checking consent:', error);
@@ -48,20 +42,16 @@ export const CartProvider = ({ children }) => {
 
   // SIMPLE localStorage wrapper - only saves if user is not authenticated OR has consent
   const safeSetItem = (key, value) => {
-    console.log('🛒 safeSetItem called:', { key, isUserAuthenticated });
     
     // For unauthenticated users, always allow (setStorageItem will handle consent)
     if (!isUserAuthenticated) {
-      console.log('✅ Unauthenticated user - allowing localStorage');
       return setStorageItem(key, value, 'shoppingData');
     }
     
     // For authenticated users, check consent directly
     if (hasShoppingDataConsent()) {
-      console.log('✅ Authenticated user with consent - allowing localStorage');
       return setStorageItem(key, value, 'shoppingData');
     } else {
-      console.log('❌ Authenticated user without consent - blocking localStorage');
       return false;
     }
   };
@@ -167,17 +157,15 @@ export const CartProvider = ({ children }) => {
   useEffect(() => {
     const handleStorageConsentChange = (event) => {
       const storageSettings = event.detail;
-      console.log('🛒 Storage consent changed:', storageSettings);
       
       if (!storageSettings.granted || !storageSettings.categories.shoppingData) {
-        console.log('Cart items will not be saved due to privacy settings');
+        // console.log('Cart items will not be saved due to privacy settings');
       } else {
         if (storageSettings.granted && storageSettings.categories.shoppingData && cartItems.length > 0) {
-          console.log('Shopping data consent granted - saving existing cart items to localStorage');
           // Use direct setStorageItem here since this is the consent grant handler
           const saveSuccess = setStorageItem('cartItems', JSON.stringify(cartItems), 'shoppingData');
           if (saveSuccess) {
-            console.log('Existing cart items successfully saved to localStorage');
+            // console.log('Existing cart items successfully saved to localStorage');
           }
         }
       }
@@ -190,14 +178,12 @@ export const CartProvider = ({ children }) => {
     };
   }, [cartItems]);
 
-  useEffect(() => {
-    console.log('🛒 Cart items changed:', { count: cartItems.length, isUserAuthenticated, initialSyncDone });
-    
+  useEffect(() => {  
     // Use safe localStorage setter
     const saveSuccess = safeSetItem('cartItems', JSON.stringify(cartItems))
 
     if (!saveSuccess && cartItems.length > 0) {
-      console.log('Cart not saved to localStorage')
+      // console.log('Cart not saved to localStorage')
     }
 
     if (sessionStorage.getItem('isUserLogout') === 'true') {
@@ -210,7 +196,7 @@ export const CartProvider = ({ children }) => {
         if (isAuthenticated()) {
           saveCartToDatabase(cartItems).then(success => {
             if (success) {
-              console.log('✅ Cart synced with database');
+              // console.log('✅ Cart synced with database');
             } else {
               console.error('❌ Failed to sync cart with database');
             }
@@ -262,7 +248,6 @@ export const CartProvider = ({ children }) => {
   }, [])
 
   const addToCart = (product) => {
-    console.log('🛒 addToCart called:', { productId: product.id, isUserAuthenticated });
     
     setCartItems((prevItems) => {
       const productColor = product.color || '';

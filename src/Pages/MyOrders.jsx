@@ -13,7 +13,7 @@ const MyOrders = () => {
   const [showRestorationNotice, setShowRestorationNotice] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-console.log('MyOrders location', orders);
+
   const getApiUrl = () => {
     return import.meta.env.VITE_NODE_ENV === "production"
       ? import.meta.env.VITE_API_BASE_URL_PROD
@@ -21,8 +21,6 @@ console.log('MyOrders location', orders);
   };
 
   useEffect(() => {
-    console.log('MyOrders component mounted');
-    
     // Check for account restoration using multiple methods (same as Profile component)
     
     // 1. Check for window-level flag (new method)
@@ -43,16 +41,8 @@ console.log('MyOrders location', orders);
     const wasRestored = windowFlagRestoration || locationStateRestoration || 
                         referrerRestoration || storageFlagRestoration;
     
-    console.log('Account restoration detection in MyOrders:', {
-      windowFlag: windowFlagRestoration,
-      locationState: locationStateRestoration,
-      referrer: referrerRestoration,
-      storageFlag: storageFlagRestoration,
-      combined: wasRestored
-    });
     
     if (wasRestored) {
-      console.log('MyOrders: Showing restoration notice');
       setShowRestorationNotice(true);
       
       // Clear all restoration flags

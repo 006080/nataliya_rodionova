@@ -10,12 +10,10 @@ const WelcomeBackPage = () => {
   const isAccountRestoration = location.state?.isAccountRestoration || false;
   
   useEffect(() => {
-    console.log('WelcomeBackPage mounted, checking restoration state');
     
     const wasRestored = window.accountWasJustRestored === true || isAccountRestoration;
     
     if (!wasRestored) {
-      console.log('WelcomeBackPage: Not a restoration flow, redirecting to profile');
       navigate('/profile', { replace: true });
       return;
     }

@@ -42,10 +42,8 @@ const OrderStatus = () => {
           // If order requires payment, setup PayPal with delay
           if (data && data.status === 'PAYER_ACTION_REQUIRED' && !paymentSetupRef.current) {
             paymentSetupRef.current = true
-            console.log('OrderStatus: Setting up PayPal for payment...')
             
             setTimeout(() => {
-              console.log('OrderStatus: Showing PayPal component')
               setShowPayPal(true)
             }, 1000) // Shorter delay since we're not loading scripts here
           }

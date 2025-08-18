@@ -137,9 +137,7 @@ const OrderDetail = () => {
     setIsClosing(true);
     setError('');
 
-    try {
-      console.log('Closing order using authFetch...');
-      
+    try {      
       // Use authFetch - same as you do for fetching order details
       const response = await authFetch(`${getApiUrl()}/api/orders/${id}/close`, {
         method: 'POST',
@@ -166,8 +164,8 @@ const OrderDetail = () => {
         throw new Error(errorData.message || `Failed to close order (${response.status})`);
       }
 
-      const result = await response.json();
-      console.log('Order closed successfully:', result);
+      // const result = await response.json();
+      // console.log('Order closed successfully:', result);
 
       // Update order status locally
       setOrder(prev => ({

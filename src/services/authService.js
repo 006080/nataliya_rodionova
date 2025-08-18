@@ -442,9 +442,7 @@ export const clearAllAuthData = async () => {
 }
 
 export const loginUser = async (email, password) => {
-  try {
-    console.log('Login attempt for:', email);
-    
+  try {    
     window.hasLoggedOut = false;
     sessionStorage.removeItem('isUserLogout');
     sessionStorage.removeItem('hasLoggedOut');
@@ -470,7 +468,6 @@ export const loginUser = async (email, password) => {
     });
 
     const data = await response.json();
-    console.log('Login response data:', data);
 
     // Handle email verification error
     if (response.status === 403 && data.needsVerification) {
@@ -493,10 +490,9 @@ export const loginUser = async (email, password) => {
     
     // Check if user's account was marked for deletion (needs restoration)
     const needsRestoration = data.user && data.user.markedForDeletion === true;
-    console.log('Account needs restoration:', needsRestoration);
     
     if (needsRestoration) {
-      console.log('Attempting to restore account for user:', data.user.email);
+      // console.log('Attempting to restore account for user:', data.user.email);
       try {
         // Call the restore endpoint
         const restorationResponse = await fetch(`${apiUrl}/api/users/restore`, {
@@ -509,7 +505,6 @@ export const loginUser = async (email, password) => {
         });
         
         const restorationData = await restorationResponse.json();
-        console.log('Restoration response:', restorationData);
         
         if (restorationResponse.ok && restorationData.success) {
           // Set window-level flag for restoration

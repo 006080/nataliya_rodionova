@@ -41,16 +41,44 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(helmet()); 
 
-// This is a security feature that helps prevent XSS and data injection attacks
+
+
+// Content Security Policy (CSP)
 app.use(helmet.contentSecurityPolicy({
-    directives: {
-      defaultSrc: ["'self'"], // Only allow resources from same origin by default
-      scriptSrc: ["'self'", "'unsafe-inline'"], // Scripts from same origin & inline
-      styleSrc: ["'self'", "'unsafe-inline'"], // Styles from same origin & inline
-    //   imgSrc: ["'self'", "data:", "https://yourcdn.com"], // Images from same origin, data URIs & your CDN
-    //   connectSrc: ["'self'", "https://yourapi.com"] // API connections to same origin & your API domain
-    }
-  }));
+  directives: {
+    defaultSrc: ["'self'"],
+    scriptSrc: ["'self'"],
+    styleSrc: ["'self'", "https://fonts.googleapis.com"],
+    fontSrc: ["'self'", "https://fonts.gstatic.com"],
+    imgSrc: ["'self'", "data:", "https://res.cloudinary.com"],
+    connectSrc: ["'self'", process.env.FRONTEND_URL_LOCAL, process.env.FRONTEND_URL_PROD],
+    frameAncestors: ["'self'"],
+    objectSrc: ["'none'"],
+    upgradeInsecureRequests: []
+  }
+}));
+
+// HTTP Strict Transport Security (HSTS)
+app.use(helmet.hsts({
+  maxAge: 31536000,
+  includeSubDomains: true,
+  preload: true
+}));
+
+// Referrer Policy
+app.use(helmet.referrerPolicy({ policy: "strict-origin-when-cross-origin" }));
+
+// X-Frame-Options (Clickjacking protection)
+app.use(helmet.frameguard({ action: 'sameorigin' }));
+
+// Permissions Policy
+app.use((req, res, next) => {
+  res.setHeader(
+    "Permissions-Policy",
+    "camera=(), microphone=(), geolocation=()"
+  );
+  next();
+});
 
 app.use(cors({
     origin: (origin, callback) => {
