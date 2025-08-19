@@ -48,44 +48,52 @@ app.use(
   helmet.contentSecurityPolicy({
     directives: {
       defaultSrc: ["'self'"],
+      
       scriptSrc: [
         "'self'",
         "https://www.paypal.com",
         "https://www.sandbox.paypal.com",
-        "https://www.paypalobjects.com"
+        "https://www.paypalobjects.com",
+        "https://www.google.com",
+        "https://www.gstatic.com",
+        "'unsafe-inline'"
       ],
+      
       styleSrc: [
         "'self'",
-        "'unsafe-inline'",
-        "https://fonts.googleapis.com"
+        "https://fonts.googleapis.com",
+        "https://www.gstatic.com",
+        "'unsafe-inline'"
       ],
-      fontSrc: [
-        "'self'",
-        "https://fonts.gstatic.com",
-        "data:"
-      ],
-      imgSrc: [
-        "'self'",
-        "data:",
-        "https://res.cloudinary.com",
-        "https://www.paypalobjects.com",
-        "https://www.sandbox.paypal.com"
-      ],
+      
+      fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
+      imgSrc: ["'self'", "data:", "https://res.cloudinary.com", "https://www.paypalobjects.com", "https://www.sandbox.paypal.com"],
+      
       connectSrc: [
         "'self'",
-        process.env.FRONTEND_URL_LOCAL,
-        process.env.FRONTEND_URL_PROD,
+        ...(process.env.FRONTEND_URL_LOCAL ? [process.env.FRONTEND_URL_LOCAL] : []),
+        ...(process.env.FRONTEND_URL_PROD ? [process.env.FRONTEND_URL_PROD] : []),
         "https://api-m.paypal.com",
         "https://api-m.sandbox.paypal.com",
-        "https://www.sandbox.paypal.com"
-      ],
+        "https://www.sandbox.paypal.com",
+        "https://www.google.com"
+      ].filter(Boolean),
+      
       frameSrc: [
         "https://www.paypal.com",
-        "https://www.sandbox.paypal.com"
+        "https://www.sandbox.paypal.com",
+        "https://www.google.com"
       ],
+      
       frameAncestors: ["'self'"],
       objectSrc: ["'none'"],
-      upgradeInsecureRequests: []
+      baseUri: ["'self'"],
+      formAction: ["'self'"],
+      mediaSrc: ["'self'"],
+      workerSrc: ["'self'"],
+      manifestSrc: ["'self'"],
+      
+      ...(process.env.NODE_ENV === 'production' && { upgradeInsecureRequests: [] })
     }
   })
 );
