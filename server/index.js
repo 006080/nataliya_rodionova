@@ -54,7 +54,7 @@ app.use(helmet.contentSecurityPolicy({
     ],
     styleSrc: [
       "'self'",
-      "'unsafe-inline'",   // потрібен для Google Fonts CSS
+      "'unsafe-inline'",   
       "https://fonts.googleapis.com"
     ],
     fontSrc: [
@@ -73,7 +73,8 @@ app.use(helmet.contentSecurityPolicy({
       process.env.FRONTEND_URL_LOCAL,
       process.env.FRONTEND_URL_PROD,
       "https://api-m.paypal.com",
-      "https://api-m.sandbox.paypal.com"
+      "https://api-m.sandbox.paypal.com",
+      "https://www.sandbox.paypal.com"
     ],
     frameSrc: [
       "https://www.paypal.com",
