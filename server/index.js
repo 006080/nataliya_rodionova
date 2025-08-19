@@ -47,16 +47,44 @@ app.use(helmet());
 app.use(helmet.contentSecurityPolicy({
   directives: {
     defaultSrc: ["'self'"],
-    scriptSrc: ["'self'"],
-    styleSrc: ["'self'", "https://fonts.googleapis.com"],
-    fontSrc: ["'self'", "https://fonts.gstatic.com"],
-    imgSrc: ["'self'", "data:", "https://res.cloudinary.com"],
-    connectSrc: ["'self'", process.env.FRONTEND_URL_LOCAL, process.env.FRONTEND_URL_PROD],
+    scriptSrc: [
+      "'self'",
+      "https://www.paypal.com",
+      "https://www.paypalobjects.com"
+    ],
+    styleSrc: [
+      "'self'",
+      "'unsafe-inline'",   // потрібен для Google Fonts CSS
+      "https://fonts.googleapis.com"
+    ],
+    fontSrc: [
+      "'self'",
+      "https://fonts.gstatic.com",
+      "data:"
+    ],
+    imgSrc: [
+      "'self'",
+      "data:",
+      "https://res.cloudinary.com",
+      "https://www.paypalobjects.com"
+    ],
+    connectSrc: [
+      "'self'",
+      process.env.FRONTEND_URL_LOCAL,
+      process.env.FRONTEND_URL_PROD,
+      "https://api-m.paypal.com",
+      "https://api-m.sandbox.paypal.com"
+    ],
+    frameSrc: [
+      "https://www.paypal.com",
+      "https://www.sandbox.paypal.com"
+    ],
     frameAncestors: ["'self'"],
     objectSrc: ["'none'"],
     upgradeInsecureRequests: []
   }
 }));
+
 
 // HTTP Strict Transport Security (HSTS)
 app.use(helmet.hsts({
