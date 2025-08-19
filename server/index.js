@@ -44,47 +44,52 @@ app.use(helmet());
 
 
 // Content Security Policy (CSP)
-app.use(helmet.contentSecurityPolicy({
-  directives: {
-    defaultSrc: ["'self'"],
-    scriptSrc: [
-      "'self'",
-      "https://www.paypal.com",
-      "https://www.paypalobjects.com"
-    ],
-    styleSrc: [
-      "'self'",
-      "'unsafe-inline'",   
-      "https://fonts.googleapis.com"
-    ],
-    fontSrc: [
-      "'self'",
-      "https://fonts.gstatic.com",
-      "data:"
-    ],
-    imgSrc: [
-      "'self'",
-      "data:",
-      "https://res.cloudinary.com",
-      "https://www.paypalobjects.com"
-    ],
-    connectSrc: [
-      "'self'",
-      process.env.FRONTEND_URL_LOCAL,
-      process.env.FRONTEND_URL_PROD,
-      "https://api-m.paypal.com",
-      "https://api-m.sandbox.paypal.com",
-      "https://www.sandbox.paypal.com"
-    ],
-    frameSrc: [
-      "https://www.paypal.com",
-      "https://www.sandbox.paypal.com"
-    ],
-    frameAncestors: ["'self'"],
-    objectSrc: ["'none'"],
-    upgradeInsecureRequests: []
-  }
-}));
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: [
+        "'self'",
+        "https://www.paypal.com",
+        "https://www.sandbox.paypal.com",
+        "https://www.paypalobjects.com"
+      ],
+      styleSrc: [
+        "'self'",
+        "'unsafe-inline'",
+        "https://fonts.googleapis.com"
+      ],
+      fontSrc: [
+        "'self'",
+        "https://fonts.gstatic.com",
+        "data:"
+      ],
+      imgSrc: [
+        "'self'",
+        "data:",
+        "https://res.cloudinary.com",
+        "https://www.paypalobjects.com",
+        "https://www.sandbox.paypal.com"
+      ],
+      connectSrc: [
+        "'self'",
+        process.env.FRONTEND_URL_LOCAL,
+        process.env.FRONTEND_URL_PROD,
+        "https://api-m.paypal.com",
+        "https://api-m.sandbox.paypal.com",
+        "https://www.sandbox.paypal.com"
+      ],
+      frameSrc: [
+        "https://www.paypal.com",
+        "https://www.sandbox.paypal.com"
+      ],
+      frameAncestors: ["'self'"],
+      objectSrc: ["'none'"],
+      upgradeInsecureRequests: []
+    }
+  })
+);
+
 
 
 // HTTP Strict Transport Security (HSTS)
