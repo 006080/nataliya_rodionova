@@ -1,6 +1,8 @@
 import express from 'express';
 import Order from '../Models/Order.js';
 import { authenticate } from '../middleware/auth.js';
+import { businessLogger } from '../middleware/logging.js';
+import logger from '../services/logger.js';
 
 const router = express.Router();
 
@@ -35,6 +37,9 @@ router.get('/api/orders', authenticate, async (req, res) => {
     res.json(formattedOrders);
   } catch (error) {
     console.error('Error fetching orders:', error);
+    await logger.error('ORDER_FETCH_ERROR', 'GET /api/orders', `Failed to fetch orders for user ${req.user._id}: ${error.message}`, {
+      userId: req.user._id.toString()
+    });
     res.status(500).json({ error: 'Server error - Unable to fetch orders' });
   }
 });
@@ -45,6 +50,9 @@ router.get('/api/orders/:id', authenticate, async (req, res) => {
     const order = await Order.findById(req.params.id);
 
     if (!order) {
+      await logger.warn('ORDER_NOT_FOUND', 'GET /api/orders/:id', `Order not found: ${req.params.id}`, {
+        userId: req.user._id.toString()
+      });
       return res.status(404).json({ error: 'Order not found' });
     }
 
@@ -62,6 +70,10 @@ router.get('/api/orders/:id', authenticate, async (req, res) => {
       // Unless user is admin
       req.user.role !== 'admin'
     ) {
+      await logger.warn('ORDER_UNAUTHORIZED_ACCESS', 'GET /api/orders/:id', `Unauthorized access attempt to order ${req.params.id}`, {
+        userId: req.user._id.toString(),
+        targetOrderId: req.params.id
+      });
       return res.status(403).json({ error: 'Unauthorized access to this order' });
     }
 
@@ -70,6 +82,11 @@ router.get('/api/orders/:id', authenticate, async (req, res) => {
     if (!order.user && req.user._id) {
       order.user = req.user._id;
       await order.save();
+
+      await logger.info('ORDER_USER_LINKED', 'GET /api/orders/:id', `Order ${req.params.id} linked to user account`, {
+        userId: req.user._id.toString(),
+        orderId: req.params.id
+      });
     }
 
     // Format the shipping address
@@ -136,6 +153,10 @@ router.get('/api/orders/:id', authenticate, async (req, res) => {
     res.json(orderResponse);
   } catch (error) {
     console.error('Error fetching order details:', error);
+    await logger.error('ORDER_DETAIL_ERROR', 'GET /api/orders/:id', `Failed to fetch order details ${req.params.id}: ${error.message}`, {
+      userId: req.user._id.toString(),
+      orderId: req.params.id
+    });
     res.status(500).json({ error: 'Server error - Unable to fetch order details' });
   }
 });
@@ -150,12 +171,21 @@ router.patch('/api/orders/:id/fulfillment', authenticate, async (req, res) => {
     
     // Check if user is admin
     if (req.user.role !== 'admin') {
+      await logger.warn('ORDER_FULFILLMENT_UNAUTHORIZED', 'PATCH /api/orders/:id/fulfillment', `Non-admin user attempted to update order fulfillment: ${id}`, {
+        userId: req.user._id.toString(),
+        orderId: id
+      });
       return res.status(403).json({ error: 'Unauthorized. Admin access required.' });
     }
     
     // Validate status
     const validStatuses = ['Processing', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled'];
     if (status && !validStatuses.includes(status)) {
+      await logger.warn('ORDER_FULFILLMENT_INVALID_STATUS', 'PATCH /api/orders/:id/fulfillment', `Invalid fulfillment status attempted: ${status} for order ${id}`, {
+        userId: req.user._id.toString(),
+        orderId: id,
+        attemptedStatus: status
+      });
       return res.status(400).json({ 
         error: `Invalid status. Must be one of: ${validStatuses.join(', ')}` 
       });
@@ -164,9 +194,14 @@ router.patch('/api/orders/:id/fulfillment', authenticate, async (req, res) => {
     // Find the order
     const order = await Order.findById(id);
     if (!order) {
+      await logger.warn('ORDER_FULFILLMENT_NOT_FOUND', 'PATCH /api/orders/:id/fulfillment', `Order not found for fulfillment update: ${id}`, {
+        userId: req.user._id.toString(),
+        orderId: id
+      });
       return res.status(404).json({ error: 'Order not found' });
     }
     
+    const previousStatus = order.fulfillmentStatus;
     // Update fields based on provided data
     const updateData = {};
     
@@ -193,6 +228,8 @@ router.patch('/api/orders/:id/fulfillment', authenticate, async (req, res) => {
       { $set: updateData },
       { new: true }
     );
+
+    businessLogger.orderFulfillmentUpdated(id, req.user._id.toString(), previousStatus, status);
     
     res.json({
       id: updatedOrder._id,
@@ -202,6 +239,10 @@ router.patch('/api/orders/:id/fulfillment', authenticate, async (req, res) => {
     });
   } catch (error) {
     console.error('Error updating order fulfillment:', error);
+    await logger.error('ORDER_FULFILLMENT_ERROR', 'PATCH /api/orders/:id/fulfillment', `Failed to update order fulfillment ${req.params.id}: ${error.message}`, {
+      userId: req.user._id.toString(),
+      orderId: req.params.id
+    });
     res.status(500).json({ error: 'Server error - Unable to update order fulfillment' });
   }
 });

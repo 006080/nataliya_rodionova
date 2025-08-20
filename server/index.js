@@ -24,8 +24,10 @@ import cartRoutes from './routes/cart.js';
 import reviewRoutes from './routes/review.js';
 import favoriteRoutes from './routes/favoritesRoutes.js';
 import userDeletionRoutes from './routes/userDeletion.js';
-
 import closeOrderRoutes from './routes/closeOrder.js';
+import { requestLogger, errorLogger } from './middleware/logging.js';
+import { businessLogger } from './middleware/logging.js';
+import logger from './services/logger.js';
 
 dotenv.config({ path: './.env.local' });
 
@@ -35,6 +37,8 @@ const server = http.createServer(app);
 
 app.set('trust proxy', 1);
 app.disable('x-powered-by');
+
+app.use(requestLogger);
 
 app.use(cookieParser());
 app.use(bodyParser.json());
@@ -228,8 +232,12 @@ const transporter = nodemailer.createTransport({
 
 // MongoDB Connection
 mongoose.connect(MONGO_URI) 
-    .then(() => {
+    .then(async () => {
         console.log('Connected to MongoDB');
+
+        // Log server startup
+        await logger.info('SERVER_START', 'mongoose.connect', 'Server connected to MongoDB and started successfully');
+
         // Initialize the payment reminder system
         initializeReminderSystem();
         console.log('Payment reminder system initialized');
@@ -238,8 +246,12 @@ mongoose.connect(MONGO_URI)
         initializeCleanupJobs();
         console.log('Data privacy cleanup jobs initialized');
     })
-    .catch((err) => {
+    .catch(async (err) => {
         console.error('MongoDB connection error:', err);
+
+    // Log connection failure
+        await logger.error('SERVER_ERROR', 'mongoose.connect', `MongoDB connection failed: ${err.message}`);
+
         process.exit(1);
     });
 
@@ -247,14 +259,30 @@ mongoose.connect(MONGO_URI)
 app.post("/api/feedback", async (req, res) => {
     const { name, surname, email, phone, message, captchaToken, terms } = req.body;
     const { error } = feedbackSchema.validate(req.body);
-    if (error) return res.status(400).json({ message: error.details[0].message });
-  
+    if (error) {
+        await logger.warn('FEEDBACK_VALIDATION_ERROR', 'POST /api/feedback', `Feedback validation failed: ${error.details[0].message}`, {
+            ip: req.ip,
+            email: email || 'unknown'
+        });
+        return res.status(400).json({ message: error.details[0].message });
+    }
     if (terms !== "yes") {
+        await logger.warn('FEEDBACK_TERMS_REJECTED', 'POST /api/feedback', `Terms not accepted in feedback submission from: ${email}`, {
+                ip: req.ip,
+                email: email
+            });
         return res.status(400).json({ message: "You must agree to the terms." });
     }
 
     const captchaValid = await verifyCaptcha(captchaToken);
-    if (!captchaValid) return res.status(400).json({ message: "reCAPTCHA error. Please try again." });
+        if (!captchaValid) {
+            await logger.warn('FEEDBACK_CAPTCHA_FAILED', 'POST /api/feedback', `reCAPTCHA verification failed for feedback from: ${email}`, {
+                ip: req.ip,
+                email: email,
+                userAgent: req.get('User-Agent')?.substring(0, 200)
+            });
+            return res.status(400).json({ message: "reCAPTCHA error. Please try again." });
+        }
 
     const sanitizedMessage = sanitizeHtml(message, {
         allowedTags: [],
@@ -278,11 +306,33 @@ app.post("/api/feedback", async (req, res) => {
                 ${sanitizedMessage}
             `,
         };
-        await transporter.sendMail(mailOptions);
+
+        try {
+            await transporter.sendMail(mailOptions);
+            
+            // Log successful feedback submission
+            businessLogger.feedbackSubmitted(req, email);
+            
+            await logger.info('FEEDBACK_EMAIL_SENT', 'POST /api/feedback', `Feedback email notification sent for submission from: ${email}`, {
+                ip: req.ip,
+                name: name,
+                surname: surname
+            });
+        } catch (emailError) {
+            await logger.error('FEEDBACK_EMAIL_ERROR', 'POST /api/feedback', `Failed to send feedback email notification from ${email}: ${emailError.message}`, {
+                ip: req.ip,
+                email: email
+            });
+            // Continue with success response even if email fails
+        }
 
         res.status(200).json({ message: "Message sent successfully." });
     } catch (error) {
         console.error(error);
+        await logger.error('FEEDBACK_ERROR', 'POST /api/feedback', `Feedback submission failed: ${error.message}`, {
+            ip: req.ip,
+            userAgent: req.get('User-Agent')?.substring(0, 200)
+        });
         res.status(500).json({ message: "Server error." });
     }
 });
@@ -362,6 +412,10 @@ app.use((req, res) => {
 //     console.error('Server error:', err);
 //     res.status(500).json({ error: 'Internal server error' });
 // });
+
+app.use(errorLogger);
+
+
 app.use((err, req, res, next) => {
     // Log detailed error internally
     console.error(err);
