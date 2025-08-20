@@ -14,6 +14,9 @@ import { generateVerificationToken, sendPasswordResetEmail, sendVerificationEmai
 import { addToBlacklist, isBlacklisted } from '../services/tokenBlacklist.js';
 import jwt from 'jsonwebtoken';
 
+import { authLogger } from '../middleware/logging.js';
+import logger from '../services/logger.js'
+
 const router = express.Router();
 
 const {
@@ -29,6 +32,7 @@ router.post('/api/auth/login', loginLimiter, trackLoginAttempts, async (req, res
     
     
     if (!email || !password) {
+      authLogger.loginAttempt(req, false, 'Login attempt with missing email or password');
       return res.status(400).json({ error: 'Email and password are required.' });
     }
     
@@ -37,6 +41,7 @@ router.post('/api/auth/login', loginLimiter, trackLoginAttempts, async (req, res
     
     
     if (!user) {
+      authLogger.loginAttempt(req, false, `Login attempt for non-existent email: ${normalizedEmail}`);
       return res.status(401).json({ error: 'Invalid email or password.' });
     }
     
@@ -56,6 +61,7 @@ router.post('/api/auth/login', loginLimiter, trackLoginAttempts, async (req, res
           // Account is still locked - calculate and show remaining time
           const remainingMinutes = Math.ceil((lockExpires.getTime() - Date.now()) / 60000);
           
+          authLogger.loginAttempt(req, false, `Login attempt for locked account: ${normalizedEmail} - ${remainingMinutes} minutes remaining`);
           return res.status(403).json({ 
             error: `Your account is temporarily locked due to multiple failed attempts. Please try again in ${remainingMinutes} minute(s).`
           });
@@ -71,6 +77,7 @@ router.post('/api/auth/login', loginLimiter, trackLoginAttempts, async (req, res
     // Verify password exists
     if (!user.password) {
       console.error('Password field missing for user:', email);
+      await logger.error('AUTH_ERROR', 'POST /api/auth/login', `Password field missing for user: ${normalizedEmail}`);
       return res.status(500).json({ error: 'Account configuration error.' });
     }
     
@@ -80,6 +87,7 @@ router.post('/api/auth/login', loginLimiter, trackLoginAttempts, async (req, res
       validPassword = await user.comparePassword(password);
     } catch (bcryptError) {
       console.error('bcrypt.compare error:', bcryptError);
+      await logger.error('AUTH_ERROR', 'POST /api/auth/login', `bcrypt.compare error for user ${normalizedEmail}: ${bcryptError.message}`);
       return res.status(500).json({ error: 'Error verifying credentials.' });
     }
     
@@ -94,18 +102,22 @@ router.post('/api/auth/login', loginLimiter, trackLoginAttempts, async (req, res
         user.lockedAt = new Date();
         
         await user.save();
+
+        authLogger.loginAttempt(req, false, `Account locked due to multiple failed attempts: ${normalizedEmail}`);
         return res.status(403).json({ 
           error: 'Your account has been temporarily locked due to multiple failed login attempts. Please try again after 1 hour.' 
         });
       }
       
       await user.save();
+       authLogger.loginAttempt(req, false, `Invalid password for user: ${normalizedEmail} (attempt ${user.failedLoginAttempts})`);
       return res.status(401).json({ error: 'Invalid email or password.' });
     }
 
 
     if (!user.emailVerified) {
       // Check if there's a pending verification
+      authLogger.loginAttempt(req, false, `Login attempt with unverified email: ${normalizedEmail}`);
       const hasToken = !!user.emailVerificationToken;
       const isExpired = user.emailVerificationExpires && user.emailVerificationExpires < Date.now();
       
@@ -136,6 +148,9 @@ router.post('/api/auth/login', loginLimiter, trackLoginAttempts, async (req, res
     }
     
     await user.save();
+
+    authLogger.loginAttempt(req, true, `Successful login for user: ${normalizedEmail}`);
+    
     
     // Generate tokens
     const { accessToken, refreshToken } = generateTokens(user._id, {
@@ -318,6 +333,8 @@ router.post('/api/auth/logout', async (req, res) => {
       await addToBlacklist(refreshToken);
     }
 
+    authLogger.logout(req);
+
     // Clear refresh token cookie - with proper settings to ensure deletion
     res.clearCookie('refreshToken', {
       httpOnly: true,
@@ -331,6 +348,10 @@ router.post('/api/auth/logout', async (req, res) => {
     res.json({ success: true });
   } catch (error) {
     console.error('Logout error:', error);
+    await logger.error('AUTH_ERROR', 'POST /api/auth/logout', `Logout error: ${error.message}`, {
+      userId: req.user?._id?.toString(),
+      ip: req.ip
+    });
     res.status(500).json({ error: 'Internal server error.' });
   }
 });
@@ -391,11 +412,15 @@ router.post('/api/auth/register', registerLimiter, async (req, res) => {
 
     await newUser.save();
 
+
+    authLogger.registration(req, newUser._id, email);
+
     // Send verification email
     try {
       await sendVerificationEmail(email, name, token);
     } catch (emailError) {
       console.error('Error sending verification email:', emailError);
+      await logger.error('EMAIL_ERROR', 'POST /api/auth/register', `Failed to send verification email to ${email}: ${emailError.message}`);
       // Continue with registration even if email fails
     }
     
@@ -430,6 +455,10 @@ router.post('/api/auth/register', registerLimiter, async (req, res) => {
     });
   } catch (error) {
     console.error('Registration error:', error);
+    await logger.error('AUTH_ERROR', 'POST /api/auth/register', `Registration error: ${error.message}`, {
+      ip: req.ip,
+      userAgent: req.get('User-Agent')?.substring(0, 200)
+    });
     res.status(500).json({ error: 'Internal server error.' });
   }
 });
@@ -597,6 +626,7 @@ router.post('/api/auth/forgot-password', async (req, res) => {
       return res.status(400).json({ error: 'Email is required.' });
     }
     
+    authLogger.passwordReset(req, email);
     // Find user
     const user = await User.findOne({ email: email.toLowerCase().trim() });
     
@@ -627,6 +657,9 @@ router.post('/api/auth/forgot-password', async (req, res) => {
       await sendPasswordResetEmail(user.email, user.name, resetToken);
     } catch (emailError) {
       console.error('Error sending password reset email:', emailError);
+      await logger.error('AUTH_ERROR', 'POST /api/auth/forgot-password', `Password reset error: ${error.message}`, {
+      ip: req.ip
+    });
       // Still return success to prevent user enumeration, but log the error
     }
     

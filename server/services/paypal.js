@@ -4,6 +4,9 @@ import { sendOrderStatusEmail } from '../services/emailNotification.js';
 import { schedulePaymentReminders, cancelExistingReminders } from '../services/paymentReminderService.js';
 import { getCountryName } from '../../src/utils/countries.js';
 
+import { businessLogger } from '../middleware/logging.js';
+import logger from '../services/logger.js';
+
 // In-memory cache for temporary orders 
 const tempOrderCache = new Map();
 
@@ -129,6 +132,7 @@ const createPayPalOrder = async (cartItems, measurements, deliveryDetails) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error("PayPal order creation failed:", errorText);
+      await logger.error('PAYPAL_ERROR', 'createPayPalOrder', `PayPal order creation failed: ${errorText}`);
       throw new Error(`Failed to create PayPal order: ${response.status}`);
     }
 
@@ -157,11 +161,15 @@ const createPayPalOrder = async (cartItems, measurements, deliveryDetails) => {
     
     // Store in temporary cache
     tempOrderCache.set(data.id, orderInfo);
-    console.log(`Temporary order created: ${data.id}`);
+
+    await logger.info('ORDER_CREATED_TEMP', 'createPayPalOrder', `Temporary PayPal order created: ${data.id} - €${totalAmount}`, {
+      statusCode: 200
+    });
     
     return data;
   } catch (error) {
     console.error("Error creating PayPal order:", error);
+     await logger.error('PAYPAL_ERROR', 'createPayPalOrder', `Error creating PayPal order: ${error.message}`);
     throw error;
   }
 };
@@ -262,6 +270,7 @@ const persistOrderToDatabase = async (orderId) => {
     
     if (!tempOrderData) {
       console.error(`No temp data found for order: ${orderId}`);
+      await logger.error('ORDER_ERROR', 'persistOrderToDatabase', `No temp data found for order: ${orderId}`);
       throw new Error('Order data not found');
     }
     
@@ -269,6 +278,7 @@ const persistOrderToDatabase = async (orderId) => {
     const interactionData = await checkPayPalUserInteraction(orderId);
     
     if (!interactionData.hasInteraction) {
+      await logger.debug('ORDER_DEBUG', 'persistOrderToDatabase', `No user interaction detected for order: ${orderId}`);
       return null;
     }
     
@@ -337,6 +347,8 @@ const persistOrderToDatabase = async (orderId) => {
     });
     
     await newOrder.save();
+
+    businessLogger.orderCreated(orderId, customer.email, tempOrderData.totalAmount);
     
     // Schedule reminders since user has interacted
     await schedulePaymentReminders(orderId);
@@ -347,6 +359,7 @@ const persistOrderToDatabase = async (orderId) => {
     return newOrder;
   } catch (error) {
     console.error(`Error persisting order to database: ${error}`);
+    await logger.error('ORDER_ERROR', 'persistOrderToDatabase', `Error persisting order ${orderId}: ${error.message}`);
     throw error;
   }
 };
@@ -380,6 +393,7 @@ const capturePayPalOrder = async (orderId) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error("PayPal capture failed:", errorText);
+      await logger.error('PAYPAL_ERROR', 'capturePayPalOrder', `PayPal capture failed for ${orderId}: ${errorText}`);
       throw new Error(`Failed to capture payment: ${response.status}`);
     }
 
@@ -420,6 +434,7 @@ const capturePayPalOrder = async (orderId) => {
     
     if (!updatedOrder) {
       console.error("Order not found in database:", orderId);
+      await logger.error('ORDER_ERROR', 'capturePayPalOrder', `Order not found in database: ${orderId}`);
     } else {
       // Check if the status has changed
       if (previousStatus !== data.status) {
@@ -431,6 +446,8 @@ const capturePayPalOrder = async (orderId) => {
         // If status changed to COMPLETED, cancel any scheduled reminders
         else if (data.status === 'COMPLETED' || data.status === 'APPROVED') {
           await cancelExistingReminders(orderId);
+
+          businessLogger.orderCompleted(orderId, updatedOrder.customer?.email, updatedOrder.totalAmount);
           
           // Send regular order status email for non-PAYER_ACTION_REQUIRED statuses
           await sendOrderStatusEmail(orderId, previousStatus);
@@ -444,6 +461,7 @@ const capturePayPalOrder = async (orderId) => {
     return data;
   } catch (error) {
     console.error("Error capturing PayPal order:", error);
+    await logger.error('PAYPAL_ERROR', 'capturePayPalOrder', `Error capturing PayPal order ${orderId}: ${error.message}`);
     throw error;
   }
 };
@@ -460,6 +478,7 @@ const updateOrderStatus = async (orderId, newStatus) => {
     const currentOrder = await Order.findOne({ paypalOrderId: orderId });
     
     if (!currentOrder) {
+      await logger.error('ORDER_ERROR', 'cancelOrder', `Order not found: ${orderId}`);
       throw new Error(`Order not found: ${orderId}`);
     }
     
@@ -546,6 +565,7 @@ const cancelOrder = async (orderId, reason = 'Payment action not completed withi
     const currentOrder = await Order.findOne({ paypalOrderId: orderId });
     
     if (!currentOrder) {
+      await logger.error('ORDER_ERROR', 'cancelOrder', `Order not found: ${orderId}`);
       throw new Error(`Order not found: ${orderId}`);
     }
     
@@ -571,6 +591,8 @@ const cancelOrder = async (orderId, reason = 'Payment action not completed withi
       },
       { new: true }
     );
+
+    businessLogger.orderCancelled(orderId, updatedOrder.customer?.email, reason);
     
     // Cancel any scheduled reminders
     await cancelExistingReminders(orderId);
@@ -581,6 +603,7 @@ const cancelOrder = async (orderId, reason = 'Payment action not completed withi
     return updatedOrder;
   } catch (error) {
     console.error(`Error cancelling order: ${error}`);
+    await logger.error('ORDER_ERROR', 'cancelOrder', `Error cancelling order ${orderId}: ${error.message}`);
     throw error;
   }
 };
