@@ -71,6 +71,10 @@ app.use(
       
       connectSrc: [
         "'self'",
+        ...(process.env.NODE_ENV === 'development' ? [
+          "ws://localhost:*",
+          "http://localhost:*"
+        ] : []),
         ...(process.env.FRONTEND_URL_LOCAL ? [process.env.FRONTEND_URL_LOCAL] : []),
         ...(process.env.FRONTEND_URL_PROD ? [process.env.FRONTEND_URL_PROD] : []),
         "https://api-m.paypal.com",
