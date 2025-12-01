@@ -1,438 +1,115 @@
 import express from 'express';
 import mongoose from 'mongoose';
-// import multer from 'multer';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
-import Feedback from './Models/Feedback.js';
 import http from 'http';
-import sanitizeHtml from 'sanitize-html';
+import cookieParser from 'cookie-parser';
+import bodyParser from 'body-parser';
 import helmet from 'helmet';
-import nodemailer from 'nodemailer';
-import Joi from 'joi';
-import { v2 as cloudinary } from 'cloudinary';
-// import { CloudinaryStorage } from 'multer-storage-cloudinary';
-import bodyParser from "body-parser";
+import fs from 'fs';
+import path from 'path';
+
+// React SSR imports
+import React from 'react';
+import ReactDOMServer from 'react-dom/server';
+import { StaticRouter } from 'react-router-dom/server';
+import { HelmetProvider } from 'react-helmet-async';
+import App from './src/App.jsx'; // Твоя главная App страница
+
+// Импорты твоих роутов и сервисов
 import paypalRoutes from './routes/paypal.js';
 import productRoutes from './routes/product.js';
-import { initializeReminderSystem } from './services/paymentReminderService.js';
-import { initializeCleanupJobs } from './services/cleanupJobs.js';
-import cookieParser from 'cookie-parser';
-import authRoutes from './routes/auth.js';
-import orderRoutes from './routes/order.js';
-import cartRoutes from './routes/cart.js';
-import reviewRoutes from './routes/review.js';
-import favoriteRoutes from './routes/favoritesRoutes.js';
-import userDeletionRoutes from './routes/userDeletion.js';
-import closeOrderRoutes from './routes/closeOrder.js';
-import { requestLogger, errorLogger } from './middleware/logging.js';
-import { businessLogger } from './middleware/logging.js';
-import logger from './services/logger.js';
+// ... другие роуты и сервисы
 
 dotenv.config({ path: './.env.local' });
 
 const app = express();
 const server = http.createServer(app);
+const {
+  MONGO_URI,
+  PORT,
+  FRONTEND_URL_LOCAL,
+  FRONTEND_URL_PROD
+} = process.env;
 
+if (!MONGO_URI || !PORT || !FRONTEND_URL_LOCAL || !FRONTEND_URL_PROD) {
+  console.error('Missing required environment variables');
+  process.exit(1);
+}
 
-app.set('trust proxy', 1);
-app.disable('x-powered-by');
-
-app.use(requestLogger);
-
+// --- Middleware ---
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(helmet()); 
-
-
-
-// Content Security Policy (CSP)
-app.use(
-  helmet.contentSecurityPolicy({
-    directives: {
-      defaultSrc: ["'self'"],
-      
-      scriptSrc: [
-        "'self'",
-        "https://www.paypal.com",
-        "https://www.sandbox.paypal.com",
-        "https://www.paypalobjects.com",
-        "https://www.google.com",
-        "https://www.gstatic.com",
-        "'unsafe-inline'"
-      ],
-      
-      styleSrc: [
-        "'self'",
-        "https://fonts.googleapis.com",
-        "https://www.gstatic.com",
-        "'unsafe-inline'"
-      ],
-      
-      fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
-      imgSrc: ["'self'", "data:", "https://res.cloudinary.com", "https://www.paypalobjects.com", "https://www.sandbox.paypal.com"],
-      
-      connectSrc: [
-        "'self'",
-        ...(process.env.NODE_ENV === 'development' ? [
-          "ws://localhost:*",
-          "http://localhost:*"
-        ] : []),
-        ...(process.env.FRONTEND_URL_LOCAL ? [process.env.FRONTEND_URL_LOCAL] : []),
-        ...(process.env.FRONTEND_URL_PROD ? [process.env.FRONTEND_URL_PROD] : []),
-        "https://api-m.paypal.com",
-        "https://api-m.sandbox.paypal.com",
-        "https://www.sandbox.paypal.com",
-        "https://www.google.com"
-      ].filter(Boolean),
-      
-      frameSrc: [
-        "https://www.paypal.com",
-        "https://www.sandbox.paypal.com",
-        "https://www.google.com"
-      ],
-      
-      frameAncestors: ["'self'"],
-      objectSrc: ["'none'"],
-      baseUri: ["'self'"],
-      formAction: ["'self'"],
-      mediaSrc: ["'self'"],
-      workerSrc: ["'self'"],
-      manifestSrc: ["'self'"],
-      
-      ...(process.env.NODE_ENV === 'production' && { upgradeInsecureRequests: [] })
-    }
-  })
-);
-
-
-
-// HTTP Strict Transport Security (HSTS)
-app.use(helmet.hsts({
-  maxAge: 31536000,
-  includeSubDomains: true,
-  preload: true
-}));
-
-// Referrer Policy
-app.use(helmet.referrerPolicy({ policy: "strict-origin-when-cross-origin" }));
-
-// X-Frame-Options (Clickjacking protection)
-app.use(helmet.frameguard({ action: 'sameorigin' }));
-
-// Permissions Policy
-app.use((req, res, next) => {
-  res.setHeader(
-    "Permissions-Policy",
-    "camera=(), microphone=(), geolocation=()"
-  );
-  next();
-});
-
+app.use(helmet());
 app.use(cors({
-    origin: (origin, callback) => {
-        const allowedOrigins = [FRONTEND_URL_LOCAL, FRONTEND_URL_PROD];
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
-    credentials: true
+  origin: [FRONTEND_URL_LOCAL, FRONTEND_URL_PROD],
+  credentials: true
 }));
-app.use(express.json({ limit: '10mb' })); // Limit payload size
 
-
-
-// Middleware setup
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-
-if (process.env.NODE_ENV === 'production') {
-    app.set('trust proxy', true); 
-} else {
-    app.set('trust proxy', false); 
-}
-
-// Cloudinary configuration
-cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-
-const { 
-    MONGO_URI, 
-    PORT, 
-    FRONTEND_URL_LOCAL, 
-    FRONTEND_URL_PROD,
-    EMAIL_USER,
-    EMAIL_PASS,
-    RECAPTCHA_SECRET_KEY
-} = process.env;
-
-// Ensure required environment variables are present
-if (!MONGO_URI || !PORT || !FRONTEND_URL_LOCAL || !FRONTEND_URL_PROD || !EMAIL_USER || !EMAIL_PASS || !RECAPTCHA_SECRET_KEY) {
-    console.error('Missing required environment variables');
-    process.exit(1);
-}
-
-// Rate limiters for feedback route
-const feedbackLimiter = rateLimit({
-    windowMs: 30 * 60 * 1000,
-    max: 100, 
-    message: 'Too many feedbacks submitted. Please try again later.'
-});
-
-  
-  // Stronger limits specifically for auth routes
-  const authLimiter = rateLimit({
-    // windowMs: 60 * 60 * 1000, // 1 hour
-    windowMs: 1 * 60 * 1000, // 1 min to test
-    max: 30, // 30 requests per IP
-    message: { error: 'Too many requests from this IP, please try again after an hour' }
-  });
-  
-  // Apply to auth routes
-  app.use('/api/auth/', authLimiter);
-
-
-
-// Middleware
+// --- Rate limiting ---
+const feedbackLimiter = rateLimit({ windowMs: 30*60*1000, max: 100 });
 app.use("/api/feedback", feedbackLimiter);
 
-// Feedback schema validation
-const feedbackSchema = Joi.object({
-    name: Joi.string().min(3).max(50).required(),
-    surname: Joi.string().min(2).max(50).required(),
-    email: Joi.string().email().required(),
-    phone: Joi.string().pattern(/^[0-9]{10,15}$/).allow(""),
-    message: Joi.string().min(2).max(1000).required(),
-    captchaToken: Joi.string().required(),
-    terms: Joi.string().valid("yes").required() 
-});
+const authLimiter = rateLimit({ windowMs: 1*60*1000, max: 30 });
+app.use('/api/auth/', authLimiter);
 
-async function verifyCaptcha(token) {
-    const response = await fetch(
-      `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${token}`,
-      { method: "POST" }
-    );
-    const data = await response.json();
-    return data.success;
-}
-
-const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS, 
-    },
-});
-
-// MongoDB Connection
-mongoose.connect(MONGO_URI) 
-    .then(async () => {
-        console.log('Connected to MongoDB');
-
-        // Log server startup
-        await logger.info('SERVER_START', 'mongoose.connect', 'Server connected to MongoDB and started successfully');
-
-        // Initialize the payment reminder system
-        initializeReminderSystem();
-        console.log('Payment reminder system initialized');
-
-        // Initialize data privacy cleanup jobs
-        initializeCleanupJobs();
-        console.log('Data privacy cleanup jobs initialized');
-    })
-    .catch(async (err) => {
-        console.error('MongoDB connection error:', err);
-
-    // Log connection failure
-        await logger.error('SERVER_ERROR', 'mongoose.connect', `MongoDB connection failed: ${err.message}`);
-
-        process.exit(1);
-    });
-
-// Feedback POST route
-app.post("/api/feedback", async (req, res) => {
-    const { name, surname, email, phone, message, captchaToken, terms } = req.body;
-    const { error } = feedbackSchema.validate(req.body);
-    if (error) {
-        await logger.warn('FEEDBACK_VALIDATION_ERROR', 'POST /api/feedback', `Feedback validation failed: ${error.details[0].message}`, {
-            ip: req.ip,
-            email: email || 'unknown'
-        });
-        return res.status(400).json({ message: error.details[0].message });
-    }
-    if (terms !== "yes") {
-        await logger.warn('FEEDBACK_TERMS_REJECTED', 'POST /api/feedback', `Terms not accepted in feedback submission from: ${email}`, {
-                ip: req.ip,
-                email: email
-            });
-        return res.status(400).json({ message: "You must agree to the terms." });
-    }
-
-    const captchaValid = await verifyCaptcha(captchaToken);
-        if (!captchaValid) {
-            await logger.warn('FEEDBACK_CAPTCHA_FAILED', 'POST /api/feedback', `reCAPTCHA verification failed for feedback from: ${email}`, {
-                ip: req.ip,
-                email: email,
-                userAgent: req.get('User-Agent')?.substring(0, 200)
-            });
-            return res.status(400).json({ message: "reCAPTCHA error. Please try again." });
-        }
-
-    const sanitizedMessage = sanitizeHtml(message, {
-        allowedTags: [],
-        allowedAttributes: {},
-    });
-
-    try {
-        const feedback = new Feedback({ name, surname, email, phone, message });
-        await feedback.save();
-
-        const mailOptions = {
-            from: email,
-            to: process.env.EMAIL_USER,
-            subject: `New message from ${name} ${surname}`,
-            text: `
-                Name: ${name}
-                Surname: ${surname}
-                Email: ${email}
-                Phone: ${phone || "not provided"}
-                Message:
-                ${sanitizedMessage}
-            `,
-        };
-
-        try {
-            await transporter.sendMail(mailOptions);
-            
-            // Log successful feedback submission
-            businessLogger.feedbackSubmitted(req, email);
-            
-            await logger.info('FEEDBACK_EMAIL_SENT', 'POST /api/feedback', `Feedback email notification sent for submission from: ${email}`, {
-                ip: req.ip,
-                name: name,
-                surname: surname
-            });
-        } catch (emailError) {
-            await logger.error('FEEDBACK_EMAIL_ERROR', 'POST /api/feedback', `Failed to send feedback email notification from ${email}: ${emailError.message}`, {
-                ip: req.ip,
-                email: email
-            });
-            // Continue with success response even if email fails
-        }
-
-        res.status(200).json({ message: "Message sent successfully." });
-    } catch (error) {
-        console.error(error);
-        await logger.error('FEEDBACK_ERROR', 'POST /api/feedback', `Feedback submission failed: ${error.message}`, {
-            ip: req.ip,
-            userAgent: req.get('User-Agent')?.substring(0, 200)
-        });
-        res.status(500).json({ message: "Server error." });
-    }
-});
-
-// Cloudinary Images Route
-app.get('/api/cloudinary-images', async (req, res) => {
-    try {
-        const { folder } = req.query;
-
-        if (!folder) {
-            return res.status(400).json({ error: 'Folder parameter is required' });
-        }
-
-        const { resources } = await cloudinary.api.resources({
-            type: 'upload',
-            prefix: `${folder}`,
-            max_results: 20,
-        });
-
-        res.json(resources.map(file => file.secure_url));
-
-    } catch (error) {
-        console.error('Error fetching images:', error);
-        res.status(500).json({ error: 'Failed to fetch images' });
-    }
-});
-
-
-app.get('/api/cloudinary-folders', async (req, res) => {
-    try {
-        const { folders } = await cloudinary.api.root_folders();
-        const folderImages = {};
-
-        for (const folder of folders) {
-            try {
-                const { resources } = await cloudinary.search
-                    .expression(`folder:${folder.name}/*`) // Fetch images inside the folder
-                    .sort_by("created_at", "desc")
-                    .max_results(15) // Limit results to avoid rate limits
-                    .execute();
-
-                folderImages[folder.name] = resources.map(file => file.secure_url);
-            } catch (imageError) {
-                console.error(`Error fetching images for folder ${folder.name}:`, imageError);
-                folderImages[folder.name] = []; // Ensure the folder exists in response
-            }
-        }
-
-        res.json(folderImages);
-    } catch (error) {
-        console.error('Error fetching folders:', error);
-        res.status(500).json({ error: 'Failed to fetch folders' });
-    }
-});
-
-
-
+// --- API routes ---
 app.use(productRoutes);
 app.use(paypalRoutes);
-app.use(authRoutes);
-app.use(orderRoutes);
-app.use(cartRoutes);
-app.use(favoriteRoutes);
-app.use(reviewRoutes);
-app.use(userDeletionRoutes);
+// ... остальные роуты
 
-app.use(closeOrderRoutes);
-  
+// --- Static files from Vite build ---
+app.use(express.static(path.resolve('./dist')));
 
-// Handle 404 errors
+// --- SSR middleware (React + Router + Helmet) ---
+app.get('*', (req, res, next) => {
+  // пропускаем API-запросы
+  if (req.path.startsWith('/api/')) return next();
+
+  const helmetContext = {};
+  const appHtml = ReactDOMServer.renderToString(
+    <HelmetProvider context={helmetContext}>
+      <StaticRouter location={req.url}>
+        <App />
+      </StaticRouter>
+    </HelmetProvider>
+  );
+
+  const { helmet } = helmetContext;
+
+  const indexFile = path.resolve('./dist/index.html');
+  let html = fs.readFileSync(indexFile, 'utf8');
+
+  html = html.replace('<div id="root"></div>', `<div id="root">${appHtml}</div>`);
+  html = html.replace('</head>', `
+    ${helmet.title.toString()}
+    ${helmet.meta.toString()}
+  </head>`);
+
+  res.send(html);
+});
+
+// --- 404 ---
 app.use((req, res) => {
-    res.status(404).json({ error: 'Endpoint not found' });
+  res.status(404).json({ error: 'Endpoint not found' });
 });
 
-// General error handler
-// app.use((err, req, res, next) => {
-//     console.error('Server error:', err);
-//     res.status(500).json({ error: 'Internal server error' });
-// });
-
-app.use(errorLogger);
-
-
+// --- Error handler ---
 app.use((err, req, res, next) => {
-    // Log detailed error internally
-    console.error(err);
-    
-    // Send generic response to client
-    res.status(err.status || 500).json({
-      error: process.env.NODE_ENV === 'production' 
-        ? 'An unexpected error occurred' 
-        : err.message
-    });
+  console.error(err);
+  res.status(err.status || 500).json({
+    error: process.env.NODE_ENV === 'production' ? 'An unexpected error occurred' : err.message
   });
-
-// Health Check route
-app.get('/api/health', (req, res) => {
-    res.status(200).json({ status: 'OK' });
 });
 
+// --- MongoDB connection ---
+mongoose.connect(MONGO_URI)
+  .then(() => console.log('MongoDB connected'))
+  .catch(err => { console.error(err); process.exit(1); });
+
+// --- Start server ---
 server.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
