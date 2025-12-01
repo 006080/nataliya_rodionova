@@ -1,5 +1,7 @@
 import { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+// ⬅️ НОВЫЙ ИМПОРТ: HelmetProvider для управления метаданными
+import { HelmetProvider } from 'react-helmet-async'; 
 import Header from "../components/Header";
 import Home from "./Pages/Home";
 import Reviews from "./Pages/Reviews";
@@ -48,7 +50,7 @@ const AppContent = () => {
   // Initialize enhanced consent management
   useEffect(() => {
     initConsentManagement();
-  }, []);  
+  }, []);  
 
   return (
     <>
@@ -96,13 +98,16 @@ const AppContent = () => {
 const App = () => {
   return (
     <Router>
-      <AuthProvider>
-        <CartProvider>
-          <FavoriteProvider>
-            <AppContent />
-          </FavoriteProvider>
-        </CartProvider>
-      </AuthProvider>
+      {/* ⬅️ НОВАЯ ОБЕРТКА: HelmetProvider должна быть здесь */}
+      <HelmetProvider> 
+        <AuthProvider>
+          <CartProvider>
+            <FavoriteProvider>
+              <AppContent />
+            </FavoriteProvider>
+          </CartProvider>
+        </AuthProvider>
+      </HelmetProvider>
     </Router>
   );
 };
