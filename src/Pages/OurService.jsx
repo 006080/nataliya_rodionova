@@ -247,7 +247,7 @@ const OurService = () => {
           <p style={{ color: 'beige' }}>
             Our clients are bold, creative, and expressive individuals who see
             fashion as a medium for storytelling and self-expression. They span
-            a wide age range from 20 to 100+, embracing diversity in gender and
+            a wide age range from 18 to 100+, embracing diversity in gender and
             life experiences, with a shared passion for originality and
             innovation. Artists are drawn to our visually striking and
             conceptually rich designs. Creators seek avant-garde, experimental

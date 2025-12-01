@@ -34,12 +34,12 @@ const Footer = () => {
         <h4 className={styles.foot} onClick={() => navigate("/return")}>
           Return Policy
         </h4>
-        {/* <h4 className={styles.foot} onClick={() => navigate("/legal-notice")}>
+        <h4 className={styles.foot} onClick={() => navigate("/legal-notice")}>
           Legal Notice
         </h4>
         <h4 className={styles.foot} onClick={() => navigate("/privacy-policy")}>
           Privacy Policy
-        </h4> */}
+        </h4>
         <h4 className={styles.foot} onClick={handleOpenCookieSettings}>
           Cookie Settings
         </h4>

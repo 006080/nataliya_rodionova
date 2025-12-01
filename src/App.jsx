@@ -27,6 +27,7 @@ import OrderDetail from "./Pages/OrderDetail";
 import { FavoriteProvider } from "../components/FavoriteContext";
 import Collaboration from "./Pages/Collaboration";
 import FavoritesPage from "./Pages/FavoritesPage";
+import About from "./Pages/About";
 import GoodbyePage from "./Pages/GoodbyePage";
 import WelcomeBackPage from "./Pages/WelcomeBackPage";
 import CookieBanner from "../components/CookieBanner";
@@ -67,12 +68,13 @@ const AppContent = () => {
         <Route path="/reviews" element={<Reviews />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-        {/* <Route path="/legal-notice" element={<LegalNotice />} /> */}
+        <Route path="/legal-notice" element={<LegalNotice />} /> 
         <Route path="/return" element={<ReturnPolicy />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/collaboration" element={<Collaboration />} />
-        {/* <Route path="/contacts" element={<Contacts />} /> */}
+        <Route path="/contacts" element={<Contacts />} />
         <Route path="/shop" element={<Shop />} />
+        <Route path="/about" element={<About />} />
         <Route path="/order-status/:orderId" element={<OrderStatus />} />
 
         <Route path="/goodbye" element={<GoodbyePage />} />

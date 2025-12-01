@@ -1,0 +1,220 @@
+/* ======================= */
+/*       ABOUT CONTAINER    */
+/* ======================= */
+.aboutContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 4rem 2rem;
+  /* font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; */
+  color: #000;
+  background-color: #fff;
+  line-height: 1.6;
+}
+
+/* ======================= */
+/*       LOGO HEADER        */
+/* ======================= */
+.logoHeader {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 4rem;
+  margin-top: 3rem;
+}
+
+.logo {
+  max-width: 180px;
+  height: auto;
+}
+
+.sustainiblity {
+  max-width: 600px;
+  margin: 40px;
+}
+
+/* ======================= */
+/*         HERO BLOCK       */
+/* ======================= */
+.hero {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4rem;
+  margin-bottom: 6rem;
+}
+
+.heroImageWrapper {
+  flex: 1 1 400px;
+  display: flex;
+  justify-content: center;
+}
+
+.heroImage {
+  width: 100%;
+  max-width: 500px;
+  height: auto;
+  object-fit: cover;
+  border-radius: 0; /* строгое фото без скруглений */
+}
+
+.heroText {
+  flex: 1 1 400px;
+  display: flex;
+  font-family: 'Merriweather', 'Cormorant Garamond', Georgia, serif;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.heroTitle {
+  color: #3a3a3a; /* благородный тёмно-серый, более мягкий, премиальный */
+  font-family: "Cormorant Garamond", serif; 
+  font-size: 2rem;
+  font-weight: 500; /* более элегантно, чем 600 */
+  letter-spacing: 0.5px; /* лёгкое дыхание, эффект luxury editorial */
+  margin-left: 2rem;
+  margin-bottom: 2rem;
+  text-transform: uppercase;
+}
+
+.quote {
+  font-size: 1.1rem;
+  font-style: italic;
+  white-space: pre-line;
+}
+
+/* ======================= */
+/*         SECTIONS         */
+/* ======================= */
+.section {
+  margin-bottom: 6rem;
+}
+
+.sectionTitle {
+  /* color: #0e094bdd; */
+  font-size: 2rem;
+  font-weight: 600;
+  margin-top: 3rem;
+  margin-bottom: 2rem;
+  text-transform: uppercase;
+}
+
+.sectionTitle1 {
+  /* color: #0e094bdd; */
+  font-size: 2rem;
+  font-weight: 600;
+  margin-top: 8rem;
+  margin-bottom: 2rem;
+  text-transform: uppercase;
+}
+
+.paragraph {
+  font-size: 1rem;
+  margin-bottom: 1.6rem;
+  margin-right: 1rem;
+  margin-left: 1rem;
+   font-family: 'Merriweather', 'Cormorant Garamond', Georgia, serif;
+   font-style: normal;
+}
+
+.paragraph1 {
+  font-size: 1rem;
+  margin-bottom: 1.6rem;
+  margin-right: 10rem;
+  margin-left: 10rem;
+   font-family: 'Merriweather', 'Cormorant Garamond', Georgia, serif;
+   font-style: normal;
+}
+
+.list {
+  list-style: none;
+  padding: 0;
+    margin-right: 1rem;
+  margin-left: 1rem;
+  margin-bottom: 0;
+}
+
+.list li {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* ======================= */
+/*        RESPONSIVE        */
+/* ======================= */
+
+@media (max-width: 1024px) {
+  .hero {
+    flex-direction: column;
+    gap: 2rem;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .logo {
+  max-width: 150px;
+  height: auto;
+}
+
+  .heroText {
+    align-items: center;
+    text-align: center;
+  }
+
+  .heroTitle {
+    font-size: 2.2rem;
+    margin: 0 0 1.5rem 0;
+  }
+
+  .quote {
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    text-align: center;
+    justify-content: center;
+  }
+
+  .logo {
+  max-width: 110px;
+  height: auto;
+}
+
+  .paragraph1 {
+    margin-left: 1rem;
+    margin-right: 1rem;
+  }
+
+  .heroText {
+    font-size: 0.5rem;
+    align-items: center;
+    text-align: center;
+  }
+
+  .heroTitle {
+    font-size: 1.5rem;
+  }
+
+  .quote {
+    margin: 0 auto;
+    font-size: 1rem;
+  }
+
+  .sectionTitle1 {
+        font-size: 1.2rem;
+  }
+
+    .sectionTitle {
+        font-size: 1.2rem;
+  }
+
+    .paragraph1 {
+    margin-left: 1rem;
+    margin-right: 1rem;
+  }
+
+  .list li {
+  font-size: 0.8rem;
+  margin-bottom: 1rem;
+}
+}
+

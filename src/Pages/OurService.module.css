@@ -37,9 +37,10 @@ section {
 section p {
     line-height: 1.5;
     font-size: large;
-    font-weight: 100;
-    font-style: italic;
-    color: #000000;
+font-weight: lighter;
+    font-style: normal;
+    /* color: #000000; */
+  font-family: 'Merriweather', 'Cormorant Garamond', Georgia, serif;
 }
 
 .textContainer {
