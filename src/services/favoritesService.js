@@ -53,7 +53,6 @@ export const saveFavoritesToDatabase = async (favorites) => {
   }
 };
 
-// FIXED: Removed all direct localStorage operations - let context handle localStorage based on consent
 export const toggleFavoriteInDatabase = async (product) => {
   if (!isAuthenticated()) {
     return { success: false, message: 'User not authenticated' };
@@ -77,7 +76,6 @@ export const toggleFavoriteInDatabase = async (product) => {
     const data = await response.json();
     
     // DO NOT update localStorage here - let the context handle it based on consent
-    console.log('🔄 toggleFavoriteInDatabase success, returning data to context');
     
     return {
       success: true,
@@ -112,10 +110,7 @@ export const clearFavoritesInDatabase = async () => {
       const errorData = await response.json().catch(() => ({}));
       throw new Error(errorData.error || 'Failed to clear favorites');
     }
-    
-    // DO NOT clear localStorage here - let the context handle it based on consent
-    console.log('🔄 clearFavoritesInDatabase success');
-    
+        
     return true;
   } catch (error) {
     console.error('Error clearing favorites:', error);
@@ -158,9 +153,7 @@ export const syncFavoritesWithDatabase = async (force = false) => {
 
   try {
     // Always fetch from database - let the context handle localStorage
-    const dbFavorites = await fetchFavoritesFromDatabase();
-    console.log('🔄 syncFavoritesWithDatabase fetched:', dbFavorites.length, 'items');
-    
+    const dbFavorites = await fetchFavoritesFromDatabase();    
     return dbFavorites || [];
   } catch (error) {
     console.error('Error syncing favorites with database:', error);

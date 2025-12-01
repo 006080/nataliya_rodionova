@@ -32,12 +32,6 @@ export const FavoriteProvider = ({ children }) => {
     try {
       const consentSettings = getConsentSettings();
       const hasConsent = consentSettings.localStorage.granted && consentSettings.localStorage.categories.shoppingData;
-      console.log('🔍 Direct consent check:', {
-        isAuthenticated: isUserAuthenticated,
-        granted: consentSettings.localStorage.granted,
-        shoppingData: consentSettings.localStorage.categories.shoppingData,
-        hasConsent
-      });
       return hasConsent;
     } catch (error) {
       console.error('Error checking consent:', error);
@@ -46,21 +40,16 @@ export const FavoriteProvider = ({ children }) => {
   };
 
   // SIMPLE localStorage wrapper - only saves if user is not authenticated OR has consent
-  const safeSetItem = (key, value) => {
-    console.log('💾 safeSetItem called:', { key, isUserAuthenticated });
-    
+  const safeSetItem = (key, value) => {    
     // For unauthenticated users, always allow (setStorageItem will handle consent)
     if (!isUserAuthenticated) {
-      console.log('✅ Unauthenticated user - allowing localStorage');
       return setStorageItem(key, value, 'shoppingData');
     }
     
     // For authenticated users, check consent directly
     if (hasShoppingDataConsent()) {
-      console.log('✅ Authenticated user with consent - allowing localStorage');
       return setStorageItem(key, value, 'shoppingData');
     } else {
-      console.log('❌ Authenticated user without consent - blocking localStorage');
       return false;
     }
   };
@@ -161,17 +150,15 @@ export const FavoriteProvider = ({ children }) => {
   useEffect(() => {
     const handleStorageConsentChange = (event) => {
       const storageSettings = event.detail;
-      console.log('🔄 Storage consent changed:', storageSettings);
       
       if (!storageSettings.granted || !storageSettings.categories.shoppingData) {
-        console.log('Favorites will not be saved due to privacy settings');
+        // console.log('Favorites will not be saved due to privacy settings');
       } else {
         if (storageSettings.granted && storageSettings.categories.shoppingData && favorites.length > 0) {
-          console.log('Shopping data consent granted - saving existing favorites to localStorage');
           // Use direct setStorageItem here since this is the consent grant handler
           const saveSuccess = setStorageItem('favorites', JSON.stringify(favorites), 'shoppingData');
           if (saveSuccess) {
-            console.log('Existing favorites successfully saved to localStorage');
+            // console.log('Existing favorites successfully saved to localStorage');
           }
         }
       }
@@ -186,13 +173,12 @@ export const FavoriteProvider = ({ children }) => {
 
   // Main sync effect - handles localStorage and database
   useEffect(() => {
-    console.log('🔄 Favorites changed:', { count: favorites.length, isUserAuthenticated, initialSyncDone });
     
     // Use safe localStorage setter
     const saveSuccess = safeSetItem('favorites', JSON.stringify(favorites));
     
     if (!saveSuccess && favorites.length > 0) {
-      console.log('Favorites not saved to localStorage');
+      // console.log('Favorites not saved to localStorage');
     }
     
     if (sessionStorage.getItem('isUserLogout') === 'true') {
@@ -205,7 +191,7 @@ export const FavoriteProvider = ({ children }) => {
         if (isAuthenticated()) {
           saveFavoritesToDatabase(favorites).then(success => {
             if (success) {
-              console.log('✅ Favorites synced with database');
+              // console.log('✅ Favorites synced with database');
             } else {
               console.error('❌ Failed to sync favorites with database');
             }
@@ -272,15 +258,12 @@ export const FavoriteProvider = ({ children }) => {
   }, []);
 
   const toggleFavorite = async (product) => {
-    console.log('❤️ toggleFavorite called:', { productId: product.id, isUserAuthenticated });
     
     // For authenticated users, use the API
     if (isUserAuthenticated && initialSyncDone) {
       try {
-        console.log('🔄 Using database API...');
         const result = await toggleFavoriteInDatabase(product);
         if (result.success) {
-          console.log('✅ Database toggle successful');
           setFavorites(result.items);
           // Do NOT save to localStorage here - let the useEffect handle it
           return;
@@ -303,7 +286,6 @@ export const FavoriteProvider = ({ children }) => {
     
     // Local toggle for unauthenticated users only
     if (!isUserAuthenticated) {
-      console.log('🔄 Local toggle for unauthenticated user');
       setFavorites((prevFavorites) => {
         const updatedFavorites = prevFavorites.some(item => item.id === product.id)
           ? prevFavorites.filter(item => item.id !== product.id)

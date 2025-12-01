@@ -72,7 +72,6 @@ function PayPalPayment({
       const currentConsent = hasThirdPartyConsent();
       
       if (currentConsent) {
-        console.log('PayPal: Has consent, setting up...');
         setHasConsent(true);
         setIsLoading(true);
         setShowPayPal(false);
@@ -91,13 +90,11 @@ function PayPalPayment({
         
         // Primary timeout to show buttons
         setTimeout(() => {
-          console.log('PayPal: Showing buttons');
           setShowPayPal(true);
           setIsLoading(false);
         }, 1500);
         
       } else {
-        console.log('PayPal: No consent');
         setHasConsent(false);
         setShowPayPal(false);
         setIsLoading(false);
@@ -111,10 +108,8 @@ function PayPalPayment({
     }
 
     const handleConsentChange = (event) => {
-      console.log('PayPal: Consent changed!', event.detail);
       
       if (event.detail && event.detail.consent === 'all') {
-        console.log('PayPal: Granting consent - setting up...');
         setHasConsent(true);
         setIsLoading(true);
         setShowPayPal(false);
@@ -130,13 +125,11 @@ function PayPalPayment({
         });
         
         setTimeout(() => {
-          console.log('PayPal: Consent granted - showing buttons');
           setShowPayPal(true);
           setIsLoading(false);
         }, 1500);
         
       } else if (event.detail && (event.detail.consent === 'essential' || event.detail.consent === 'none')) {
-        console.log('PayPal: Revoking consent - hiding buttons immediately');
         setHasConsent(false);
         setShowPayPal(false);
         setIsLoading(false);
@@ -144,11 +137,9 @@ function PayPalPayment({
     };
 
     const handlePayPalLoaded = () => {
-      console.log('PayPal: Script loaded event');
       // Check current consent state when script loads
       if (hasThirdPartyConsent()) {
         setTimeout(() => {
-          console.log('PayPal: Script loaded - showing buttons');
           setShowPayPal(true);
           setIsLoading(false);
         }, 300);
@@ -449,7 +440,6 @@ function PayPalPayment({
             Please accept cookies by clicking &quot;Accept All&quot; in the 
             <button 
               onClick={() => {
-                console.log('PayPal: Opening cookie settings...');
                 window.dispatchEvent(new CustomEvent('openCookieSettings'));
               }}
               className={styles.cookieSettingsLink}

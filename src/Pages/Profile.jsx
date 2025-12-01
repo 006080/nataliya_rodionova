@@ -23,7 +23,6 @@ const Profile = () => {
   }
 
   useEffect(() => {
-    console.log('Profile component mounted');
     
     // 1. Check for window-level flag (new method)
     const windowFlagRestoration = !!window.accountWasJustRestored;
@@ -43,16 +42,8 @@ const Profile = () => {
     const wasRestored = windowFlagRestoration || locationStateRestoration || 
                         referrerRestoration || storageFlagRestoration;
     
-    console.log('Account restoration detection:', {
-      windowFlag: windowFlagRestoration,
-      locationState: locationStateRestoration,
-      referrer: referrerRestoration,
-      storageFlag: storageFlagRestoration,
-      combined: wasRestored
-    });
     
     if (wasRestored) {
-      console.log('Showing restoration notice');
       setShowRestorationNotice(true);
       
       // Clear all restoration flags

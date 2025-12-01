@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import Order from '../Models/Order.js';
 import ReminderTask from '../Models/ReminderTask.js';
 import { sendPayerActionRequiredEmail } from './emailNotification.js';
+import logger from './logger.js';
 
 dotenv.config({ path: './.env.local' });
 
@@ -16,16 +17,18 @@ let schedulerRunning = false;
  */
 export const schedulePaymentReminders = async (orderId) => {
   try {
-    
+    await logger.debug('REMINDER_SCHEDULE_START', 'schedulePaymentReminders', `Starting to schedule reminders for order: ${orderId}`);
     // Check if order exists and has PAYER_ACTION_REQUIRED status
     const order = await Order.findOne({ paypalOrderId: orderId });
     
     if (!order) {
       console.error(`Order not found: ${orderId}`);
+      await logger.error('REMINDER_ORDER_NOT_FOUND', 'schedulePaymentReminders', `Order not found when scheduling reminders: ${orderId}`);
       return;
     }
     
     if (order.status !== 'PAYER_ACTION_REQUIRED') {
+      await logger.debug('REMINDER_INVALID_STATUS', 'schedulePaymentReminders', `Order ${orderId} has status ${order.status}, not scheduling reminders`);
       return;
     }
     
@@ -60,6 +63,11 @@ export const schedulePaymentReminders = async (orderId) => {
       orderUrl
     });
     await followupReminder.save();
+
+    await logger.info('REMINDER_SCHEDULED', 'schedulePaymentReminders', `Payment reminders scheduled for order ${orderId}`, {
+      initialTime: initialReminderTime.toISOString(),
+      followupTime: followupReminderTime.toISOString()
+    });
     
     if (!schedulerRunning) {
       startReminderScheduler();
@@ -67,6 +75,7 @@ export const schedulePaymentReminders = async (orderId) => {
 
   } catch (error) {
     console.error(`Error scheduling payment reminders for order ${orderId}:`, error);
+    await logger.error('REMINDER_SCHEDULE_ERROR', 'schedulePaymentReminders', `Error scheduling payment reminders for order ${orderId}: ${error.message}`);
   }
 };
 
@@ -82,10 +91,13 @@ export const cancelExistingReminders = async (orderId) => {
       { orderId, status: 'pending' },
       { status: 'cancelled' }
     );
-    
-    console.log(`Cancelled ${result.modifiedCount} existing reminders for order ${orderId}`);
+
+    if (result.modifiedCount > 0) {
+      await logger.info('REMINDER_CANCELLED', 'cancelExistingReminders', `Cancelled ${result.modifiedCount} reminders for order ${orderId}`);
+    }    
   } catch (error) {
     console.error(`Error cancelling reminders for order ${orderId}:`, error);
+      await logger.error('REMINDER_CANCEL_ERROR', 'cancelExistingReminders', `Error cancelling reminders for order ${orderId}: ${error.message}`);
   }
 };
 
@@ -115,17 +127,19 @@ const processReminderTasks = async () => {
       scheduledFor: { $lte: now }
     }).sort({ scheduledFor: 1 });
     
-    // if (dueTasks.length > 0) {
-    //   console.log(`Found ${dueTasks.length} reminder tasks to process`);
-    // }
+    if (dueTasks.length > 0) {
+      await logger.debug('REMINDER_PROCESSING', 'processReminderTasks', `Found ${dueTasks.length} reminder tasks to process`);
+    }
     
     for (const task of dueTasks) {
       try {
+        await logger.debug('REMINDER_TASK_START', 'processReminderTasks', `Processing reminder task ${task._id} for order ${task.orderId}`);
         // Check if order still exists and has PAYER_ACTION_REQUIRED status
         const order = await Order.findOne({ paypalOrderId: task.orderId });
         
         if (!order) {
           console.error(`Order not found for task: ${task._id}, orderId: ${task.orderId}`);
+          await logger.error('REMINDER_TASK_NO_ORDER', 'processReminderTasks', `Order not found for reminder task ${task._id}, orderId: ${task.orderId}`);
           await ReminderTask.findByIdAndUpdate(task._id, { 
             status: 'cancelled',
             error: 'Order not found'
@@ -134,6 +148,7 @@ const processReminderTasks = async () => {
         }
         
         if (order.status !== 'PAYER_ACTION_REQUIRED') {
+          await logger.info('REMINDER_TASK_STATUS_CHANGED', 'processReminderTasks', `Order ${task.orderId} status changed to ${order.status}, cancelling reminder`);
           await ReminderTask.findByIdAndUpdate(task._id, { 
             status: 'cancelled',
             error: `Order status changed to ${order.status}`
@@ -143,6 +158,9 @@ const processReminderTasks = async () => {
         
         // Send the reminder email
         const reminderType = task.taskType === 'initialReminder' ? 'initial' : 'followup';
+
+        await logger.info('REMINDER_EMAIL_SENDING', 'processReminderTasks', `Sending ${reminderType} payment reminder for order ${task.orderId}`);
+
         await sendPayerActionRequiredEmail(task.orderId, task.orderUrl, reminderType);
         
         // Update task status to completed
@@ -169,10 +187,12 @@ const processReminderTasks = async () => {
             }
           );
         }
+
+        await logger.info('REMINDER_EMAIL_SENT', 'processReminderTasks', `${reminderType} payment reminder sent successfully for order ${task.orderId}`);
         
       } catch (error) {
         console.error(`Error processing reminder task ${task._id}:`, error);
-        
+        await logger.error('REMINDER_TASK_ERROR', 'processReminderTasks', `Error processing reminder task ${task._id}: ${error.message}`);
         // Mark the task as failed but keep it pending for retry
         await ReminderTask.findByIdAndUpdate(task._id, {
           error: error.message || 'Unknown error'
@@ -181,6 +201,7 @@ const processReminderTasks = async () => {
     }
   } catch (error) {
     console.error('Error processing reminder tasks:', error);
+    await logger.error('REMINDER_PROCESS_ERROR', 'processReminderTasks', `Error processing reminder tasks: ${error.message}`);
   }
 };
 
@@ -193,6 +214,8 @@ export const startReminderScheduler = () => {
   }
   
   schedulerRunning = true;
+
+  logger.info('REMINDER_SCHEDULER_START', 'startReminderScheduler', 'Payment reminder scheduler started');
   
   // Process immediately on startup
   processReminderTasks();
@@ -205,6 +228,7 @@ export const startReminderScheduler = () => {
  * Initialize the reminder system - should be called at server startup
  */
 export const initializeReminderSystem = () => {
+  logger.info('REMINDER_SYSTEM_INIT', 'initializeReminderSystem', 'Initializing payment reminder system');
   startReminderScheduler();
 };
 
