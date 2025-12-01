@@ -1,7 +1,5 @@
 import { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
-// ⬅️ НОВЫЙ ИМПОРТ: HelmetProvider для управления метаданными
-import { HelmetProvider } from 'react-helmet-async'; 
 import Header from "../components/Header";
 import Home from "./Pages/Home";
 import Reviews from "./Pages/Reviews";
@@ -97,9 +95,7 @@ const AppContent = () => {
 
 const App = () => {
   return (
-    <Router>
-      {/* ⬅️ НОВАЯ ОБЕРТКА: HelmetProvider должна быть здесь */}
-      <HelmetProvider> 
+    <Router> 
         <AuthProvider>
           <CartProvider>
             <FavoriteProvider>
@@ -107,7 +103,6 @@ const App = () => {
             </FavoriteProvider>
           </CartProvider>
         </AuthProvider>
-      </HelmetProvider>
     </Router>
   );
 };
