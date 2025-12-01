@@ -22,8 +22,12 @@
 }
 
 .logo {
-  max-width: 180px;
+  max-width: 120px;
   height: auto;
+}
+
+.logo1 {
+  width: 300px;
 }
 
 .sustainiblity {

@@ -2,8 +2,8 @@ import React from 'react';
 import { Helmet } from 'react-helmet-async'; // ⬅️ NEW: Import Helmet for SEO
 import styles from './About.module.css';
 import Logo from '../assets/LOGO.png'; // локальный логотип
-import ART from '../assets/art.jpg';
 import Tum from '../assets/Tum2.jpg';
+import NR from '../assets/NR.jpg';
 
 const About = () => {
     return (
@@ -42,6 +42,11 @@ const About = () => {
                 {/*        HERO BLOCK       */}
                 {/* ======================= */}
                 <section className={styles.hero}>
+                     <img
+                        src={NR}
+                        alt="Nataliya Rodionova"
+                        className={styles.logo1}
+                    />
                     <div className={styles.heroText}>
                         <h1 className={styles.heroTitle}>True Style as Authorship</h1>
                         
