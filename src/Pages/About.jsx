@@ -37,14 +37,22 @@ const About = () => {
                     <blockquote className={styles.quote}>
                         <em>
                             “For me, fashion and storytelling coexist as refined forms of expression—
-                            revealing what cannot be spoken, without noise, flirtation, or superficiality.
+revealing what cannot be spoken, without noise, flirtation, or superficiality.
 
-                            I create for individuals who treat fashion as an intellectual domain,
-                            not a stage for attention. My work stands firmly in craftsmanship, focus,
-                            and intention—unaffected by distraction or the trivial
-                            games of the everyday world.
+I create for individuals who treat fashion as an intellectual domain,
+not a stage for attention. My work stands firmly in craftsmanship, focus,
+and intention—unaffected by distraction or the trivial
+games of the everyday world.
 
-                            I do not work with imitation or requests to mirror someone else’s identity. True style is self-authored, and I collaborate only with those who seek to shape their own identity with honesty, originality, and intention.”
+I do not work with imitation or requests to mirror someone else’s identity.
+True style is self-authored, and I collaborate only with those who seek to shape
+their own identity with honesty, originality, and intention.
+
+And most importantly—
+I work with people who value time: their own, mine, and the shared journey that unfolds in the creative process.
+Those who commit to progress, who enter the work with respect,
+and who understand that transformation requires presence, patience,
+and a willingness to walk the path, not rush through it.”
                         </em>
                     </blockquote>
                 </div>
