@@ -86,22 +86,22 @@ const About = () => {
                     <h2 className={styles.sectionTitle}>About the Brand & Vision</h2>
 
                     <p className={styles.paragraph}>
-                       Nataliya Rodionova founded her eponymous brand on the belief that true style is a form of authorship. Every creation begins as an artistic intuition — a spark that chooses its own direction, living both in garments and in the narratives we explore: truth, identity, and the emotional depth behind appearances.
+                       I founded my eponymous brand on the belief that true style is a form of authorship. Every creation begins as an artistic intuition — a spark that chooses its own direction, living both in garments and in the narratives we explore: truth, identity, and the emotional depth behind appearances.
                     </p>
 
                     <p className={styles.paragraph}>
-                       We design for those who see fashion as an intellectual game: a space where identity is shaped, challenged, and revealed. Our work balances the purity of craftsmanship with the courage of creative risk, honoring individuality and celebrating each unique moment.
+                       I design for those who see fashion as an intellectual game: a space where identity is shaped, challenged, and revealed. My work balances the purity of craftsmanship with the courage of creative risk, honoring individuality and celebrating each unique moment.
                     </p>
                     
                     {/* Simplified biography paragraph */}
                     <p className={styles.paragraph}>
-                        Nataliya graduated from Istituto Marangoni in Milan (2011–2012) and continued her education at NABA in Milan. Following internships at companies such as Dolce & Gabbana and Marni, she gained practical insight into the Milan fashion industry. The brand later presented collections at the OZONE showroom during both Paris and Milan Fashion Weeks, debuting with its first runway show at Kyiv Fashion Week in 2019.
+                        I graduated from Istituto Marangoni in Milan (2011–2012) and continued her education at NABA in Milan. Following internships at companies such as Dolce & Gabbana and Marni, I gained practical insight into the Milan fashion industry. The brand later presented collections at the OZONE showroom during both Paris and Milan Fashion Weeks, debuting with its first runway show at Kyiv Fashion Week in 2019.
                     </p>
 
                     <h2 className={styles.sectionTitle}>SUSTAINABILITY</h2> {/* Corrected potential typo sectionTitle1 */}
 
                     <p className={styles.paragraph}> {/* Corrected potential typo paragraph1 */}
-                        Guided by a responsible approach to modern luxury, we explore refined natural fibers,
+                        Guided by a responsible approach to modern luxury, I explore refined natural fibers,
                         advanced sustainable textiles, and innovative conscious materials. Sustainability is not a trend, but a thoughtful artistic discipline: creating beauty with intention, clarity, and awareness.
                     </p>
 
