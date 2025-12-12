@@ -1,5 +1,5 @@
 import React from 'react';
-import { Helmet } from 'react-helmet-async'; // ⬅️ NEW: Import Helmet for SEO
+// import { Helmet } from 'react-helmet-async'; // ⬅️ NEW: Import Helmet for SEO
 import styles from './About.module.css';
 import Logo from '../assets/LOGO.png'; // локальный логотип
 import Tum from '../assets/Tum2.jpg';
@@ -11,7 +11,7 @@ const About = () => {
             {/* ======================= */}
             {/*       SEO & META TAGS     */}
             {/* ======================= */}
-            <Helmet>
+            {/* <Helmet>
                 <title>Nataliya Rodionova | Sustainable Luxury & Artistic Authorship</title>
                 <meta 
                     name="description" 
@@ -22,8 +22,8 @@ const About = () => {
                     content="Sustainable Fashion, Luxury Design, Nataliya Rodionova, Wool Masterpieces, Recycled Ocean Plastic, Artistic Fashion, Ethical Luxury, BFW 2027" 
                 />
                 <meta property="og:title" content="Nataliya Rodionova | Sustainable Luxury & Artistic Authorship" />
-                {/* Add og:image, og:url, etc., here for social media previews */}
-            </Helmet>
+        
+            </Helmet> */}
 
             <div className={styles.aboutContainer}>
 

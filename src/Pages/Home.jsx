@@ -17,7 +17,7 @@ const cld = new Cloudinary({
 
 // Replace with your public ID from Cloudinary
 
-const backgroundImage = cld.image('MATTEO9_evbaep_ytggkq')
+const backgroundImage = cld.image('IMG_9165_upscayl_16x_upscayl-lite-4x_pwn4xl')
 .format('auto')
 .quality('auto');
 
