@@ -119,7 +119,7 @@ Explore VARONA — where every garment carries a story, and style becomes a thou
           <p>✔ Hemp blends</p>
           <p>✔ Bio-polyester (plant-based)</p>
           <p>✔ Organic cotton</p>
-          <p>✔ Regenerated cellulose (lyocell/modern viscose)</p>
+          <p>✔ Regenerated cellulose</p>
           <p>✔ Recycled polyester (rPET)</p>
           <p>✔ Deadstock fabrics</p>
           </div>
