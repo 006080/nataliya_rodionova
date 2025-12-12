@@ -82,7 +82,7 @@ const About = () => {
                     <h2 className={styles.sectionTitle}>About the Brand & Vision</h2>
 
                     <p className={styles.paragraph}>
-                       I founded my brand on the belief that true style is a form of authorship. Every creation begins as an artistic intuition — a spark that chooses its own direction, living both in garments and in the narratives we explore: truth, identity, and the emotional depth behind appearances.
+                       I founded my brand on the belief that true style is a form of authorship. Every creation begins as an artistic intuition — a spark that chooses its own direction, living both in garments and in the narratives I explore: truth, identity, and the emotional depth behind appearances.
                     </p>
 
                     <p className={styles.paragraph}>
@@ -91,7 +91,7 @@ const About = () => {
                     
                     {/* Simplified biography paragraph */}
                     <p className={styles.paragraph}>
-                        I graduated from Istituto Marangoni in Milan (2011–2012) and continued her education at NABA in Milan. Following internships at companies such as Dolce & Gabbana and Marni, I gained practical insight into the Milan fashion industry. The brand later presented collections at the OZONE showroom during both Paris and Milan Fashion Weeks, debuting with its first runway show at Kyiv Fashion Week in 2019.
+                        I graduated from Istituto Marangoni in Milan (2011–2012) and continued my education at NABA in Milan. Following internships at companies such as Dolce & Gabbana and Marni, I gained practical insight into the Milan fashion industry. The brand later presented collections at the OZONE showroom during both Paris and Milan Fashion Weeks, debuting with its first runway show at Kyiv Fashion Week in 2019.
                     </p>
 
                     <h2 className={styles.sectionTitle}>SUSTAINABILITY</h2> {/* Corrected potential typo sectionTitle1 */}
@@ -125,7 +125,7 @@ const About = () => {
                 {/* EDUCATION & PROFESSIONAL EXPERIENCE */}
                 {/* ======================= */}
                 <section className={styles.section}>
-                    <h2 className={styles.sectionTitle}>Timeline & Professional Background</h2>
+                    <h2 className={styles.sectionTitle}>Professional Background</h2>
 
                     <ul className={styles.list}>
                         <li><p style={{fontSize:'1rem'}}><strong>2005–2008</strong>  Tailoring & Garment Construction — VPTU 38, Zaporizhzhya</p></li>
