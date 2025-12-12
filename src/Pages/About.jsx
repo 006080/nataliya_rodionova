@@ -47,14 +47,10 @@ const About = () => {
                         alt="Nataliya Rodionova"
                         className={styles.logo1}
                     />
-                    <div className={styles.heroText}>
+                    {/* <div className={styles.heroText}>
                         <h1 className={styles.heroTitle}>True Style as Authorship</h1>
                         
-                        {/* ⬅️ NEW: FOUNDER & CREATIVE DIRECTOR INFO */}
-                        {/* <p className={styles.designerInfo}>
-                            Nataliya Rodionova | Founder & Creative Director
-                        </p> */}
-
+        
                         <blockquote className={styles.quote}>
                             <em>
                                 “For me, fashion and storytelling coexist as refined forms of expression—
@@ -76,7 +72,7 @@ const About = () => {
                                 and a willingness to walk the path, not rush through it.”
                             </em>
                         </blockquote>
-                    </div>
+                    </div> */}
                 </section>
 
                 {/* ======================= */}
@@ -86,7 +82,7 @@ const About = () => {
                     <h2 className={styles.sectionTitle}>About the Brand & Vision</h2>
 
                     <p className={styles.paragraph}>
-                       I founded my eponymous brand on the belief that true style is a form of authorship. Every creation begins as an artistic intuition — a spark that chooses its own direction, living both in garments and in the narratives we explore: truth, identity, and the emotional depth behind appearances.
+                       I founded my brand on the belief that true style is a form of authorship. Every creation begins as an artistic intuition — a spark that chooses its own direction, living both in garments and in the narratives we explore: truth, identity, and the emotional depth behind appearances.
                     </p>
 
                     <p className={styles.paragraph}>
@@ -100,10 +96,23 @@ const About = () => {
 
                     <h2 className={styles.sectionTitle}>SUSTAINABILITY</h2> {/* Corrected potential typo sectionTitle1 */}
 
-                    <p className={styles.paragraph}> {/* Corrected potential typo paragraph1 */}
-                        Guided by a responsible approach to modern luxury, I explore refined natural fibers,
-                        advanced sustainable textiles, and innovative conscious materials. Sustainability is not a trend, but a thoughtful artistic discipline: creating beauty with intention, clarity, and awareness.
-                    </p>
+                  
+<div className= {styles.paragraph}>
+    <p>The production process follows a low-waste strategy with digital prototyping, zero-waste pattern development, and precision small-batch manufacturing. This innovative combination of craftsmanship and responsible sourcing ensures minimal textile waste, reduced environmental impact, and long-lasting garment quality.</p>
+                    <p>I use a carefully curated selection of recycled and low-impact materials:</p>
+
+
+<p><strong>Recycled wool and wool-blend yarns</strong> — reducing textile waste while maintaining warmth, durability, and texture.</p>
+<p><strong>Recycled polyester (rPET)</strong> — fibers derived from post-consumer plastic, significantly lowering the reliance on virgin polyester.</p>
+<p><strong>Organic cotton</strong> — certified cotton grown without pesticides or harmful chemicals.</p>
+<p><strong>Regenerated cellulose</strong> — a next-generation cellulosic fiber from controlled sources, offering a more sustainable alternative to conventional viscose.</p>
+<p><strong>Deadstock fabrics</strong> — surplus textiles sourced from certified European manufacturers, helping to reduce overproduction.</p>
+<p><strong>Hemp blends</strong> — hemp combined with cotton or cellulosic fibers to create strong, breathable, long-lasting fabrics.</p>
+<p><strong>Bio-polyester (plant-based</strong>) — bio-derived polyester made from sugar or corn feedstocks, with durability validated through modern material modelling.</p>
+
+<p>My goal is to combine high quality with minimal environmental impact. Sustainability is not a trend, but a thoughtful artistic discipline: creating beauty with intention, clarity, and awareness.</p>
+</div>
+
 
                     <img
                         src={Tum}
@@ -119,14 +128,14 @@ const About = () => {
                     <h2 className={styles.sectionTitle}>Timeline & Professional Background</h2>
 
                     <ul className={styles.list}>
-                        <li><span className={styles.timelineYear}>2005–2008</span> Tailoring & Garment Construction — VPTU 38, Zaporizhzhya</li>
-                        <li><span className={styles.timelineYear}>2008–2009</span> Pattern-Making / Pattern Directrice — Advanced Construction, Fit & Grading</li>
-                        <li><span className={styles.timelineYear}>2005–2010</span> Bachelor’s Degree in Management & Administration — ZNTU University</li>
-                        <li><span className={styles.timelineYear}>2011–2012</span> Fashion Design — Istituto Marangoni, Milan</li>
-                        <li><span className={styles.timelineYear}>2016–2017</span> Illustration — NABA, Nuova Accademia di Belle Arti, Milan</li>
-                        <li><span className={styles.timelineYear}>2018</span> Presentation — OZON Showroom, Paris Fashion Week</li>
-                        <li><span className={styles.timelineYear}>2018</span> Presentation — OZON Showroom, Milan Fashion Week</li>
-                        <li><span className={styles.timelineYear}>2019</span> Independent Runway SHOW — Kyiv Fashion Week</li>
+                        <li><p style={{fontSize:'1rem'}}><strong>2005–2008</strong>  Tailoring & Garment Construction — VPTU 38, Zaporizhzhya</p></li>
+                        <li><p style={{fontSize:'1rem'}}><strong>2008–2009</strong> Pattern-Making / Pattern Directrice — Advanced Construction, Fit & Grading</p></li>
+                        <li><p style={{fontSize:'1rem'}}><strong>2005–2010</strong> Bachelor’s Degree in Management & Administration — ZNTU University</p></li>
+                        <li><p style={{fontSize:'1rem'}}><strong>2011–2012</strong> Fashion Design — Istituto Marangoni, Milan</p></li>
+                        <li><p style={{fontSize:'1rem'}}><strong>2016–2017</strong> Illustration — NABA, Nuova Accademia di Belle Arti, Milan</p></li>
+                        <li><p style={{fontSize:'1rem'}}><strong>2018</strong> Presentation — OZON Showroom, Paris Fashion Week</p></li>
+                        <li><p style={{fontSize:'1rem'}}><strong>2018</strong> Presentation — OZON Showroom, Milan Fashion Week</p></li>
+                        <li><p style={{fontSize:'1rem'}}><strong>2019</strong> Independent Runway SHOW — Kyiv Fashion Week</p></li>
                     </ul>
 
                 </section>

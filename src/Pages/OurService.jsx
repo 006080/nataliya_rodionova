@@ -57,14 +57,11 @@ const OurService = () => {
         <div className={styles.textContainer}>
           <h1>Our Style:</h1>
           <p>
-            Welcome to VARONA, where elegance meets poetry in the realm of
-            Fashion. Inspired by the graceful allure of crows, our brand crafts
-            sophisticated wardrobe essentials and accessories for both men and
-            women from the finest Italian wool and cashmere. In shades of grey,
-            white, and black, VARONA embodies a captivating amalgamation of
-            refinement and lyrical resonance. Explore our collection and embrace
-            the timeless charm that defines VARONA - where every piece tells a
-            story, and style becomes a poetic manifestation of uniqueness.
+            Welcome to VARONA — a space where elegance intertwines with quiet poetry. Inspired by the enigmatic presence of the crow, our brand creates refined wardrobe essentials and accessories for all genders using carefully selected recycled, low-impact, and innovative materials.
+
+VARONA blends minimalism with lyrical depth. Each piece is designed with intention, embracing responsible craftsmanship, longevity, and expressive individuality.
+
+Explore VARONA — where every garment carries a story, and style becomes a thoughtful, poetic expression of uniqueness.
           </p>
         </div>
       </section>
@@ -82,18 +79,18 @@ const OurService = () => {
 
       <section className={styles.sectionMission}>
         <div className={styles.textContainer}>
-          <h1 style={{ color: 'black' }}>Our Mission:</h1>
+          <h1 style={{ color: 'black' }}>Why Choose Us?</h1>
           <p>
-            Our mission is more than just creating handmade knitwear.
-            Recognizing the uniqueness of each client, our approach is far from
-            one-size-fits-all. We take the time to understand, adapt, and create
-            bespoke pieces that resonate with your individual style. We set the
-            highest standards, ensuring every piece is a testament to quality,
-            personalized service, and guarantees of satisfaction. Your trust is
-            our most cherished possession. Beyond transactions, Varona is a
-            haven of care and warmth. We build relationships, providing
-            personalized attention to ensure you feel embraced throughout your
-            journey with us.
+            We combine creative fashion expertise with sustainability strategy
+          </p>
+
+          <p>
+            Our services are tailored to the Berlin ecosystem and impact funding programs
+
+          </p>
+
+          <p>
+            We support you from concept to launch — ethically, transparently and with measurable results
           </p>
         </div>
       </section>
@@ -115,15 +112,17 @@ const OurService = () => {
         <div className={styles.textContainer}>
           <h1>Materials:</h1>
           <p>
-            We are committed to using only the finest materials to create our
-            designs. Our fabrics are sourced exclusively from highly regarded
-            suppliers in Italy, known worldwide for their superior quality and
-            craftsmanship. Each piece is crafted with luxurious materials such
-            as wool, silk, and cashmere, ensuring unparalleled comfort,
-            durability, and elegance. By choosing these premium textiles, we aim
-            to deliver timeless creations that reflect our dedication to
-            excellence and sophistication.
+            We use a carefully curated selection of recycled and low-impact materials. Our goal is to combine high quality with minimal environmental impact:
           </p>
+          <div className= {styles.listOff} >
+          <p>✔ Recycled wool and wool-blend yarns</p>
+          <p>✔ Hemp blends</p>
+          <p>✔ Bio-polyester (plant-based)</p>
+          <p>✔ Organic cotton</p>
+          <p>✔ Regenerated cellulose (lyocell/modern viscose)</p>
+          <p>✔ Recycled polyester (rPET)</p>
+          <p>✔ Deadstock fabrics</p>
+          </div>
         </div>
       </section>
 
@@ -142,17 +141,11 @@ const OurService = () => {
         <div className={styles.textContainer}>
           <h1>Our Concept:</h1>
           <p>
-            Varona is more than a brand; it’s an embodiment of elegance, a
-            fusion of mystery, and a celebration of timeless shades like black,
-            grey, and beige. Founded by Nataliya Rodionova, Varona originated
-            from the creative depths cultivated during her education at a
-            sartorial school in Ukraine and Istituto Marangoni in Milan. Each
-            piece tells a story of artistry and refinement, where every stitch
-            and silhouette reflects a harmonious blend of tradition and
-            innovation. Varona is a tribute to the beauty of contrasts—where
-            simplicity meets sophistication, and individuality finds its perfect
-            expression.
+           Varona is more than a brand. 
           </p>
+          <p>It embodies elegance and mystery, where each piece reflects a refined balance of tradition and innovation. A tribute to the beauty of contrasts, Varona celebrates simplicity, sophistication, and authentic individuality.
+
+Aligned with this vision, the brand embraces circular design by prioritizing recycled fibers, creating long-lasting garments, and minimizing waste at every stage—where sustainability becomes a natural expression of thoughtful craftsmanship.</p>
         </div>
       </section>
 
@@ -165,16 +158,16 @@ const OurService = () => {
           cldImg={getImage('IMG_2624_qepkei')}
           alt="Miale Journal"
         />
-          <AdvancedImage
-            style={{
-              width: '350px',
-              height: 'auto',
-              cursor: 'pointer',
-            }}
-            className={styles.miaLogo}
-            cldImg={getImage('MIALEJOURNAL_BLACK_rwcikd')}
-            alt="MiaJournal Logo"
-          />
+        <AdvancedImage
+          style={{
+            width: '350px',
+            height: 'auto',
+            cursor: 'pointer',
+          }}
+          className={styles.miaLogo}
+          cldImg={getImage('MIALEJOURNAL_BLACK_rwcikd')}
+          alt="MiaJournal Logo"
+        />
       </section>
 
       <section
@@ -185,14 +178,10 @@ const OurService = () => {
           <h1 style={{ color: 'black' }}>Our Service:</h1>
           <p style={{ color: 'black' }}>
             We specialize in creating exclusive, handmade items and accessories
-            tailored for both men and women. Using only premium natural
-            materials, we craft each piece with care and precision, ensuring it
+            tailored for both men and women. We craft each piece with care and precision, ensuring it
             reflects the individuality of its wearer. Whether it’s a bespoke
             garment or a custom accessory, we’re here to turn your boldest
-            visions into reality. At the heart of our service is a commitment to
-            excellence and personal connection, where every creation is a
-            masterpiece designed to inspire confidence, elegance, and timeless
-            style.
+            visions into reality.
           </p>
         </div>
       </section>
@@ -214,16 +203,9 @@ const OurService = () => {
         <div className={styles.textContainer}>
           <h1>Collaboration:</h1>
           <p>
-            At the heart of our brand is a commitment to fostering creativity
-            through collaboration. We work closely with some of the most
-            sought-after photographers, stylists, makeup artists, hairdressers,
-            models, and modeling agencies to bring bold visions to life. Our
-            service extends beyond fashion design — we offer clients the
-            opportunity to organize professional photo shoots, providing
-            expertise and access to top-tier creative talent. Whether you’re
-            looking to rent exclusive clothing for a project or realize your
-            most daring ideas, we are here to help you craft unforgettable
-            moments and capture them in stunning detail.
+            We are open to collaborating with NGOs, industry associations, and organizations that promote ethical production, circular solutions, and transparent supply-chain practices. As we grow, we aim to build partnerships with certified material suppliers and textile innovation platforms that provide access to recycled, low-impact, and plant-based fabrics suitable for small-scale production.
+
+Our goal is to develop a network of responsible partners within the EU, strengthening the environmental and social foundation of the brand and contributing to a more forward-thinking approach to fashion.
           </p>
         </div>
       </section>
@@ -245,19 +227,10 @@ const OurService = () => {
         <div className={styles.textContainer}>
           <h1 style={{ color: 'beige' }}>Our Clients:</h1>
           <p style={{ color: 'beige' }}>
-            Our clients are bold, creative, and expressive individuals who see
-            fashion as a medium for storytelling and self-expression. They span
-            a wide age range from 18 to 100+, embracing diversity in gender and
-            life experiences, with a shared passion for originality and
-            innovation. Artists are drawn to our visually striking and
-            conceptually rich designs. Creators seek avant-garde, experimental
-            styles that align with their boundary-pushing mindsets. Performers,
-            including actors and musicians, value our pieces as essential
-            elements of their public personas. Lastly, fashion-forward
-            individuals, always ahead of trends, invest in our unique,
-            high-quality wardrobe staples that embody individuality. Globally
-            connected, they are united by their appreciation for niche,
-            unconventional fashion.
+           Our clients are bold, creative, and expressive individuals who view fashion as a medium for storytelling and self-expression. They span a wide age range — from 18 to 100+ — and embrace diversity in gender, background, and life experience, united by a shared passion for originality and innovation.
+
+Artists are drawn to our visually striking and conceptually rich designs. Creators seek avant-garde, experimental pieces that align with their boundary-pushing mindset. Creative professionals value our garments as essential elements of their public persona. And fashion-forward individuals — always ahead of the curve — invest in our unique, high-quality wardrobe staples that embody individuality.
+
           </p>
         </div>
       </section>
