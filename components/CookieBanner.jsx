@@ -183,10 +183,10 @@ const CookieBanner = () => {
             <p className={styles.bannerText}>
               You can manage your choices in Settings, where you may allow only
               essential cookies or enable all services and local storage. Please
-              review our{' '} 
+              review our{' '}
               <Link to="/privacy-policy" className={styles.policyLink}>
                 Privacy Policy
-              </Link>{' '} 
+              </Link>{' '}
               carefully before proceeding. By clicking
               “Accept All”, you agree to the use of cookies, third-party
               services, and local data storage as described in our Privacy
@@ -198,19 +198,22 @@ const CookieBanner = () => {
               experience on the site may be limited.
             </p>
             <div className={styles.bannerButtons}>
+
               <button
-                className={styles.continueButton}
-                onClick={handleContinueWithoutConsent}
-              >
-                Reject All
-              </button>
-              <button
-                className={styles.settingsButton}
+
                 onClick={handleOpenSettings}
               >
                 Settings
               </button>
-              <button className={styles.acceptButton} onClick={handleAcceptAll}>
+
+              <button
+                style={{ backgroundColor: '#50093b', borderRadius: '5px;' }}
+                onClick={handleContinueWithoutConsent}
+              >
+                Reject All
+              </button>
+
+              <button style={{ backgroundColor: '#e07ed8ff', borderRadius: '5px;' }} onClick={handleAcceptAll}>
                 Accept All
               </button>
             </div>
@@ -312,28 +315,25 @@ const CookieBanner = () => {
                   </div>
                 </div>
                 <div
-                  className={`${styles.toggle} ${
-                    settings.localStorage.granted ? styles.toggleActive : ''
-                  }`}
+                  className={`${styles.toggle} ${settings.localStorage.granted ? styles.toggleActive : ''
+                    }`}
                   onClick={handleStorageToggle}
                 >
                   <div
-                    className={`${styles.toggleSlider} ${
-                      settings.localStorage.granted
+                    className={`${styles.toggleSlider} ${settings.localStorage.granted
                         ? styles.toggleSliderActive
                         : ''
-                    }`}
+                      }`}
                   />
                 </div>
               </div>
 
               {/* Category-specific settings */}
               <div
-                className={`${styles.categoryContainer} ${
-                  settings.localStorage.granted
+                className={`${styles.categoryContainer} ${settings.localStorage.granted
                     ? ''
                     : styles.categoryContainerDisabled
-                }`}
+                  }`}
               >
                 {Object.entries(storageCategories).map(([key, category]) => (
                   <div key={key} className={styles.toggleContainer}>
@@ -344,19 +344,17 @@ const CookieBanner = () => {
                       </div>
                     </div>
                     <div
-                      className={`${styles.toggle} ${
-                        settings.localStorage.categories[key]
+                      className={`${styles.toggle} ${settings.localStorage.categories[key]
                           ? styles.toggleActive
                           : ''
-                      }`}
+                        }`}
                       onClick={() => handleCategoryToggle(key)}
                     >
                       <div
-                        className={`${styles.toggleSlider} ${
-                          settings.localStorage.categories[key]
+                        className={`${styles.toggleSlider} ${settings.localStorage.categories[key]
                             ? styles.toggleSliderActive
                             : ''
-                        }`}
+                          }`}
                       />
                     </div>
                   </div>

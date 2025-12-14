@@ -9,6 +9,14 @@
   border-top: 1px solid #333;
 }
 
+.settingsButton {
+  background-color: #ff91f6;
+}
+
+.acceptButton {
+  background-color: #50093b;
+}
+
 .bannerContainer {
   max-width: 1200px;
   margin: 0 auto;

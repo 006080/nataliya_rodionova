@@ -110,7 +110,7 @@ const Shop = () => {
         price={320}
         description="Crafted from 100% pure cotton, this timeless white collar adds an elegant accent to any look. Soft yet structured, it’s designed for versatility — perfect to pair with dresses, blouses, or knitwear for a refined touch."
         material="100% cotton"
-        colors={["black", "#e6ff43b9", "#2d7e16b3", "white"]}
+        colors={["black", "white"]}
       // primaryColor="black"
       />
 

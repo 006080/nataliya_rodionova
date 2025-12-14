@@ -34,7 +34,8 @@
 
 /* Button Styling */
 .homeButton {
-    margin-top: 20px;
+    margin-top: 15px;
+    margin-left: -3px;
     font-family: "Roboto Serif", serif;
     width: 170px;
     height: 50px;
