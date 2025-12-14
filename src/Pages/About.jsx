@@ -128,14 +128,14 @@ const About = () => {
                     <h2 className={styles.sectionTitle}>Professional Background</h2>
 
                     <ul className={styles.list}>
-                        <li><p style={{fontSize:'1rem'}}><strong>2005–2008</strong>  Tailoring & Garment Construction — VPTU 38, Zaporizhzhya</p></li>
-                        <li><p style={{fontSize:'1rem'}}><strong>2008–2009</strong> Pattern-Making / Pattern Directrice — Advanced Construction, Fit & Grading</p></li>
-                        <li><p style={{fontSize:'1rem'}}><strong>2005–2010</strong> Bachelor’s Degree in Management & Administration — ZNTU University</p></li>
-                        <li><p style={{fontSize:'1rem'}}><strong>2011–2012</strong> Fashion Design — Istituto Marangoni, Milan</p></li>
-                        <li><p style={{fontSize:'1rem'}}><strong>2016–2017</strong> Illustration — NABA, Nuova Accademia di Belle Arti, Milan</p></li>
-                        <li><p style={{fontSize:'1rem'}}><strong>2018</strong> Presentation — OZON Showroom, Paris Fashion Week</p></li>
-                        <li><p style={{fontSize:'1rem'}}><strong>2018</strong> Presentation — OZON Showroom, Milan Fashion Week</p></li>
-                        <li><p style={{fontSize:'1rem'}}><strong>2019</strong> Independent Runway SHOW — Kyiv Fashion Week</p></li>
+                        <li><p style={{fontSize:'1rem', fontWeight: '400'}}><strong>2005–2008</strong>  Tailoring & Garment Construction — VPTU 38, Zaporizhzhya</p></li>
+                        <li><p style={{fontSize:'1rem', fontWeight: '400'}}><strong>2008–2009</strong> Pattern-Making / Pattern Directrice — Advanced Construction, Fit & Grading</p></li>
+                        <li><p style={{fontSize:'1rem' , fontWeight: '400'}}><strong>2005–2010</strong> Bachelor’s Degree in Management & Administration — ZNTU University</p></li>
+                        <li><p style={{fontSize:'1rem' , fontWeight: '400'}}><strong>2011–2012</strong> Fashion Design — Istituto Marangoni, Milan</p></li>
+                        <li><p style={{fontSize:'1rem' , fontWeight: '400'}}><strong>2016–2017</strong> Illustration — NABA, Nuova Accademia di Belle Arti, Milan</p></li>
+                        <li><p style={{fontSize:'1rem' , fontWeight: '400'}}><strong>2018</strong> Presentation — OZON Showroom, Paris Fashion Week</p></li>
+                        <li><p style={{fontSize:'1rem' , fontWeight: '400'}}><strong>2018</strong> Presentation — OZON Showroom, Milan Fashion Week</p></li>
+                        <li><p style={{fontSize:'1rem' , fontWeight: '400'}}><strong>2019</strong> Independent Runway SHOW — Kyiv Fashion Week</p></li>
                     </ul>
 
                 </section>

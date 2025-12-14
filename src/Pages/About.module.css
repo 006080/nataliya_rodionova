@@ -107,6 +107,7 @@
 }
 
 .paragraph p{
+    font-weight: 400;
   font-size: 1rem;
   margin-bottom: 1.6rem;
   font-style: normal;
@@ -122,7 +123,7 @@
 }
 
 .paragraph1 {
-    font-weight: 200;
+    font-weight: 400;
   font-size: 1rem;
   margin-bottom: 1.6rem;
   margin-right: 10rem;
@@ -130,7 +131,8 @@
   font-style: normal;
 }
 
-.list {
+.list { 
+    font-weight: 400;
   list-style: none;
   padding: 0;
   margin-right: 1rem;
@@ -139,6 +141,7 @@
 }
 
 .list li {
+    font-weight: 400;
   font-size: 1rem;
   margin-bottom: 1.6rem;
   margin-right: 1rem;
@@ -163,6 +166,15 @@
   height: auto;
 }
 
+.paragraph {
+  font-weight: 100;
+  font-size: 1rem;
+  margin-bottom: 1.6rem;
+  margin-right: 1rem;
+  margin-left: 1rem;
+  font-style: normal;
+}
+
   .heroText {
     align-items: center;
     text-align: center;
@@ -183,6 +195,13 @@
     text-align: center;
     justify-content: center;
   }
+
+  .paragraph p{
+    font-weight: 100;
+  font-size: 1rem;
+  margin-bottom: 1.6rem;
+  font-style: normal;
+}
 
 
   .logo {
