@@ -113,6 +113,7 @@
 }
 
 .paragraph {
+  font-weight: 400;
   font-size: 1rem;
   margin-bottom: 1.6rem;
   margin-right: 1rem;
@@ -121,6 +122,7 @@
 }
 
 .paragraph1 {
+    font-weight: 200;
   font-size: 1rem;
   margin-bottom: 1.6rem;
   margin-right: 10rem;
