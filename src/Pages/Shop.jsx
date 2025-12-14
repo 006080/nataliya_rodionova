@@ -107,7 +107,7 @@ const Shop = () => {
         images={collarImages}
         onImageClick={() => handleImageClick(collarImages)}
         name="Collar"
-        price={120}
+        price={320}
         description="Crafted from 100% pure cotton, this timeless white collar adds an elegant accent to any look. Soft yet structured, it’s designed for versatility — perfect to pair with dresses, blouses, or knitwear for a refined touch."
         material="100% cotton"
         colors={["black", "#e6ff43b9", "#2d7e16b3", "white"]}
@@ -120,13 +120,13 @@ const Shop = () => {
         images={scarfImages}
         onImageClick={() => handleImageClick(scarfImages)}
         name="Scarf"
-        price={180}
+        price={360}
         description="Made from 100% pure wool, this scarf is warm, soft, and naturally breathable — the perfect companion for colder days. Available in several shades of grey, offering subtle variations to match your personal style."
         material="100% Wool"
         colors={["#333333", "#555555", "#999999"]}
       // primaryColor="#333333"
       />
-
+{/* 
       <CardProduct
         addToCart={addToCart}
         id="trousers-003"
@@ -138,8 +138,8 @@ const Shop = () => {
         material="80% wool 20% cashmere"
         // colors={["#333333", "#555555", "#999999"]}
         primaryColor="grey"
-      />
-
+      /> */}
+{/* 
       <CardProduct
         addToCart={addToCart}
         id="skirt"
@@ -151,7 +151,7 @@ const Shop = () => {
         material="50% wool, 50% acrylic"
         colors={["#B611ED", "#CCF045", "#0028F0"]}
         primaryColor="black"
-      />
+      /> */}
 
       <CardProduct
         addToCart={addToCart}
@@ -159,14 +159,13 @@ const Shop = () => {
         images={gloves}
         onImageClick={() => handleImageClick(gloves)}
         name="Gloves"
-        price={120}
+        price={420}
         description="Delicately handmade from 100% pure cotton, these lace gloves embody elegance and timeless charm. Their intricate openwork design highlights the artistry of traditional craftsmanship, making them a refined accessory for both everyday sophistication and special occasions."
         material="100% cotton"
         colors={["black", "beige", "white", "grey"]}
-      // primaryColor="black"
       />
 
-      <CardProduct
+      {/* <CardProduct
         addToCart={addToCart}
         id="dress"
         images={dress}
@@ -175,11 +174,10 @@ const Shop = () => {
         price={120}
         description="A statement piece straight from the runway – this nylon dress with a refined gray insert embodies modern minimalism and bold design. Lightweight yet structured, it drapes gracefully while the contrasting detail adds a sophisticated edge."
         material="100% nylon"
-        // colors={["black", "beige", "white", "grey"]}
         primaryColor="yellow"
-      />
+      /> */}
 
-      <CardProduct
+      {/* <CardProduct
         addToCart={addToCart}
         id="mandress"
         images={mandress}
@@ -189,8 +187,7 @@ const Shop = () => {
         description="This unique men’s dress is entirely handcrafted, showcasing a bold chessboard pattern that blends tradition with contemporary style. Thoughtfully designed with welt pockets in the side seams, it offers both refined detail and practical function. The meticulous craftsmanship highlights the brand’s dedication to artistry and individuality, making this garment a statement piece for the modern wardrobe."
         material="100% sheep wool"
         colors={["beige", "brown", "#999999"]}
-
-      />
+      /> */}
 
 
 
