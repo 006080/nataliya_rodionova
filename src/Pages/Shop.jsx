@@ -25,7 +25,7 @@ const skirtImages = [
   cld.image("Untitled-1_laensr").toURL(),
   cld.image("Burning_Man_imx0zw").toURL(),
 ];
-const trousersImages = [cld.image("trousers_x3ryc0").toURL()];
+const coatImages = [cld.image("Coat_01_wpy33i").toURL()];
 const gloves = [cld.image("5E6EEA4C-C555-4329-9E4A-7895944041D0_r7vgpm").toURL()];
 const dress = [
   cld.image("Dress_xyjue7").toURL(),
@@ -126,19 +126,19 @@ const Shop = () => {
         colors={["#333333", "#555555", "#999999"]}
       // primaryColor="#333333"
       />
-{/* 
+
       <CardProduct
         addToCart={addToCart}
-        id="trousers-003"
-        images={trousersImages}
-        onImageClick={() => handleImageClick(trousersImages)}
-        name="Trousers"
-        price={480}
-        description="These handmade trousers, crafted from 100% wool, are designed as a unique two-piece set: classic grey wool trousers paired with a detachable overlay. The overlay features a handmade ornamental insert, adding an artisanal touch and elevating the design with subtle sophistication."
-        material="80% wool 20% cashmere"
+        id="coat01"
+        images={coatImages}
+        onImageClick={() => handleImageClick(coatImages)}
+        name="Polka-Dot Coat"
+        price={720}
+        description="Statement coat crafted from high-quality neoprene in the signature Polkadot Yellow Code. Designed with discreet side slit pockets and accented by a refined plastic front detail, it embodies a modern, architectural elegance."
+         material="Premium neoprene"
         // colors={["#333333", "#555555", "#999999"]}
-        primaryColor="grey"
-      /> */}
+        primaryColor="yellow"
+      />
 {/* 
       <CardProduct
         addToCart={addToCart}
