@@ -200,20 +200,27 @@ const CookieBanner = () => {
             <div className={styles.bannerButtons}>
 
               <button
-
                 onClick={handleOpenSettings}
               >
                 Settings
               </button>
 
-              <button
-                style={{ backgroundColor: '#50093b', borderRadius: '5px;' }}
-                onClick={handleContinueWithoutConsent}
-              >
-                Reject All
-              </button>
-
-              <button style={{ backgroundColor: '#e07ed8ff', borderRadius: '5px;' }} onClick={handleAcceptAll}>
+          <button
+    onClick={handleContinueWithoutConsent}
+    style={{ 
+        background: 'linear-gradient(90deg, #5a2c4cff, #724261ff)',
+        borderRadius: '5px', 
+        color: '#FFFFFF', 
+        padding: '10px 20px',
+        border: 'none',
+        cursor: 'pointer'
+    }}
+>
+   Reject All
+</button>
+              <button style={{
+                 background: 'linear-gradient(90deg, #c07fadff, #d9b4cbff)', }}
+                  onClick={handleAcceptAll}>
                 Accept All
               </button>
             </div>

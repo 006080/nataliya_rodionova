@@ -30,6 +30,11 @@
 
 .sloganBlog h2 {
     font-size: 30px;
+    text-align: left;
+    margin-top:-15px;
+    color:'black';
+    font-weight: 400;
+    font-style: italic;
 }
 
 /* Button Styling */
@@ -86,9 +91,14 @@ h2 {
         font-size: 30px;
     }
     
-    .sloganBlog h2 {
-        font-size: 20px;
-    }
+   .sloganBlog h2 {
+    font-size: 20px;
+    text-align: left;
+    margin-top:-15px;
+    color:'black';
+    font-weight: 400;
+    font-style: italic;
+}
 }
 
 @media (max-width: 540px) {
@@ -96,6 +106,15 @@ h2 {
         height: 100vh;
         object-fit: cover;
     }
+
+    .sloganBlog h2 {
+    font-size: medium;
+    text-align: left;
+    margin-top:-15px;
+    color:'black';
+    font-weight: 400;
+    font-style: italic;
+}
 
     .homeButton {
         margin-top: 0px;
@@ -134,7 +153,12 @@ h2 {
         font-size: 40px;
     }
     
-    .sloganBlog h2 {
-        font-size: 20px;
-    }
+.sloganBlog h2 {
+    font-size: medium;
+    text-align: left;
+    margin-top:-15px;
+    color:'black';
+    font-weight: 400;
+    font-style: italic;
+}
 }
