@@ -120,7 +120,7 @@ const Shop = () => {
         images={scarfImages}
         onImageClick={() => handleImageClick(scarfImages)}
         name="Scarf"
-        price={360}
+        price={180}
         description="Made from 100% pure wool, this scarf is warm, soft, and naturally breathable — the perfect companion for colder days. Available in several shades of grey, offering subtle variations to match your personal style."
         material="100% Wool"
         colors={["#333333", "#555555", "#999999"]}
@@ -159,7 +159,7 @@ const Shop = () => {
         images={gloves}
         onImageClick={() => handleImageClick(gloves)}
         name="Gloves"
-        price={420}
+        price={380}
         description="Delicately handmade from 100% pure cotton, these lace gloves embody elegance and timeless charm. Their intricate openwork design highlights the artistry of traditional craftsmanship, making them a refined accessory for both everyday sophistication and special occasions."
         material="100% cotton"
         colors={["black", "beige", "white", "grey"]}
