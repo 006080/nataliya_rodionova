@@ -107,7 +107,7 @@ const Shop = () => {
         images={collarImages}
         onImageClick={() => handleImageClick(collarImages)}
         name="Collar"
-        price={320}
+        price={120}
         description="Crafted from 100% pure cotton, this timeless white collar adds an elegant accent to any look. Soft yet structured, it’s designed for versatility — perfect to pair with dresses, blouses, or knitwear for a refined touch."
         material="100% cotton"
         colors={["black", "white"]}
@@ -120,7 +120,7 @@ const Shop = () => {
         images={scarfImages}
         onImageClick={() => handleImageClick(scarfImages)}
         name="Scarf"
-        price={180}
+        price={360}
         description="Made from 100% pure wool, this scarf is warm, soft, and naturally breathable — the perfect companion for colder days. Available in several shades of grey, offering subtle variations to match your personal style."
         material="100% Wool"
         colors={["#333333", "#555555", "#999999"]}
