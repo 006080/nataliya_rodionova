@@ -1,31 +1,18 @@
 import PropTypes from "prop-types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTimes, faPlus, faMinus } from "@fortawesome/free-solid-svg-icons";
-import { Link } from "react-router-dom"; 
+import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import styles from "./CartSummary.module.css";
 import { useCart } from "./CartContext";
 import useOutsideClick from "../src/hooks/useOutsideClick";
+import { useState } from "react";
 
 const CartSummary = ({ onClose }) => {
-  const { cartItems, removeFromCart, updateQuantity } = useCart();
+  const [isHovered, setIsHovered] = useState(false);
+  const { cartItems, removeFromCart } = useCart();
   const cartRef = useOutsideClick(() => onClose());
 
   const totalItems = cartItems.reduce((total, item) => total + item.quantity, 0);
   const totalPrice = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
-
-  const increaseQuantity = (item) => {
-    const identifier = item.id || item.name;
-    updateQuantity(identifier, item.quantity + 1);
-  };
-
-  const decreaseQuantity = (item) => {
-    const identifier = item.id || item.name;
-    if (item.quantity > 1) {
-      updateQuantity(identifier, item.quantity - 1);
-    } else {
-      removeFromCart(item);
-    }
-  };
 
   return (
     <div className={styles.cartSummary} ref={cartRef}>
@@ -45,7 +32,6 @@ const CartSummary = ({ onClose }) => {
                     {item.name}
                   </p>
 
-                  {/* Display color swatch */}
                   {item.color && (
                     <div className={styles.colorDisplay}>
                       <span style={{ fontSize: "12px", fontStyle: "italic" }}>Color:</span>
@@ -62,28 +48,6 @@ const CartSummary = ({ onClose }) => {
                       />
                     </div>
                   )}
-
-        
-                  {/* Quantity controls */}
-                  {/* <div className={styles.quantityControls}>
-                    <button
-                      className={styles.quantityButton}
-                      onClick={() => decreaseQuantity(item)}
-                      aria-label="Decrease quantity"
-                    >
-                      <FontAwesomeIcon icon={faMinus} size="xs" />
-                    </button>
-
-                    <span className={styles.quantityValue}>{item.quantity}</span>
-
-                    <button
-                      className={styles.quantityButton}
-                      onClick={() => increaseQuantity(item)}
-                      aria-label="Increase quantity"
-                    >
-                      <FontAwesomeIcon icon={faPlus} size="xs" />
-                    </button>
-                  </div> */}
 
                   <p style={{ fontSize: "14px", fontStyle: "italic", fontWeight: "200" }}>
                     ${item.price.toFixed(2)}
@@ -106,9 +70,21 @@ const CartSummary = ({ onClose }) => {
             Price includes taxes and shipping.
           </p>
 
-          <Link to="/checkout" onClick={onClose} className={styles.checkoutButton}>
-            Checkout
-          </Link>
+          <div 
+            className={styles.buttonContainer}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            style={{ position: 'relative' }} // Ensures tooltip anchors to the button
+          >
+            {isHovered && (
+              <div className={styles.hoverPopup}>
+                Our shop is currently in Demo Mode. Orders cannot be processed at this time.
+              </div>
+            )}
+            <button onClick={onClose} className={styles.checkoutButton}>
+              Checkout
+            </button>
+          </div>
         </>
       ) : (
         <p style={{ fontStyle: "italic", color: "gray", marginTop: "20px" }}>Your cart is empty</p>

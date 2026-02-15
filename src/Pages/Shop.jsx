@@ -139,7 +139,7 @@ const Shop = () => {
         // colors={["#333333", "#555555", "#999999"]}
         primaryColor="yellow"
       />
-{/* 
+
       <CardProduct
         addToCart={addToCart}
         id="skirt"
@@ -151,7 +151,7 @@ const Shop = () => {
         material="50% wool, 50% acrylic"
         colors={["#B611ED", "#CCF045", "#0028F0"]}
         primaryColor="black"
-      /> */}
+      /> 
 
       <CardProduct
         addToCart={addToCart}
@@ -165,7 +165,7 @@ const Shop = () => {
         colors={["black", "beige", "white", "grey"]}
       />
 
-      {/* <CardProduct
+      <CardProduct
         addToCart={addToCart}
         id="dress"
         images={dress}
@@ -175,7 +175,7 @@ const Shop = () => {
         description="A statement piece straight from the runway – this nylon dress with a refined gray insert embodies modern minimalism and bold design. Lightweight yet structured, it drapes gracefully while the contrasting detail adds a sophisticated edge."
         material="100% nylon"
         primaryColor="yellow"
-      /> */}
+      />
 
       {/* <CardProduct
         addToCart={addToCart}

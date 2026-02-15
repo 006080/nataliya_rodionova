@@ -46,7 +46,6 @@
   border-radius: 13px;
   width: 140px;
   padding: 10px;
-
 }
 
 .item {
@@ -68,8 +67,44 @@
   margin: 30px;
 }
 
+.buttonContainer {
+  position: relative;
+  display: flex;
+}
+
+.hoverPopup {
+  position: absolute;
+  bottom: 110%; /* Sit above the button */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #222;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  width: 200px;
+  text-align: center;
+  z-index: 100;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+  pointer-events: none; /* Mouse ignores the popup so it doesn't flicker */
+}
+
+/* Small arrow pointing down */
+.hoverPopup::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #222 transparent transparent transparent;
+}
+
 .checkoutButton {
-  padding: 10px 25px;
+  /* padding: 10px 25px; */
+  margin: 0;
+  width: 100%;
   background-color: #000000;
   color: white;
   border: none;

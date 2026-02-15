@@ -21,18 +21,26 @@ const CardProduct = ({
   price,
   description,
   material = "Not specified",
-  colors = [],                       // ✅ Default colors first
+  colors = [],
   color = "Not specified",
-  primaryColor, // ✅ Then fallback
+  primaryColor,
 }) => {
   const [count, setCount] = useState(1);
   const [selectedStars, setSelectedStars] = useState(0);
   const [fullscreenImage, setFullscreenImage] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [selectedColor, setSelectedColor] = useState(color || primaryColor);
+  
+  // State for the hover popup
+  const [isHovered, setIsHovered] = useState(false);
 
   const { addToCart } = useCart();
   const { toggleFavorite, isFavorite } = useFavorites();
+
+  // --- Validation Logic ---
+  // Define which IDs require the measurement popup
+  const customMadeIds = ["dress", "skirt", "coat01"];
+  const requiresMeasurements = customMadeIds.includes(id);
 
   const increment = () => setCount(count + 1);
   const decrement = () => count > 1 && setCount(count - 1);
@@ -113,15 +121,13 @@ const CardProduct = ({
         <div className={styles.notes}>
           <p style={{ fontSize: "13px" }}>{description}</p>
           <p style={{ fontSize: "14px" }}><em>Material: </em> {material}</p>
-         {primaryColor && (
-  <p style={{ fontSize: "14px" }}>
-   <em> Primary Color: </em> {hexToColorName(primaryColor)}
-  </p>
-)}
-
+          {primaryColor && (
+            <p style={{ fontSize: "14px" }}>
+              <em> Primary Color: </em> {hexToColorName(primaryColor)}
+            </p>
+          )}
         </div>
 
-        {/* 🎨 Dynamic Color Swatches */}
         {colors.length > 0 && (
           <div className={styles.colorSelector}>
             <span style={{ fontSize: "14px" }}> <em>Available Colors:</em></span>
@@ -142,13 +148,7 @@ const CardProduct = ({
 
         <div className={styles.starPrice}>
           <p style={{ fontSize: "20px", fontStyle: "italic" }}>${price}</p>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
             {[...Array(5)].map((_, index) => (
               <FontAwesomeIcon
                 key={index}
@@ -177,10 +177,21 @@ const CardProduct = ({
             </p>
           </div>
 
-          <Button onClick={itemAdd}>
-            <FontAwesomeIcon icon={faShoppingCart} className={styles.cartIcon} />
-            Add to Cart
-          </Button>
+          <div 
+            className={styles.buttonContainer}
+            onMouseEnter={() => requiresMeasurements && setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+          >
+            {isHovered && (
+              <div className={styles.hoverPopup}>
+                This item is made to your measurements. Please fill in your size before checkout.
+              </div>
+            )}
+            <Button onClick={itemAdd}>
+              <FontAwesomeIcon icon={faShoppingCart} className={styles.cartIcon} />
+              Add to Cart
+            </Button>
+          </div>
         </div>
       </div>
 
