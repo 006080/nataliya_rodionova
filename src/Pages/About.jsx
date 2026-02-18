@@ -79,20 +79,34 @@ const About = () => {
                 {/*  BRAND + VISION + BIO   */}
                 {/* ======================= */}
                 <section className={styles.section}>
-                    <h2 className={styles.sectionTitle}>About the Brand & Vision</h2>
+                   
+                   <section className={styles.section}>
+    <h2 className={styles.sectionTitle}>Brand Philosophy</h2>
 
-                    <p className={styles.paragraph}>
-                       I founded my brand on the belief that true style is a form of authorship. Every creation begins as an artistic intuition — a spark that chooses its own direction, living both in garments and in the narratives I explore: truth, identity, and the emotional depth behind appearances.
-                    </p>
-
-                    <p className={styles.paragraph}>
-                       I design for those who see fashion as an intellectual game: a space where identity is shaped, challenged, and revealed. My work balances the purity of craftsmanship with the courage of creative risk, honoring individuality and celebrating each unique moment.
-                    </p>
-                    
-                    {/* Simplified biography paragraph */}
-                    <p className={styles.paragraph}>
-                        I graduated from Istituto Marangoni in Milan (2011–2012) and continued my education at NABA in Milan. Following internships at companies such as Dolce & Gabbana and Marni, I gained practical insight into the Milan fashion industry. The brand later presented collections at the OZONE showroom during both Paris and Milan Fashion Weeks, debuting with its first runway show at Kyiv Fashion Week in 2019.
-                    </p>
+    <div className={styles.epigraphContainer}>
+        <span className={styles.quoteMark}>“</span>
+        <blockquote className={styles.philosophyQuote}>
+            VARONA does not understand darkness as a comfort zone.<br />
+            In a world where monochrome often promises safety,<br />
+            it becomes a space of tension.
+            <br /><br />
+            Not as retreat.<br />
+            Not as protection.
+            <br /><br />
+            But as a stage for contrast, colour, and controlled intensity.
+            <br /><br />
+            Architectural lines shape the body like space.<br />
+            Colour interrupts expectation.<br />
+            Silhouettes carry presence.
+            <br /><br />
+            VARONA is not a symbol.<br />
+            It is a decision.
+            <br /><br />
+            A darkness that does not hide —<br />
+            but defines.
+        </blockquote>
+    </div>
+</section>
 
                     <h2 className={styles.sectionTitle}>SUSTAINABILITY</h2> {/* Corrected potential typo sectionTitle1 */}
 

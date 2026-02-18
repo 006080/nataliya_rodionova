@@ -55,14 +55,26 @@ const OurService = () => {
 
       <section className={styles.sectionStyle}>
         <div className={styles.textContainer}>
-          <h1>Our Style:</h1>
+          <h1>Brand Manifest :</h1>
+
+          <br />
+          <div className= {styles.listOff}>
           <p>
-            Welcome to VARONA — a space where elegance intertwines with quiet poetry. Inspired by the enigmatic presence of the crow, our brand creates refined wardrobe essentials and accessories for all genders using carefully selected recycled, low-impact, and innovative materials.
-
-VARONA blends minimalism with lyrical depth. Each piece is designed with intention, embracing responsible craftsmanship, longevity, and expressive individuality.
-
-Explore VARONA — where every garment carries a story, and style becomes a thoughtful, poetic expression of uniqueness.
+            VARONA is more than a brand.
           </p>
+
+          <br />
+          <br />
+          <p>
+            VARONA does not treat darkness as a comfort zone.
+            <p>  In a world where monochrome often promises safety,
+            it becomes a space of tension, contrast, and presence.
+            
+            </p>
+          Architectural lines, controlled colour, deliberate deviation —
+            fashion shaped as intention, not protection.
+          </p>
+          </div>
         </div>
       </section>
 
@@ -114,14 +126,14 @@ Explore VARONA — where every garment carries a story, and style becomes a thou
           <p>
             We use a carefully curated selection of recycled and low-impact materials. Our goal is to combine high quality with minimal environmental impact:
           </p>
-          <div className= {styles.listOff} >
-          <p>✔ Recycled wool and wool-blend yarns</p>
-          <p>✔ Hemp blends</p>
-          <p>✔ Bio-polyester (plant-based)</p>
-          <p>✔ Organic cotton</p>
-          <p>✔ Regenerated cellulose</p>
-          <p>✔ Recycled polyester (rPET)</p>
-          <p>✔ Deadstock fabrics</p>
+          <div className={styles.listOff} >
+            <p>✔ Recycled wool and wool-blend yarns</p>
+            <p>✔ Hemp blends</p>
+            <p>✔ Bio-polyester (plant-based)</p>
+            <p>✔ Organic cotton</p>
+            <p>✔ Regenerated cellulose</p>
+            <p>✔ Recycled polyester (rPET)</p>
+            <p>✔ Deadstock fabrics</p>
           </div>
         </div>
       </section>
@@ -140,12 +152,23 @@ Explore VARONA — where every garment carries a story, and style becomes a thou
       <section className={styles.sectionService}>
         <div className={styles.textContainer}>
           <h1>Our Concept:</h1>
+          <div>
           <p>
-           Varona is more than a brand. 
+            Varona is more than a brand.
           </p>
-          <p>It embodies elegance and mystery, where each piece reflects a refined balance of tradition and innovation. A tribute to the beauty of contrasts, Varona celebrates simplicity, sophistication, and authentic individuality.
+          <p>
+            VARONA does not treat darkness as a comfort zone.
+          </p>
+          <p>
+            In a world where monochrome often promises safety,
+            it becomes a space of tension, contrast, and presence.
+          </p>
 
-Aligned with this vision, the brand embraces circular design by prioritizing recycled fibers, creating long-lasting garments, and minimizing waste at every stage—where sustainability becomes a natural expression of thoughtful craftsmanship.</p>
+          <p>
+            Architectural lines, controlled colour, deliberate deviation —
+            fashion shaped as intention, not protection.
+          </p>
+          </div>
         </div>
       </section>
 
@@ -205,7 +228,7 @@ Aligned with this vision, the brand embraces circular design by prioritizing rec
           <p>
             We are open to collaborating with NGOs, industry associations, and organizations that promote ethical production, circular solutions, and transparent supply-chain practices. As we grow, we aim to build partnerships with certified material suppliers and textile innovation platforms that provide access to recycled, low-impact, and plant-based fabrics suitable for small-scale production.
 
-Our goal is to develop a network of responsible partners within the EU, strengthening the environmental and social foundation of the brand and contributing to a more forward-thinking approach to fashion.
+            Our goal is to develop a network of responsible partners within the EU, strengthening the environmental and social foundation of the brand and contributing to a more forward-thinking approach to fashion.
           </p>
         </div>
       </section>
@@ -227,9 +250,9 @@ Our goal is to develop a network of responsible partners within the EU, strength
         <div className={styles.textContainer}>
           <h1 style={{ color: 'beige' }}>Our Clients:</h1>
           <p style={{ color: 'beige' }}>
-           Our clients are bold, creative, and expressive individuals who view fashion as a medium for storytelling and self-expression. They span a wide age range — from 18 to 100+ — and embrace diversity in gender, background, and life experience, united by a shared passion for originality and innovation.
+            Our clients are bold, creative, and expressive individuals who view fashion as a medium for storytelling and self-expression. They span a wide age range — from 18 to 65 + — and embrace diversity in gender, background, and life experience, united by a shared passion for originality and innovation.
 
-Artists are drawn to our visually striking and conceptually rich designs. Creators seek avant-garde, experimental pieces that align with their boundary-pushing mindset. Creative professionals value our garments as essential elements of their public persona. And fashion-forward individuals — always ahead of the curve — invest in our unique, high-quality wardrobe staples that embody individuality.
+            Artists are drawn to our visually striking and conceptually rich designs. Creators seek avant-garde, experimental pieces that align with their boundary-pushing mindset. Creative professionals value our garments as essential elements of their public persona. And fashion-forward individuals — always ahead of the curve — invest in our unique, high-quality wardrobe staples that embody individuality.
 
           </p>
         </div>
