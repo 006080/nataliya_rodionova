@@ -6,6 +6,17 @@
     --color-customers: #400b42;
 }
 
+.textBlock p {
+  max-width: 620px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.textContainer {
+  padding: 80px 20px;
+}
+
+
 body {
     margin: 0;
     overflow-x: hidden;

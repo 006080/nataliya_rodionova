@@ -58,22 +58,23 @@ const OurService = () => {
           <h1>Brand Manifest :</h1>
 
           <br />
-          <div className= {styles.listOff}>
-          <p>
-            VARONA is more than a brand.
-          </p>
+          <div className={styles.listOff}>
 
-          <br />
-          <br />
-          <p>
-            VARONA does not treat darkness as a comfort zone.
-            <p>  In a world where monochrome often promises safety,
-            it becomes a space of tension, contrast, and presence.
-            
+            <br />
+            <br />
+            <p>
+              VARONA does not treat darkness as a comfort zone.
+              <p>  In a world where monochrome often promises safety,
+                it becomes a space of tension, contrast, and presence.
+                <br />
+                <p>Controlled surreal elegance defines the aesthetic —
+                  an avant-garde approach guided by structure and restraint.</p>
+              </p>
+           This is not darkness in its classical sense.
+           <br />
+VARONA explores darkness through form and concept,
+not through colour alone.
             </p>
-          Architectural lines, controlled colour, deliberate deviation —
-            fashion shaped as intention, not protection.
-          </p>
           </div>
         </div>
       </section>
@@ -93,16 +94,16 @@ const OurService = () => {
         <div className={styles.textContainer}>
           <h1 style={{ color: 'black' }}>Why Choose Us?</h1>
           <p>
-            We combine creative fashion expertise with sustainability strategy
-          </p>
-
-          <p>
-            Our services are tailored to the Berlin ecosystem and impact funding programs
-
-          </p>
-
-          <p>
-            We support you from concept to launch — ethically, transparently and with measurable results
+            Because fashion is not neutral.
+            <br />
+            VARONA combines conceptual design with responsible production —
+            not as a strategy, but as a structural decision.
+            <br />
+            Every piece is developed with intention, transparency,
+            and respect for material, process, and form.
+            <br />
+            VARONA is chosen by those who seek clarity, presence,
+            and meaning beyond trend or convenience.
           </p>
         </div>
       </section>
@@ -124,16 +125,12 @@ const OurService = () => {
         <div className={styles.textContainer}>
           <h1>Materials:</h1>
           <p>
-            We use a carefully curated selection of recycled and low-impact materials. Our goal is to combine high quality with minimal environmental impact:
+            We use a carefully curated selection of recycled and low-impact materials.
+            <br /> Our goal is to combine high quality with minimal environmental impact:
           </p>
           <div className={styles.listOff} >
-            <p>✔ Recycled wool and wool-blend yarns</p>
-            <p>✔ Hemp blends</p>
-            <p>✔ Bio-polyester (plant-based)</p>
-            <p>✔ Organic cotton</p>
-            <p>✔ Regenerated cellulose</p>
-            <p>✔ Recycled polyester (rPET)</p>
-            <p>✔ Deadstock fabrics</p>
+            <p>VARONA works with a curated selection of recycled and low-impact materials, chosen for quality, durability, and responsible impact.
+              <br /> Material is treated as structure — not excess.</p>
           </div>
         </div>
       </section>
@@ -152,24 +149,18 @@ const OurService = () => {
       <section className={styles.sectionService}>
         <div className={styles.textContainer}>
           <h1>Our Concept:</h1>
-          <div>
-          <p>
-            Varona is more than a brand.
-          </p>
-          <p>
-            VARONA does not treat darkness as a comfort zone.
-          </p>
-          <p>
-            In a world where monochrome often promises safety,
-            it becomes a space of tension, contrast, and presence.
-          </p>
 
           <p>
-            Architectural lines, controlled colour, deliberate deviation —
-            fashion shaped as intention, not protection.
+            VARONA approaches fashion as a spatial and conceptual practice.
+
+            Each piece is developed through architectural thinking, where form, proportion, and tension define the silhouette. Colour is introduced deliberately — not as decoration, but as a counterpoint to structure.
+
+            The collections exist between art and wearability, allowing garments to function both as visual statements and personal extensions of identity.
+
+            VARONA rejects uniformity and comfort-driven design in favour of controlled deviation — where every decision is intentional and nothing is neutral.
           </p>
-          </div>
         </div>
+
       </section>
 
       <section
@@ -200,11 +191,15 @@ const OurService = () => {
         <div className={styles.textContainer}>
           <h1 style={{ color: 'black' }}>Our Service:</h1>
           <p style={{ color: 'black' }}>
-            We specialize in creating exclusive, handmade items and accessories
-            tailored for both men and women. We craft each piece with care and precision, ensuring it
-            reflects the individuality of its wearer. Whether it’s a bespoke
-            garment or a custom accessory, we’re here to turn your boldest
-            visions into reality.
+            VARONA designs and produces bespoke garments and limited pieces
+            for individuals who approach fashion as expression.
+            <br />
+            Each creation is developed with architectural precision
+            and adapted to the wearer, allowing form, colour, and presence
+            to unfold individually.
+            <br />
+            This is not customization for comfort —
+            but design as a conscious choice.
           </p>
         </div>
       </section>
@@ -226,9 +221,12 @@ const OurService = () => {
         <div className={styles.textContainer}>
           <h1>Collaboration:</h1>
           <p>
-            We are open to collaborating with NGOs, industry associations, and organizations that promote ethical production, circular solutions, and transparent supply-chain practices. As we grow, we aim to build partnerships with certified material suppliers and textile innovation platforms that provide access to recycled, low-impact, and plant-based fabrics suitable for small-scale production.
-
-            Our goal is to develop a network of responsible partners within the EU, strengthening the environmental and social foundation of the brand and contributing to a more forward-thinking approach to fashion.
+            VARONA approaches collaboration as a conscious choice.
+            <br />
+            We seek partnerships with organizations and initiatives that share a commitment to responsible production, transparency, and material innovation — not as a trend, but as a structural decision.
+            <br />
+            As the brand evolves, we work towards building a network of carefully selected partners within the EU, focusing on certified materials, small-scale production, and innovative textile solutions that align with our values.
+            <br />
           </p>
         </div>
       </section>
@@ -250,10 +248,20 @@ const OurService = () => {
         <div className={styles.textContainer}>
           <h1 style={{ color: 'beige' }}>Our Clients:</h1>
           <p style={{ color: 'beige' }}>
-            Our clients are bold, creative, and expressive individuals who view fashion as a medium for storytelling and self-expression. They span a wide age range — from 18 to 65 + — and embrace diversity in gender, background, and life experience, united by a shared passion for originality and innovation.
-
-            Artists are drawn to our visually striking and conceptually rich designs. Creators seek avant-garde, experimental pieces that align with their boundary-pushing mindset. Creative professionals value our garments as essential elements of their public persona. And fashion-forward individuals — always ahead of the curve — invest in our unique, high-quality wardrobe staples that embody individuality.
-
+            Our clients do not follow fashion — they articulate themselves through it.
+            <br />
+            They are individuals for whom clothing is not decoration,
+            but language.
+            <br />
+            Artists, creators, performers, and cultural figures choose VARONA
+            as part of their visual identity — not to blend in,
+            but to define presence.
+            <br />
+            They value conceptual depth, architectural form,
+            and garments that carry intention rather than trend.
+            <br />
+            VARONA speaks to those who recognize meaning in deviation
+            and see style as a conscious decision.
           </p>
         </div>
       </section>
