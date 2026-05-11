@@ -1,3 +1,4 @@
+'use client';
 import React from 'react';
 // import { Helmet } from 'react-helmet-async'; // ⬅️ NEW: Import Helmet for SEO
 import styles from './About.module.css';

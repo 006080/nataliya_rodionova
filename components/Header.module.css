@@ -78,7 +78,7 @@
   align-items: center;
   justify-content: space-between;
   transition: background-color 0.3s ease, color 0.3s ease;
-  padding: 10px 15px;
+  padding: 20px;
   box-sizing: border-box;
 }
 

@@ -40,9 +40,9 @@ const Home = () => {
       <div className={styles.sloganBlog}>
         <h1 style={{color:'beige'}}>Unveil Timeless Beauty</h1>
         <h2>Designed for Responsible Future</h2>
-        <Button className={styles.homeButton} onClick={handleClick}>
+        {/* <Button className={styles.homeButton} onClick={handleClick}>
           Shop Now
-        </Button>
+        </Button> */}
       
       </div>
     </div>
