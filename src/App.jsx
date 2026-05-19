@@ -7,10 +7,9 @@ import OurService from "./Pages/OurService";
 import Contacts from "./Pages/Contacts";
 import Shop from "./Pages/Shop";
 import Footer from "../components/Footer";
-import Terms from "./Pages/Terms"; 
+import Terms from "./Pages/Terms";
 import PrivacyPolicy from "./Pages/PrivacyPolicy";
 import { CartProvider } from '../components/CartContext';
-import ReturnPolicy from "./Pages/ReturnPolicy";
 import Checkout from "./Pages/Checkout";
 import OrderStatus from "./Pages/OrderStatus";
 import Profile from "./Pages/Profile";
@@ -31,8 +30,11 @@ import About from "./Pages/About";
 import GoodbyePage from "./Pages/GoodbyePage";
 import WelcomeBackPage from "./Pages/WelcomeBackPage";
 import CookieBanner from "../components/CookieBanner";
+import CookieSettings from "./Pages/CookieSettings";
 import { initConsentManagement } from "../src/utils/enhancedConsentUtils";
 import LegalNotice from "./Pages/LegalNotice";
+import Impressum from "./Pages/Impressum";
+import ScrollToTop from '../components/ScrollToTop';
 
 const Unauthorized = () => (
   <div style={{ padding: '2rem', textAlign: 'center' }}>
@@ -48,13 +50,14 @@ const AppContent = () => {
   // Initialize enhanced consent management
   useEffect(() => {
     initConsentManagement();
-  }, []);  
+  }, []);
 
   return (
     <>
       <CookieBanner />
       <Header />
-      <Routes> 
+      <ScrollToTop></ScrollToTop>
+      <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<LoginForm />} />
         <Route path="/register" element={<RegisterForm />} />
@@ -68,41 +71,40 @@ const AppContent = () => {
         <Route path="/reviews" element={<Reviews />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-        <Route path="/legal-notice" element={<LegalNotice />} /> 
-        <Route path="/return" element={<ReturnPolicy />} />
+        <Route path="/legal-notice" element={<LegalNotice />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/collaboration" element={<Collaboration />} />
         <Route path="/contacts" element={<Contacts />} />
         <Route path="/shop" element={<Shop />} />
         <Route path="/about" element={<About />} />
         <Route path="/order-status/:orderId" element={<OrderStatus />} />
+        <Route path="/impressum" element={<Impressum />} />
+        <Route path="/cookie-settings" element={<CookieSettings />} />
+      <Route path="/goodbye" element={<GoodbyePage />} />
 
-        <Route path="/goodbye" element={<GoodbyePage />} />
+      {/* Protected routes (require authentication) */}
+      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+      <Route path="/orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
+      <Route path="/orders/:id" element={<ProtectedRoute><OrderDetail /></ProtectedRoute>} />
+      <Route path="/welcome-back" element={<ProtectedRoute><WelcomeBackPage /></ProtectedRoute>} />
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes >
 
-        {/* Protected routes (require authentication) */}
-        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-        <Route path="/orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
-        <Route path="/orders/:id" element={<ProtectedRoute><OrderDetail /></ProtectedRoute>} />
-        <Route path="/welcome-back" element={<ProtectedRoute><WelcomeBackPage /></ProtectedRoute>} />
-        
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
-
-      {location.pathname !== "/" && location.pathname !== "/contacts" && <Footer />}
+      { location.pathname !== "/" && location.pathname !== "/contacts" && <Footer /> }
     </>
   );
 };
 
 const App = () => {
   return (
-    <Router> 
-        <AuthProvider>
-          <CartProvider>
-            <FavoriteProvider>
-              <AppContent />
-            </FavoriteProvider>
-          </CartProvider>
-        </AuthProvider>
+    <Router>
+      <AuthProvider>
+        <CartProvider>
+          <FavoriteProvider>
+            <AppContent />
+          </FavoriteProvider>
+        </CartProvider>
+      </AuthProvider>
     </Router>
   );
 };

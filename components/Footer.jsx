@@ -1,150 +1,146 @@
+'use client';
+
 import { useNavigate } from "react-router-dom";
+import styles from "./Footer.module.css";
+// Импортируем модули Cloudinary для отображения оригинального логотипа
 import { Cloudinary } from "@cloudinary/url-gen";
 import { AdvancedImage } from "@cloudinary/react";
-import { auto } from "@cloudinary/url-gen/actions/resize";
-import { autoGravity } from "@cloudinary/url-gen/qualifiers/gravity";
-import styles from "./Footer.module.css";
 
+// Инициализируем Cloudinary с вашим облачным именем dwenvtwyx
 const cld = new Cloudinary({
   cloud: {
     cloudName: "dwenvtwyx",
   },
 });
 
+// Настраиваем объект изображения логотипа. 
+// "LOGO" — это Public ID вашего файла в медиатеке Cloudinary.
+const logoImage = cld
+  .image("LOGO_remqhx")
+  .format("auto")
+  .quality("auto");
+
 const Footer = () => {
   const navigate = useNavigate();
 
-  const getImage = (imageId) =>
-    cld
-      .image(imageId)
-      .format("auto")
-      .quality("auto")
-      .resize(auto().gravity(autoGravity()));
-
-  const handleOpenCookieSettings = () => {
-    window.dispatchEvent(new CustomEvent('openCookieSettings'));
-  };
-
   return (
-    <div className={styles.footer}>
-      <div className={styles.footerLinks}>
-        <h4 className={styles.foot} onClick={() => navigate("/terms")}>
-          Terms and Conditions
-        </h4>
-        <h4 className={styles.foot} onClick={() => navigate("/return")}>
-          Return Policy
-        </h4>
-        <h4 className={styles.foot} onClick={() => navigate("/legal-notice")}>
-          Legal Notice
-        </h4>
-        <h4 className={styles.foot} onClick={() => navigate("/privacy-policy")}>
-          Privacy Policy
-        </h4>
-        <h4 className={styles.foot} onClick={handleOpenCookieSettings}>
-          Cookie Settings
-        </h4>
-      </div>
+    <footer className={styles.footer}>
+      <div className={styles.topSection}>
 
-      <div className={styles.iconsLine}>
-        <div className={styles.paymentIcons}>
-          <div className={styles.iconWrapper}>
-            <AdvancedImage
-              className={styles.paymentIcon}
-              cldImg={getImage("card_zoasyf")}
+        {/* ЛЕВАЯ КОЛОНКА: БРЕНД И КОНТАКТЫ */}
+        <div className={styles.brandColumn}>
+          <h2 className={styles.logoContainer}>
+            <AdvancedImage 
+              cldImg={logoImage} 
+              className={styles.logoImg} 
+              alt="VARONA Logo"
             />
-          </div>
-          <div className={styles.iconWrapper}>
-            <AdvancedImage
-              className={styles.paymentIcon}
-              cldImg={getImage("visa_vqehyp")}
-            />
-          </div>
-          {/* <div className={styles.iconWrapper}>
-            <AdvancedImage
-              style={{ filter: "invert(1)", marginTop: "10px", width: "75px" }}
-              className={styles.paymentIcon}
-              cldImg={getImage("png-transparent-mollie-logo-tech-companies_u6ibbl")}
-            />
-          </div> */}
-          {/* <div className={styles.iconWrapper}>
-            <AdvancedImage
-              className={styles.paymentIcon}
-              cldImg={getImage("stripe_pl0sbg")}
-            />
-          </div> */}
-          <div className={styles.iconWrapper}>
-            <AdvancedImage
-              className={styles.paymentIcon}
-              style={{ width: "82px", marginTop: "-16px" }}
-              cldImg={getImage("paypal_ww2gpn")}
-            />
+          </h2>
+
+          <p className={styles.description}>
+            Independent Fashion Platform — Berlin.
+            <br />
+            Responsible luxury, digital craftsmanship
+            and contemporary design.
+          </p>
+
+          <div className={styles.contactBlock}>
+            <a
+              href="mailto:info@nataliyarodionova.com"
+              className={styles.contactLink}
+            >
+              info@nataliyarodionova.com
+            </a>
+            <span className={styles.location}>
+              Berlin, Germany
+            </span>
           </div>
         </div>
 
-        <div className={styles.paymentIcons}>
-          <div className={styles.iconWrapper}>
-            <a
-              href="https://www.youtube.com/watch?app=desktop&v=YhKtUzEA-jU"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <AdvancedImage
-                className={styles.socialIcons}
-                cldImg={getImage(
-                  "5282548_play_player_video_youtube_youtuble_logo_icon_tayhki"
-                )}
-              />
-            </a>
-          </div>
-          <div className={styles.iconWrapper}>
-            <a
-              href="https://www.facebook.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <AdvancedImage
-                className={styles.socialIcons}
-                style={{
-                  filter: "invert(1)",
-                  width: "22px",
-                  margin: "5px",
-                  opacity: 0.9,
-                }}
-                cldImg={getImage(
-                  "5282541_fb_social_media_facebook_facebook_logo_social_network_icon_e8ixwq"
-                )}
-              />
-            </a>
-          </div>
-          <div className={styles.iconWrapper}>
-            <a
-              href="https://www.instagram.com/varona_nataliyarodionova/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <AdvancedImage
-                className={styles.socialIcons}
-                style={{
-                  filter: "invert(1)",
-                  width: "22px",
-                  margin: "5px",
-                  opacity: 0.9,
-                }}
-                cldImg={getImage(
-                  "5282544_camera_instagram_social_media_social_network_instagram_logo_icon_jycw7z"
-                )}
-              />
-            </a>
-          </div>
+        {/* ЦЕНТРАЛЬНАЯ КОЛОНКА: НАВИГАЦИЯ */}
+        <div className={styles.navigationColumn}>
+          <span className={styles.columnTitle}>Navigation</span>
+
+          {/* Чистый внешний тег <a> без обёртки в <button> */}
+          <a
+            href="https://www.varonaofficial.com/shop/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.externalNavLink}
+          >
+            Shop
+          </a>
+
+          <button type="button" onClick={() => navigate("/contacts")}>
+           Contact
+          </button>
+
+          <button type="button" onClick={() => navigate("/collaboration")}>
+            Collaboration
+          </button>
+
+          {/* Чистый внешний тег <a> без обёртки в <button> */}
+          <a
+            href="https://thefashionvox.wordpress.com/2018/07/27/varona/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.externalNavLink}
+          >
+            Press
+          </a>
         </div>
+
+        {/* ПРАВАЯ КОЛОНКА: ЮРИДИЧЕСКАЯ ИНФОРМАЦИЯ */}
+        <div className={styles.legalColumn}>
+          <span className={styles.columnTitle}>Legal</span>
+
+          <button type="button" onClick={() => navigate("/impressum")}>
+            Impressum
+          </button>
+
+          <button type="button" onClick={() => navigate("/privacy-policy")}>
+            Privacy Policy
+          </button>
+
+          <button type="button" onClick={() => navigate("/cookie-settings")}>
+            Cookie Settings
+          </button>
+
+          
+        </div>
+
       </div>
 
-      <p>
-        Seite – verwaltet von The Level S.r.l. - copyright © VARONA S.R.L. 2024
-        - Alle Rechte vorbehalten - Jegliche Reproduktion der Inhalte ist
-        strengstens verboten.
-      </p>
-    </div>
+      {/* ДЕКОРАТИВНАЯ ЛИНИЯ-РАЗДЕЛИТЕЛЬ */}
+      <div className={styles.divider} />
+
+      {/* НИЖНЯЯ СЕКЦИЯ: СОЦСЕТИ И КОПИРАЙТ */}
+      <div className={styles.bottomSection}>
+
+        <div className={styles.socials}>
+          <a
+            href="https://www.instagram.com/varona_nataliyarodionova/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Instagram
+          </a>
+
+          <a
+            href="https://www.youtube.com/watch?app=desktop&v=YhKtUzEA-jU"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Film
+          </a>
+        </div>
+
+        <p className={styles.copyright}>
+          © VARONA — All Rights Reserved
+        </p>
+
+      </div>
+    </footer>
   );
 };
 

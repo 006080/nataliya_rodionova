@@ -1,164 +1,416 @@
-.fon {
-    position: relative;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+/* ==========================================================================
+   PAGE GENERAL ARCHITECTURE
+   ========================================================================== */
+.pageWrapper {
+  background-color: #000000;
+  color: #ffffff;
+  width: 100%;
+}
+
+.hero {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 140px 8% 40px 8%;
+  overflow: hidden; 
+}
+
+/* 1. CSS PARALLAX CONTAINER (Работает при скролле) */
+.parallaxContainer {
+  position: absolute;
+  top: -12%; 
+  left: -2%;
+  width: 104%;
+  height: 124%;
+  z-index: 1;
+  will-change: transform;
+}
+
+@keyframes parallaxScroll {
+  from { transform: translateY(0); }
+  to { transform: translateY(14%); }
+}
+
+/* 2. LIVE BACKGROUND ZOOM CONTAINER */
+.zoomContainer {
+  width: 100%;
+  height: 100%;
+  will-change: transform;
+  
+  /* Дефолтное значение для переменной пользовательского зума */
+  --user-zoom: 1; 
+
+  /* Бесконечное «дыхание» картинки: 20 секунд на цикл */
+  animation: backgroundPulse 20s ease-in-out infinite alternate;
+  
+  /* Плавный переход для интерактива мыши */
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes backgroundPulse {
+  0% {
+    transform: scale(calc(1.03 * var(--user-zoom)));
+  }
+  50% {
+    transform: scale(calc(1.12 * var(--user-zoom)));
+  }
+  100% {
+    transform: scale(calc(1.05 * var(--user-zoom)));
+  }
 }
 
 .backgroundImage {
-    width: 100%;
-    height: auto; 
-    display: block; 
-    z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
 }
 
-.sloganBlog {
-
-    display: flex;
-    flex-direction: column;
-    align-content: flex-start;
-    z-index: 1;
-    padding: 20px;
-    position: fixed;
-    top: 35vh; 
+/* ==========================================================================
+   OVERLAY & TYPOGRAPHY STYLES
+   ========================================================================== */
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.9) 0%,
+    rgba(0, 0, 0, 0.4) 50%,
+    rgba(0, 0, 0, 0.1) 100%
+  );
+  z-index: 2;
 }
 
-.sloganBlog h1{
-    font-size: 70px;
+.content {
+  position: relative;
+  z-index: 3;
+  max-width: 680px;
 }
 
-.sloganBlog h2 {
-    font-size: 30px;
-    text-align: left;
-    margin-top:-15px;
-    color:'black';
-    font-weight: 400;
-    font-style: italic;
+.label {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 20px;
+  display: block;
 }
 
-/* Button Styling */
-.homeButton {
-    margin-top: 15px;
-    margin-left: -3px;
-    font-family: "Roboto Serif", serif;
-    width: 170px;
-    height: 50px;
-    background-color: rgb(37, 40, 1);
-    color: rgb(204, 204, 204);
-    border: none;
-    padding: 10px 30px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s;
+.description {
+  font-family: var(--font-main);
+  font-size: 14px;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.65);
+  margin-bottom: 44px;
 }
 
-.homeButton:hover {
-    background-color: rgb(11, 4, 4); /* Darker color on hover */
+.linksContainer { 
+  display: flex; 
+  gap: 28px; 
+  align-items: center; /* Центрирует текстовую ссылку по оси новой кнопки */
 }
 
-h1 {
-    font-family: "Playfair Display", serif;
-    color: rgb(254, 249, 224);
-    font-style: italic;
+/* ==========================================================================
+   FASHION EDITORIAL EXPLORE BUTTON (С полной инверсией цветов при hover)
+   ========================================================================== */
+.exploreButtonLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;                  /* Отступ между "Explore" и логотипом */
+  padding: 10px 24px;         /* Пропорции минималистичной кнопки */
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Тонкая деликатная рамка */
+  background-color: transparent;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-h2 {
-    color: rgb(254, 249, 224);
-    font-weight: 300;
-    font-style: italic;
-    font-family: "Roboto Serif", serif;
+.exploreText {
+  font-family: var(--font-ui), sans-serif;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.8);
+  transition: color 0.4s ease;
+}
+
+.exploreButtonLogo {
+  height: 18px;               /* Сбалансированная высота логотипа под текст 11px */
+  width: auto;
+  object-fit: contain;
+  filter: brightness(0) invert(1); /* Делает исходный черный логотип белым */
+  transition: filter 0.4s ease;
+  will-change: filter;
+}
+
+/* Эффект наведения: Кнопка полностью меняет полярность цвета */
+.exploreButtonLink:hover {
+  background-color: #ffffff;  /* Чистый белый фон */
+  border-color: #ffffff;
+}
+
+/* Текст становится черным на белом фоне */
+.exploreButtonLink:hover .exploreText {
+  color: #000000;
+}
+
+/* Логотип сбрасывает инверсию и становится черным на белом фоне */
+.exploreButtonLink:hover .exploreButtonLogo {
+  filter: brightness(0);      /* Полностью убирает белый цвет, превращая в черный */
+}
+
+.secondaryLink {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  text-decoration: none;
+  transition: all 0.4s ease;
+  padding-bottom: 4px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.secondaryLink:hover { 
+  color: #ffffff; 
+  border-bottom: 1px solid #ffffff; 
+}
+
+/* ==========================================================================
+   SECTIONS & BRAND MANIFESTO LAYOUT
+   ========================================================================== */
+.sectionMeta {
+  margin-top: 11%;
+  font-family: var(--font-ui);
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  color: rgba(255, 255, 255, 0.3);
+  display: block;
+  margin-bottom: 30px;
+  text-transform: uppercase;
+}
+
+.sectionTitle {
+  font-family: var(--font-serif);
+  font-size: clamp(24px, 3vw, 36px);
+  text-transform: uppercase;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  margin-bottom: 30px;
+}
+
+.editorialSection {
+  margin-top: 10px;
+  display: flex;
+  justify-content: flex-start;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.textContainer { 
+  max-width: 800px; 
+}
+
+.manifestoQuote {
+  line-height: 1.5;
+  color: #ffffff;
+  margin: 0 0 40px 0;
+  font-weight: 100;
+}
+
+.manifestoQuoteSub {
+  font-family: var(--font-main);
+  font-size: 16px;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+  max-width: 600px;
+}
+
+/* ==========================================================================
+   DARK PHILOSOPHY & REVELATION SYSTEM
+   ========================================================================== */
+.darkPhilosophySection {
+  padding: 120px 8%;
+  background-color: #050505;
+  border-top: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.splitGrid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 60px;
+  align-items: center;
+}
+
+.philosophyTitle {
+  font-family: var(--font-serif);
+  font-size: 42px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 32px;
+}
+
+.philosophyText p {
+  font-family: var(--font-main);
+  font-size: 15px;
+  line-height: 1.8;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 20px;
+}
+
+.highlightText {
+  font-family: var(--font-serif) !important;
+  font-size: 18px !important;
+  font-style: italic;
+  color: #ffffff !important;
+  border-left: 2px solid #ffffff;
+  padding-left: 20px;
+  margin-top: 30px;
+}
+
+.embeddedLogo {
+  width: 100%;
+  max-width: 280px;
+  opacity: 0.15;
+  filter: brightness(0) invert(1);
+  margin: 0 auto;
+  display: block;
+}
+
+/* ==========================================================================
+   SUSTAINABILITY MATRIX
+   ========================================================================== */
+.sustainabilityGrid {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 80px;
+  align-items: center;
+  width: 100%;
+}
+
+.editorialImage {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  filter: grayscale(1);
+  opacity: 0.85;
+}
+
+.leadParagraph {
+  font-family: var(--font-main);
+  font-size: 16px;
+  line-height: 1.7;
+  color: #ffffff;
+  margin-bottom: 30px;
+}
+
+.materialsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.materialItem {
+  font-family: var(--font-main);
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 12px;
+}
+
+/* ==========================================================================
+   TIMELINE SECTIONS
+   ========================================================================== */
+.timelineSection {
+  padding: 120px 8% 160px 8%;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.timelineContainer { 
+  max-width: 1000px; 
+}
+
+.timelineRows { 
+  margin-top: 40px; 
+  display: flex; 
+  flex-direction: column; 
+}
+
+.timelineRow {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  padding: 24px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  align-items: baseline;
+}
+
+.year {
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: #ffffff;
+}
+
+.event {
+  font-family: var(--font-main);
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.65);
+  line-height: 1.5;
+}
+
+/* ==========================================================================
+   MEDIA QUERIES (RESPONSIVE ENGINE)
+   ========================================================================== */
+@media (max-width: 1024px) {
+  .splitGrid, .sustainabilityGrid { 
+    grid-template-columns: 1fr; 
+    gap: 40px; 
+  }
+  .rightGridColumn { 
+    order: -1; 
+  }
+  .embeddedLogo { 
+    max-width: 150px; 
+  }
 }
 
 @media (max-width: 768px) {
+  .hero { 
+    padding-top: 100px; 
+  }
+  .linksContainer {
+    gap: 20px;
+    flex-direction: column; /* На маленьких мобильных экранах выстраиваем кнопку и ссылку друг под другом */
+    align-items: flex-start;
+  }
+  .exploreButtonLink {
+    padding: 8px 18px;        /* Делаем кнопку чуть компактнее на смартфонах */
+    gap: 10px;
+    width: 90%;             /* Кнопка адаптируется под ширину мобильного контента */
+    justify-content: center;
+  }
+  .editorialSection, .darkPhilosophySection, .timelineSection { 
+    padding: 80px 6%; 
+  }
+  .timelineRow { 
+    grid-template-columns: 1fr; 
+    gap: 8px; 
+  }
   
-    .fon {
-    background-size: cover; 
-    background-repeat: no-repeat; 
-    position: relative;
-    height: 100%;
-    width: 100vw; 
-    display: flex;
-    align-items: center; 
-    justify-content: center; 
-    color: white;
-    text-align: center;
-    }
-
-    
-    .sloganBlog h1{
-        font-size: 30px;
-    }
-    
-   .sloganBlog h2 {
-    font-size: 20px;
-    text-align: left;
-    margin-top:-15px;
-    color:'black';
-    font-weight: 400;
-    font-style: italic;
-}
-}
-
-@media (max-width: 540px) {
-    .backgroundImage {
-        height: 100vh;
-        object-fit: cover;
-    }
-
-    .sloganBlog h2 {
-    font-size: medium;
-    text-align: left;
-    margin-top:-15px;
-    color:'black';
-    font-weight: 400;
-    font-style: italic;
-}
-
-    .homeButton {
-        margin-top: 0px;
-        font-family: "Roboto Serif", serif;
-        width: 120px;
-        height: 40px;
-        background-color: rgb(37, 40, 1);
-        color: rgb(204, 204, 204);
-        border: none;
-        padding: 8px 20px;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 14px;
-        transition: background-color 0.3s;
-    }
-}
-
-
-
-@media (min-width: 768px) and (max-width: 1024px) {
-      .fon {
-    background-size: cover; 
-    background-repeat: no-repeat; 
-    position: relative;
-    height: 100%;
-    width: 100vw; 
-    display: flex;
-    align-items: center; 
-    justify-content: center; 
-    color: white; 
-    text-align: center;
-    }
-
-
-    .sloganBlog h1{
-        font-size: 40px;
-    }
-    
-.sloganBlog h2 {
-    font-size: medium;
-    text-align: left;
-    margin-top:-15px;
-    color:'black';
-    font-weight: 400;
-    font-style: italic;
-}
+  /* Отключение ресурсоемких параллакс-эффектов на мобильных устройствах во избежание фризов */
+  .parallaxContainer { 
+    animation: none !important; 
+    transform: none !important; 
+    top: 0; 
+    height: 100%; 
+  }
+  .zoomContainer { 
+    animation: none !important; 
+    transform: none !important; 
+    transition: none; 
+  }
 }

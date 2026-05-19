@@ -1,17 +1,19 @@
-import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import {
   getConsentSettings,
   saveConsentSettings,
   getStorageCategories,
   hasUserMadeConsentChoice,
-} from '../src/utils/enhancedConsentUtils'
-import styles from './CookieBanner.module.css'
+} from '../src/utils/enhancedConsentUtils';
+import styles from './CookieBanner.module.css';
 
 const CookieBanner = () => {
-  const [showBanner, setShowBanner] = useState(false)
-  const [showMiniBanner, setShowMiniBanner] = useState(false)
-  const [showSettingsModal, setShowSettingsModal] = useState(false)
+  const [showBanner, setShowBanner] = useState(false);
+  const [showMiniBanner, setShowMiniBanner] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [settings, setSettings] = useState({
     cookies: 'none',
     localStorage: {
@@ -21,42 +23,40 @@ const CookieBanner = () => {
         shoppingData: true,
       },
     },
-  })
+  });
 
-  const storageCategories = getStorageCategories()
+  const storageCategories = getStorageCategories();
 
-  // Check if user has already set preferences
   useEffect(() => {
-    const hasChoice = hasUserMadeConsentChoice()
-    const currentSettings = getConsentSettings()
+    const hasChoice = hasUserMadeConsentChoice();
+    const currentSettings = getConsentSettings();
 
-    setSettings(currentSettings)
+    setSettings(currentSettings);
 
     if (!hasChoice) {
-      setShowBanner(true)
-      setShowMiniBanner(false)
+      setShowBanner(true);
+      setShowMiniBanner(false);
     } else {
-      setShowBanner(false)
-      setShowMiniBanner(true)
+      setShowBanner(false);
+      setShowMiniBanner(true);
     }
 
-    // Listen for requests to reopen settings
     const handleOpenSettings = () => {
-      setShowSettingsModal(true)
-    }
+      setShowSettingsModal(true);
+    };
 
     const handleOpenCookieSettings = () => {
-      setShowBanner(true)
-    }
+      setShowBanner(true);
+    };
 
-    window.addEventListener('openConsentSettings', handleOpenSettings)
-    window.addEventListener('openCookieSettings', handleOpenCookieSettings)
+    window.addEventListener('openConsentSettings', handleOpenSettings);
+    window.addEventListener('openCookieSettings', handleOpenCookieSettings);
 
     return () => {
-      window.removeEventListener('openConsentSettings', handleOpenSettings)
-      window.removeEventListener('openCookieSettings', handleOpenCookieSettings)
-    }
-  }, [])
+      window.removeEventListener('openConsentSettings', handleOpenSettings);
+      window.removeEventListener('openCookieSettings', handleOpenCookieSettings);
+    };
+  }, []);
 
   const handleAcceptAll = () => {
     const newSettings = {
@@ -68,12 +68,12 @@ const CookieBanner = () => {
           shoppingData: true,
         },
       },
-    }
+    };
 
-    saveConsentSettings(newSettings)
-    setSettings(newSettings)
-    closeAllModals()
-  }
+    saveConsentSettings(newSettings);
+    setSettings(newSettings);
+    closeAllModals();
+  };
 
   const handleContinueWithoutConsent = () => {
     const newSettings = {
@@ -85,142 +85,113 @@ const CookieBanner = () => {
           shoppingData: false,
         },
       },
-    }
+    };
 
-    saveConsentSettings(newSettings)
-    setSettings(newSettings)
-    closeAllModals()
-  }
+    saveConsentSettings(newSettings);
+    setSettings(newSettings);
+    closeAllModals();
+  };
 
   const handleSaveSettings = () => {
-    saveConsentSettings(settings)
-    closeAllModals()
-  }
+    saveConsentSettings(settings);
+    closeAllModals();
+  };
 
   const closeAllModals = () => {
-    setShowBanner(false)
-    setShowSettingsModal(false)
-    setShowMiniBanner(true)
-  }
+    setShowBanner(false);
+    setShowSettingsModal(false);
+    setShowMiniBanner(true);
+  };
 
   const handleOpenSettings = () => {
-    setShowSettingsModal(true)
-  }
+    setShowSettingsModal(true);
+  };
 
   const handleCloseSettings = () => {
-    setShowSettingsModal(false)
-  }
+    setShowSettingsModal(false);
+  };
 
   const handleCookieSettingChange = (value) => {
     setSettings((prev) => ({
       ...prev,
       cookies: value,
-    }))
-  }
+    }));
+  };
 
-  // UPDATED: Auto-toggle categories when main localStorage toggle changes
   const handleStorageToggle = () => {
     setSettings((prev) => {
-      const newGranted = !prev.localStorage.granted
+      const newGranted = !prev.localStorage.granted;
       return {
         ...prev,
         localStorage: {
           granted: newGranted,
           categories: {
-            // When enabling localStorage, turn on all categories
-            // When disabling localStorage, turn off all categories
             userPreferences: newGranted,
             shoppingData: newGranted,
           },
         },
-      }
-    })
-  }
+      };
+    });
+  };
 
-  // UPDATED: Auto-update main toggle when categories change
   const handleCategoryToggle = (category) => {
     setSettings((prev) => {
-      const newCategoryValue = !prev.localStorage.categories[category]
+      const newCategoryValue = !prev.localStorage.categories[category];
       const updatedCategories = {
         ...prev.localStorage.categories,
         [category]: newCategoryValue,
-      }
+      };
 
-      // If any category is enabled, enable main localStorage toggle
       const anyCategoryEnabled = Object.values(updatedCategories).some(
         (value) => value
-      )
+      );
 
       return {
         ...prev,
         localStorage: {
-          granted: anyCategoryEnabled, // Auto-update main toggle based on categories
+          granted: anyCategoryEnabled,
           categories: updatedCategories,
         },
-      }
-    })
-  }
+      };
+    });
+  };
 
   return (
     <>
+      {/* ГЛАВНЫЙ НИЖНИЙ БАННЕР */}
       {showBanner && (
         <div className={styles.cookieBanner}>
           <div className={styles.bannerContainer}>
-            {/* <button className={styles.closeButtonBanner} onClick={() => setShowBanner(false)}>
-              ×
-            </button> */}
             <h2 className={styles.bannerTitle}>
-              Cookie and Privacy Policy Consent
+              Cookie & Privacy Consent
             </h2>
             <p className={styles.bannerText}>
-              We use essential cookies to ensure the core functionality of our
-              website. With your consent, we may also use third-party cookies
-              from services such as Google reCAPTCHA to enhance security and
-              PayPal to support payment processing. In addition, we may use
-              local data storage to remember your preferences, save your
-              shopping cart, and improve your overall experience.
+              We use essential cookies to ensure the core functionality of our website. With your consent, we may also use third-party cookies from services such as Google reCAPTCHA to enhance security and PayPal to support payment processing. In addition, we use local data storage to securely save your shopping cart and layout preferences.
             </p>
             <p className={styles.bannerText}>
-              You can manage your choices in Settings, where you may allow only
-              essential cookies or enable all services and local storage. Please
-              review our{' '}
+              You can customize your choices in Settings at any time. Review our{' '}
               <Link to="/privacy-policy" className={styles.policyLink}>
                 Privacy Policy
               </Link>{' '}
-              carefully before proceeding. By clicking
-              “Accept All”, you agree to the use of cookies, third-party
-              services, and local data storage as described in our Privacy
-              Policy.
+              for deeper insights into how we respect your independent data.
             </p>
-            <p className={styles.bannerText}>
-              Please note: If you choose not to accept certain cookies or local
-              data storage, some features may not function properly, and your
-              experience on the site may be limited.
-            </p>
+            
             <div className={styles.bannerButtons}>
+              
 
               <button
-                onClick={handleOpenSettings}
+                type="button"
+                className={styles.secondaryButton}
+                onClick={handleContinueWithoutConsent}
               >
-                Settings
+                Reject All
               </button>
-
-          <button
-    onClick={handleContinueWithoutConsent}
-    style={{ 
-        background: 'linear-gradient(90deg, #5a2c4cff, #724261ff)',
-        borderRadius: '5px', 
-        color: '#FFFFFF', 
-        padding: '10px 20px',
-        border: 'none',
-        cursor: 'pointer'
-    }}
->
-   Reject All
-</button>
-              <button style={{
-                 background: 'linear-gradient(90deg, #c07fadff, #d9b4cbff)', }}
-                  onClick={handleAcceptAll}>
+              
+              <button 
+                type="button"
+                className={styles.primaryButton}
+                onClick={handleAcceptAll}
+              >
                 Accept All
               </button>
             </div>
@@ -228,6 +199,7 @@ const CookieBanner = () => {
         </div>
       )}
 
+      {/* МИНИ-КНОПКА ВЫЗОВА (ОТПЕЧАТОК КУКИ) */}
       {showMiniBanner && (
         <button
           className={styles.cookieSettingsButton}
@@ -237,8 +209,8 @@ const CookieBanner = () => {
           <div className={styles.cookieIcon}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
+              width="20"
+              height="20"
               fill="currentColor"
               viewBox="0 0 24 24"
             >
@@ -253,8 +225,9 @@ const CookieBanner = () => {
         </button>
       )}
 
+      {/* МОДАЛЬНОЕ ОКНО НАСТРОЕК (SETTINGS MODAL) */}
       {showSettingsModal && (
-        <div className={styles.modal} onClick={handleCloseSettings}>
+        <div className={styles.modalOverlay} onClick={handleCloseSettings}>
           <div
             className={styles.modalContent}
             onClick={(e) => e.stopPropagation()}
@@ -262,6 +235,7 @@ const CookieBanner = () => {
             <div className={styles.modalHeader}>
               <h2 className={styles.modalTitle}>Privacy Settings</h2>
               <button
+                type="button"
                 className={styles.closeButton}
                 onClick={handleCloseSettings}
               >
@@ -269,12 +243,12 @@ const CookieBanner = () => {
               </button>
             </div>
 
-            {/* Cookie Settings */}
+            {/* Группа 1: Радио-кнопки для сторонних сервисов */}
             <div className={styles.section}>
               <h3 className={styles.sectionTitle}>Third-Party Services</h3>
               <div className={styles.radioGroup}>
-                <label
-                  className={styles.radioOption}
+                <label 
+                  className={`${styles.radioOption} ${settings.cookies === 'essential' ? styles.radioOptionSelected : ''}`}
                   onClick={() => handleCookieSettingChange('essential')}
                 >
                   <input
@@ -284,13 +258,13 @@ const CookieBanner = () => {
                     checked={settings.cookies === 'essential'}
                     onChange={(e) => handleCookieSettingChange(e.target.value)}
                   />
-                  <span>
-                    <strong>Essential Only</strong> - Basic website
-                    functionality only
+                  <span className={styles.radioText}>
+                    <strong>Essential Only</strong> — Basic functionality, security configurations, and technical core operations.
                   </span>
                 </label>
-                <label
-                  className={styles.radioOption}
+                
+                <label 
+                  className={`${styles.radioOption} ${settings.cookies === 'all' ? styles.radioOptionSelected : ''}`}
                   onClick={() => handleCookieSettingChange('all')}
                 >
                   <input
@@ -300,84 +274,66 @@ const CookieBanner = () => {
                     checked={settings.cookies === 'all'}
                     onChange={(e) => handleCookieSettingChange(e.target.value)}
                   />
-                  <span>
-                    <strong>All Services</strong> - Include Google reCAPTCHA,
-                    PayPal, and other third-party services
+                  <span className={styles.radioText}>
+                    <strong>All Services</strong> — Activates Google reCAPTCHA protection, seamless PayPal transactions, and analytics.
                   </span>
                 </label>
               </div>
             </div>
 
-            {/* Local Storage Settings */}
+            {/* Группа 2: Главный переключатель Local Storage */}
             <div className={styles.section}>
               <h3 className={styles.sectionTitle}>Local Data Storage</h3>
-              <div className={styles.toggleContainer}>
-                <div>
-                  <div className={styles.toggleLabel}>
-                    Allow Local Data Storage
-                  </div>
+              <div className={styles.toggleRow}>
+                <div className={styles.textContainer}>
+                  <div className={styles.toggleLabel}>Allow Local Data Storage</div>
                   <div className={styles.toggleDescription}>
-                    Store your preferences and data locally for a better
-                    experience
+                    Enables persistent sessions, layout preferences, and secures item storage in your bag.
                   </div>
                 </div>
                 <div
-                  className={`${styles.toggle} ${settings.localStorage.granted ? styles.toggleActive : ''
-                    }`}
+                  className={`${styles.toggleSwitch} ${settings.localStorage.granted ? styles.toggleActive : ''}`}
                   onClick={handleStorageToggle}
                 >
-                  <div
-                    className={`${styles.toggleSlider} ${settings.localStorage.granted
-                        ? styles.toggleSliderActive
-                        : ''
-                      }`}
-                  />
+                  <div className={styles.toggleSlider} />
                 </div>
               </div>
 
-              {/* Category-specific settings */}
+              {/* Вложенные подкатегории локального хранилища */}
               <div
-                className={`${styles.categoryContainer} ${settings.localStorage.granted
-                    ? ''
-                    : styles.categoryContainerDisabled
-                  }`}
+                className={`${styles.categoryContainer} ${settings.localStorage.granted ? '' : styles.categoryContainerDisabled}`}
               >
                 {Object.entries(storageCategories).map(([key, category]) => (
-                  <div key={key} className={styles.toggleContainer}>
-                    <div>
-                      <div className={styles.toggleLabel}>{category.name}</div>
-                      <div className={styles.toggleDescription}>
+                  <div key={key} className={styles.toggleRowNested}>
+                    <div className={styles.textContainer}>
+                      <div className={styles.toggleLabelNested}>{category.name}</div>
+                      <div className={styles.toggleDescriptionNested}>
                         {category.description}
                       </div>
                     </div>
                     <div
-                      className={`${styles.toggle} ${settings.localStorage.categories[key]
-                          ? styles.toggleActive
-                          : ''
-                        }`}
-                      onClick={() => handleCategoryToggle(key)}
+                      className={`${styles.toggleSwitchSmall} ${settings.localStorage.categories[key] ? styles.toggleActive : ''}`}
+                      onClick={() => settings.localStorage.granted && handleCategoryToggle(key)}
                     >
-                      <div
-                        className={`${styles.toggleSlider} ${settings.localStorage.categories[key]
-                            ? styles.toggleSliderActive
-                            : ''
-                          }`}
-                      />
+                      <div className={styles.toggleSliderSmall} />
                     </div>
                   </div>
                 ))}
               </div>
             </div>
 
+            {/* Кнопки управления внизу модального окна */}
             <div className={styles.modalButtons}>
               <button
-                className={styles.continueButton}
+                type="button"
+                className={styles.modalSecondaryButton}
                 onClick={handleCloseSettings}
               >
                 Cancel
               </button>
               <button
-                className={styles.acceptButton}
+                type="button"
+                className={styles.modalPrimaryButton}
                 onClick={handleSaveSettings}
               >
                 Save Settings
@@ -387,7 +343,7 @@ const CookieBanner = () => {
         </div>
       )}
     </>
-  )
-}
+  );
+};
 
-export default CookieBanner
+export default CookieBanner;

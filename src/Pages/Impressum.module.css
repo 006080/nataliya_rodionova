@@ -1,19 +1,38 @@
 .container {
-  background-color: #000000; /* Matching your dark, premium cinematic theme */
+ background: 
+    /* 1. Мягкий верхний левый блик (Студийный свет) */
+    radial-gradient(circle at 20% 25%, rgba(35, 35, 45, 0.5) 0%, transparent 45%),
+    
+    /* 2. Едва заметный правый нижний контрастный блик */
+    radial-gradient(circle at 85% 70%, rgba(20, 24, 38, 0.4) 0%, transparent 50%),
+    
+    /* 3. Основной глубокий вертикальный переход */
+    linear-gradient(
+      to bottom, 
+      #0a0a0c 0%,     /* Тёмный графит на самом верху */
+      #111114 40%,    /* Мягкий объём по центру за контентом */
+      #050507 75%,    /* Уход в глубокую тень */
+      #000000 92%     /* 100% чистый чёрный задолго до футера */
+    );
+    
+  /* Включаем аппаратное ускорение для идеальной плавности градиентов при скролле */
   min-height: 100vh;
   padding: 140px 8% 60px 8%;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: flex-start; /* Aligned left for an asymmetric editorial look */
   font-family: var(--font-main), -apple-system, BlinkMacSystemFont, sans-serif;
   color: #ffffff;
+
+  will-change: transform;
+  background-attachment: scroll;
 }
 
 .header {
   max-width: 800px;
   width: 100%;
   text-align: left;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08); /* Subtle white divider line */
   padding-bottom: 40px;
   margin-bottom: 60px;
 }
@@ -51,57 +70,20 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 3px;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.5); /* Muted headers to emphasize content */
   margin-bottom: 25px;
-}
-
-.subHeading {
-  font-family: var(--font-ui), sans-serif;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  color: rgba(255, 255, 255, 0.8);
-  margin-bottom: 10px;
-  font-weight: 600;
 }
 
 .text {
   font-size: 15px;
   line-height: 1.8;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.75); /* Highly readable, soft white prose */
   font-weight: 300;
-  margin-bottom: 15px;
 }
 
 .text strong {
   color: #ffffff;
   font-weight: 500;
-}
-
-.text em {
-  color: #ffffff;
-  font-style: normal;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-.controllerDetails {
-  font-size: 15px;
-  line-height: 1.8;
-  color: #ffffff;
-  font-weight: 300;
-  background-color: rgba(255, 255, 255, 0.02);
-  border-left: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 15px 20px;
-  margin: 20px 0;
-}
-
-/* --- Footer Link Row --- */
-.footerRow {
-  margin-top: 60px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  padding-top: 30px;
-  width: 100%;
 }
 
 .backLink {
@@ -115,6 +97,7 @@
   padding-bottom: 4px;
   transition: opacity 0.3s ease, border-color 0.3s ease;
   display: inline-block;
+  margin-top: 40px;
 }
 
 .backLink:hover {
@@ -130,5 +113,10 @@
 
   .mainTitle {
     font-size: 28px;
+  }
+
+  .sectionHeading {
+    font-size: 12px;
+    letter-spacing: 2px;
   }
 }
