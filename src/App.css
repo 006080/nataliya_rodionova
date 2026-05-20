@@ -1,28 +1,52 @@
+/* ==========================================================================
+   GLOBAL RESET & LAYOUT ENGINE (Убирает белую полосу и горизонтальный скролл)
+   ========================================================================== */
 
-#root {
+/* 1. Настройка box-sizing для ВСЕХ элементов на сайте */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:root {
   --color-style: #110a71dd;
   --color-mission: #fff3e3;
   --color-materials: #064f37;
   --color-service: #000000;
   --color-customers: #69056e;
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  /* height: 100%; */
 }
 
 html,
 body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-width: 100vw;
+  min-height: 100vh;
+  background-color: #000000; /* Делает подложку сайта полностью чёрной */
+  
+  /* Жестко блокируем горизонтальный ползунок на уровне браузера */
+  overflow-x: hidden;
+  
+  /* Защита от багов скролла на iOS Safari */
+  position: relative; 
 }
 
-.app-container {
-  /* background-size: cover; */
-  /* display: flex;  */
+/* 2. Исправление главного контейнера React */
+#root {
+  display: flex;
   flex-direction: column;
-  /* min-height: 100vh; */
+  min-height: 100vh;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+/* 3. Контейнер самого приложения */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  flex-grow: 1;
 }

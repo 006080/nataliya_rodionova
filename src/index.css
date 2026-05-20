@@ -1,6 +1,57 @@
+/* ==========================================================================
+   GLOBAL RESET, FONTS & LAYOUT ENGINE
+   ========================================================================== */
+
+/* Настройка box-sizing для абсолютно всех элементов на сайте */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 :root {
+  /* Твоя типографика */
   margin: 0;
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
+
+  /* Твоя палитра цветов */
+  --color-style: #110a71dd;
+  --color-mission: #fff3e3;
+  --color-materials: #064f37;
+  --color-service: #000000;
+  --color-customers: #69056e;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-width: 100vw;
+  min-height: 100vh;
+  background-color: #000000; /* Черный фон убирает белые вспышки при рендере */
+  
+  /* Жесткая блокировка горизонтального скролла */
+  overflow-x: hidden;
+  position: relative; 
+}
+
+/* Корневой контейнер React */
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+/* Контейнер приложения */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  flex-grow: 1;
 }
